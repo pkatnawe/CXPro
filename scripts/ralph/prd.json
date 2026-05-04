@@ -1,0 +1,31 @@
+{
+  "project": "CXPro",
+  "branchName": "ralph/initial-build",
+  "description": "Replace this description with your feature goal",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Placeholder story 1 — replace before running",
+      "description": "As a [user], I want [feature] so that [benefit].",
+      "acceptanceCriteria": [
+        "Replace with concrete, testable criteria",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "SCAFFOLD — replace this story before running Ralph"
+    },
+    {
+      "id": "US-002",
+      "title": "Placeholder story 2 — replace before running",
+      "description": "As a [user], I want [feature] so that [benefit].",
+      "acceptanceCriteria": [
+        "Replace with concrete, testable criteria",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "SCAFFOLD — replace this story before running Ralph"
+    }
+  ]
+}

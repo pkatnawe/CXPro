@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CXPro — Site A Phase 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F6F7F9;
+    --surface: #FFFFFF;
+    --border: #E4E7EC;
+    --primary: #2563EB;
+    --primary-light: #EFF6FF;
+    --text: #111827;
+    --muted: #6B7280;
+    --danger: #EF4444;
+    --danger-light: #FEF2F2;
+    --success: #10B981;
+    --success-light: #ECFDF5;
+    --warning: #F59E0B;
+    --radius: 8px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+  .logo span { color: var(--primary); }
+  .divider { width: 1px; height: 20px; background: var(--border); }
+  .project-name { color: var(--muted); font-size: 14px; }
+  .project-name strong { color: var(--text); font-weight: 500; }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--success-light);
+    color: var(--success);
+    margin-left: auto;
+  }
+  .status-pill::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+  }
+
+  /* ── Main Layout ── */
+  .main {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* ── Panel ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .panel-title {
+    font-weight: 600;
+    font-size: 15px;
+    flex: 1;
+  }
+  .panel-count {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .panel-toolbar {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .search-input {
+    flex: 1;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--primary); background: #fff; }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s, opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: #1D4ED8; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--bg); color: var(--text); }
+  .btn-danger-ghost {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid transparent;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  .btn-danger-ghost:hover { background: var(--danger-light); }
+  .btn-icon {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-icon:hover { background: var(--bg); color: var(--text); }
+  .btn-icon.danger:hover { background: var(--danger-light); color: var(--danger); }
+
+  /* ── Equipment Table ── */
+  .panel-body { flex: 1; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 8px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #FAFAFA; }
+  tbody td { padding: 11px 16px; vertical-align: middle; }
+  .asset-name { font-weight: 500; color: var(--text); }
+  .asset-type { color: var(--muted); font-size: 12px; }
+  .asset-tag { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: var(--muted); }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .status-active { background: var(--success-light); color: var(--success); }
+  .status-pending { background: #FFFBEB; color: var(--warning); }
+  .status-decommissioned { background: var(--bg); color: var(--muted); }
+
+  .row-actions { display: flex; gap: 2px; justify-content: flex-end; }
+
+  /* inline confirm */
+  .inline-confirm {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--danger);
+  }
+  .inline-confirm.visible { display: flex; }
+  .inline-confirm .confirm-yes {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .inline-confirm .confirm-no {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--muted);
+  }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; padding: 8px 0; }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item:hover { background: #FAFAFA; }
+  .checklist-item:hover .item-actions { opacity: 1; }
+
+  .check-wrap { padding-top: 2px; flex-shrink: 0; }
+  input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--success);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .item-content { flex: 1; min-width: 0; }
+  .item-desc {
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+  .item-desc:hover { color: var(--primary); }
+  .item-desc.done { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+  .item-assignee { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .item-actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .add-item-row {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .add-item-input {
+    flex: 1;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+  }
+  .add-item-input:focus { border-color: var(--primary); background: #fff; }
+
+  /* ── Modal ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 440px;
+    padding: 24px;
+    animation: modalIn 0.15s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--primary); background: #fff; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Toast ── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+  }
+  .toast {
+    background: var(--text);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    box-shadow: var(--shadow-md);
+    animation: toastIn 0.2s ease;
+    max-width: 300px;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-state-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.4; }
+  .empty-state p { font-size: 13px; }
+
+  /* ── Edit inline ── */
+  .inline-edit-input {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    padding: 2px 6px;
+    background: #fff;
+    outline: none;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="topbar">
+  <div class="logo">CX<span>Pro</span></div>
+  <div class="divider"></div>
+  <div class="project-name"><strong>Site A</strong> &mdash; Phase 1</div>
+  <div class="status-pill">In Progress</div>
+</header>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Equipment & Assets Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Equipment &amp; Assets</div>
+      <span class="panel-count" id="eq-count">0</span>
+    </div>
+    <div class="panel-toolbar">
+      <input type="text" class="search-input" placeholder="Search equipment…" oninput="filterEquipment(this.value)">
+      <button class="btn btn-primary" onclick="openEquipmentModal()">+ Add</button>
+    </div>
+    <div class="panel-body">
+      <table>
+        <thead>
+          <tr>
+            <th>Name / Type</th>
+            <th>Tag</th>
+            <th>Status</th>
+            <th style="width:80px;text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="eq-tbody"></tbody>
+      </table>
+      <div class="empty-state" id="eq-empty" style="display:none">
+        <div class="empty-state-icon">⚙️</div>
+        <p>No equipment yet. Add your first asset.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checklist Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Commissioning Checklist</div>
+      <span class="panel-count" id="cl-count">0</span>
+    </div>
+    <div class="panel-toolbar">
+      <input type="text" class="search-input" placeholder="Search checklist…" oninput="filterChecklist(this.value)">
+      <button class="btn btn-primary" onclick="openChecklistModal()">+ Add</button>
+    </div>
+    <div class="panel-body">
+      <ul class="checklist" id="cl-list"></ul>
+      <div class="empty-state" id="cl-empty" style="display:none">
+        <div class="empty-state-icon">✓</div>
+        <p>No checklist items yet.</p>
+      </div>
+    </div>
+    <div class="add-item-row">
+      <input type="text" class="add-item-input" id="quick-add-input" placeholder="Quick add item… press Enter" onkeydown="quickAddItem(event)">
+    </div>
+  </div>
+
+</main>
+
+<!-- Equipment Modal -->
+<div class="modal-backdrop" id="eq-modal">
+  <div class="modal">
+    <div class="modal-title" id="eq-modal-title">Add Equipment</div>
+    <input type="hidden" id="eq-edit-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-input" id="eq-name" placeholder="e.g. Air Handler Unit">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <input type="text" class="form-input" id="eq-type" placeholder="e.g. HVAC">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tag / Serial</label>
+        <input type="text" class="form-input" id="eq-tag" placeholder="e.g. AHU-01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="eq-status">
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="decommissioned">Decommissioned</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('eq-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEquipment()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Checklist Modal -->
+<div class="modal-backdrop" id="cl-modal">
+  <div class="modal">
+    <div class="modal-title" id="cl-modal-title">Add Checklist Item</div>
+    <input type="hidden" id="cl-edit-id">
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <input type="text" class="form-input" id="cl-desc" placeholder="e.g. Verify BAS integration">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Assigned To</label>
+      <input type="text" class="form-input" id="cl-assignee" placeholder="e.g. J. Smith">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('cl-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveChecklistItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────
+let equipment = [
+  { id: 1, name: 'Air Handler Unit 1', type: 'HVAC', tag: 'AHU-01', status: 'active' },
+  { id: 2, name: 'Chiller Plant', type: 'Cooling', tag: 'CH-01', status: 'pending' },
+  { id: 3, name: 'Emergency Generator', type: 'Power', tag: 'GEN-01', status: 'active' },
+  { id: 4, name: 'Cooling Tower', type: 'HVAC', tag: 'CT-01', status: 'decommissioned' },
+];
+let checklist = [
+  { id: 1, desc: 'Verify BAS integration with AHU-01', assignee: 'J. Smith', done: true },
+  { id: 2, desc: 'Complete factory acceptance testing', assignee: 'R. Patel', done: false },
+  { id: 3, desc: 'Submit O&M manuals to client', assignee: 'L. Torres', done: false },
+  { id: 4, desc: 'Confirm sequence of operations', assignee: 'J. Smith', done: true },
+];
+let nextEqId = 10;
+let nextClId = 10;
+let eqFilter = '';
+let clFilter = '';
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderEquipment() {
+  const tbody = document.getElementById('eq-tbody');
+  const empty = document.getElementById('eq-empty');
+  const filtered = equipment.filter(e =>
+    [e.name, e.type, e.tag].some(v => v.toLowerCase().includes(eqFilter.toLowerCase()))
+  );
+  document.getElementById('eq-count').textContent = equipment.length;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(e => `
+    <tr id="eq-row-${e.id}">
+      <td>
+        <div class="asset-name">${esc(e.name)}</div>
+        <div class="asset-type">${esc(e.type)}</div>
+      </td>
+      <td><span class="asset-tag">${esc(e.tag)}</span></td>
+      <td><span class="status-badge status-${e.status}">${cap(e.status)}</span></td>
+      <td>
+        <div class="row-actions" id="eq-actions-${e.id}">
+          <button class="btn-icon" title="Edit" onclick="openEquipmentModal(${e.id})">✎</button>
+          <button class="btn-icon danger" title="Delete" onclick="confirmDeleteEq(${e.id})">✕</button>
+        </div>
+        <div class="inline-confirm" id="eq-confirm-${e.id}">
+          Remove?
+          <button class="confirm-yes" onclick="deleteEquipment(${e.id})">Yes</button>
+          <button class="confirm-no" onclick="cancelConfirm('eq', ${e.id})">No</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderChecklist() {
+  const list = document.getElementById('cl-list');
+  const empty = document.getElementById('cl-empty');
+  const filtered = checklist.filter(c =>
+    [c.desc, c.assignee].some(v => v.toLowerCase().includes(clFilter.toLowerCase()))
+  );
+  const done = checklist.filter(c => c.done).length;
+  document.getElementById('cl-count').textContent = `${done}/${checklist.length}`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = filtered.map(c => `
+    <li class="checklist-item" id="cl-item-${c.id}">
+      <div class="check-wrap">
+        <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleCheck(${c.id}, this.checked)">
+      </div>
+      <div class="item-content">
+        <div class="item-desc ${c.done ? 'done' : ''}" id="cl-desc-${c.id}" onclick="inlineEditCl(${c.id})">${esc(c.desc)}</div>
+        <div class="item-assignee">${c.assignee ? esc(c.assignee) : '<span style="opacity:0.5">Unassigned</span>'}</div>
+      </div>
+      <div class="item-actions" id="cl-actions-${c.id}">
+        <button class="btn-icon" title="Edit" onclick="openChecklistModal(${c.id})">✎</button>
+        <button class="btn-icon danger" title="Delete" onclick="confirmDeleteCl(${c.id})">✕</button>
+      </div>
+      <div class="inline-confirm" id="cl-confirm-${c.id}">
+        Remove?
+        <button class="confirm-yes" onclick="deleteChecklistItem(${c.id})">Yes</button>
+        <button class="confirm-no" onclick="cancelConfirm('cl', ${c.id})">No</button>
+      </div>
+    </li>
+  `).join('');
+}
+
+// ── Equipment CRUD ─────────────────────────────────────────────────────────
+function openEquipmentModal(id) {
+  const modal = document.getElementById('eq-modal');
+  document.getElementById('eq-modal-title').textContent = id ? 'Edit Equipment' : 'Add Equipment';
+  document.getElementById('eq-edit-id').value = id || '';
+
+  if (id) {
+    const e = equipment.find(x => x.id === id);
+    document.getElementById('eq-name').value = e.name;
+    document.getElementById('eq-type').value = e.type;
+    document.getElementById('eq-tag').value = e.tag;
+    document.getElementById('eq-status').value = e.status;
+  } else {
+    ['eq-name','eq-type','eq-tag'].forEach(f => document.getElementById(f).value = '');
+    document.getElementById('eq-status').value = 'active';
+  }
+  modal.classList.add('open');
+  document.getElementById('eq-name').focus();
+}
+
+function saveEquipment() {
+  const name = document.getElementById('eq-name').value.trim();
+  const type = document.getElementById('eq-type').value.trim();
+  const tag = document.getElementById('eq-tag').value.trim();
+  const status = document.getElementById('eq-status').value;
+  const editId = parseInt(document.getElementById('eq-edit-id').value);
+
+  if (!name) { document.getElementById('eq-name').focus(); return; }
+
+  if (editId) {
+    const e = equipment.find(x => x.id === editId);
+    Object.assign(e, { name, type, tag, status });
+    toast('Equipment updated');
+  } else {
+    equipment.push({ id: nextEqId++, name, type, tag, status });
+    toast('Equipment added');
+  }
+  closeModal('eq-modal');
+  renderEquipment();
+}
+
+function confirmDeleteEq(id) {
+  document.getElementById(`eq-actions-${id}`).style.display = 'none';
+  document.getElementById(`eq-confirm-${id}`).classList.add('visible');
+}
+
+function deleteEquipment(id) {
+  equipment = equipment.filter(e => e.id !== id);
+  toast('Equipment removed');
+  renderEquipment();
+}
+
+// ── Checklist CRUD ──────────────────────────────────────────────────────────
+function openChecklistModal(id) {
+  document.getElementById('cl-modal-title').textContent = id ? 'Edit Item' : 'Add Checklist Item';
+  document.getElementById('cl-edit-id').value = id || '';
+  if (id) {
+    const c = checklist.find(x => x.id === id);
+    document.getElementById('cl-desc').value = c.desc;
+    document.getElementById('cl-assignee').value = c.assignee || '';
+  } else {
+    document.getElementById('cl-desc').value = '';
+    document.getElementById('cl-assignee').value = '';
+  }
+  document.getElementById('cl-modal').classList.add('open');
+  document.getElementById('cl-desc').focus();
+}
+
+function saveChecklistItem() {
+  const desc = document.getElementById('cl-desc').value.trim();
+  const assignee = document.getElementById('cl-assignee').value.trim();
+  const editId = parseInt(document.getElementById('cl-edit-id').value);
+
+  if (!desc) { document.getElementById('cl-desc').focus(); return; }
+
+  if (editId) {
+    const c = checklist.find(x => x.id === editId);
+    Object.assign(c, { desc, assignee });
+    toast('Item updated');
+  } else {
+    checklist.push({ id: nextClId++, desc, assignee, done: false });
+    toast('Item added');
+  }
+  closeModal('cl-modal');
+  renderChecklist();
+}
+
+function toggleCheck(id, done) {
+  const c = checklist.find(x => x.id === id);
+  c.done = done;
+  renderChecklist();
+}
+
+function confirmDeleteCl(id) {
+  const actions = document.getElementById(`cl-actions-${id}`);
+  if (actions) actions.style.opacity = '0';
+  document.getElementById(`cl-confirm-${id}`).classList.add('visible');
+}
+
+function deleteChecklistItem(id) {
+  checklist = checklist.filter(c => c.id !== id);
+  toast('Item removed');
+  renderChecklist();
+}
+
+function quickAddItem(e) {
+  if (e.key !== 'Enter') return;
+  const input = document.getElementById('quick-add-input');
+  const desc = input.value.trim();
+  if (!desc) return;
+  checklist.push({ id: nextClId++, desc, assignee: '', done: false });
+  input.value = '';
+  toast('Item added');
+  renderChecklist();
+}
+
+function inlineEditCl(id) {
+  const c = checklist.find(x => x.id === id);
+  const el = document.getElementById(`cl-desc-${id}`);
+  const prev = el.textContent;
+  el.innerHTML = `<input class="inline-edit-input" value="${esc(c.desc)}" id="cl-inline-${id}">`;
+  const inp = document.getElementById(`cl-inline-${id}`);
+  inp.focus();
+  inp.select();
+  inp.onblur = () => {
+    const val = inp.value.trim();
+    if (val) c.desc = val;
+    renderChecklist();
+  };
+  inp.onkeydown = (ev) => {
+    if (ev.key === 'Enter') inp.blur();
+    if (ev.key === 'Escape') { c.desc = prev; renderChecklist(); }
+  };
+}
+
+// ── Shared ──────────────────────────────────────────────────────────────────
+function cancelConfirm(type, id) {
+  if (type === 'eq') {
+    document.getElementById(`eq-actions-${id}`).style.display = '';
+    document.getElementById(`eq-confirm-${id}`).classList.remove('visible');
+  } else {
+    const actions = document.getElementById(`cl-actions-${id}`);
+    if (actions) actions.style.opacity = '';
+    document.getElementById(`cl-confirm-${id}`).classList.remove('visible');
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close modal on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(b => {
+  b.addEventListener('click', e => { if (e.target === b) b.classList.remove('open'); });
+});
+
+// Escape key closes modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.open').forEach(b => b.classList.remove('open'));
+});
+
+function filterEquipment(v) { eqFilter = v; renderEquipment(); }
+function filterChecklist(v) { clFilter = v; renderChecklist(); }
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 2500);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ── Init ───────────────────────────────────────────────────────────────────
+renderEquipment();
+renderChecklist();
+</script>
+</body>
+</html>
