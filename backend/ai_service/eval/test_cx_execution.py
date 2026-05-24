@@ -20,9 +20,9 @@ from psycopg2.extras import RealDictCursor
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from document_detector import DocumentDetector
+from document_detector import DocumentTypeDetector
 from pdf_chunker import PDFChunker
-from spec_extractor import SpecExtractor
+from spec_extractor import SubmittalSpecExtractor
 from generate_checklist import GenerateL2Checklist
 from cx_execution_agent import CxExecutionAgent
 
@@ -62,9 +62,9 @@ class CxExecutionEvaluator:
     def __init__(self, fixtures_dir: str = "fixtures"):
         self.fixtures_dir = Path(__file__).parent / fixtures_dir
         self.fixtures = self._load_fixtures()
-        self.detector = DocumentDetector()
+        self.detector = DocumentTypeDetector()
         self.chunker = PDFChunker()
-        self.extractor = SpecExtractor()
+        self.extractor = SubmittalSpecExtractor()
         self.checklist_generator = GenerateL2Checklist()
         self.agent = CxExecutionAgent()
         
