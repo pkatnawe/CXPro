@@ -51,3 +51,17 @@ Ralph reads `scripts/ralph/prd.json` for user stories, executes one story per it
 ```
 
 The agent picks the highest-priority story where `passes: false`, implements it, runs quality checks, commits, then sets `passes: true`.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues at `shlokpatel1998/CXPro` via the `gh` CLI. See [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md).
+
+### Triage labels
+
+Canonical vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. Project-specific extras: `HITL`, `AFK`. See [`docs/agents/triage-labels.md`](docs/agents/triage-labels.md).
+
+### Domain docs
+
+Single-context. Domain language and architecture both live in [`docs/architecture.md`](docs/architecture.md). See [`docs/agents/domain.md`](docs/agents/domain.md).
