@@ -256,12 +256,20 @@ export default function InboxPage() {
                               {project && (
                                 <span>Project: {project.name}</span>
                               )}
-                              {item.metadata?.asset_tag && (
-                                <span>Asset: {item.metadata.asset_tag}</span>
-                              )}
-                              {item.metadata?.document_name && (
-                                <span>Source: {item.metadata.document_name}</span>
-                              )}
+                              {(() => {
+                                const assetTag = item.metadata?.['asset_tag']
+                                if (assetTag) {
+                                  return <span>Asset: {String(assetTag)}</span>
+                                }
+                                return null
+                              })()}
+                              {(() => {
+                                const documentName = item.metadata?.['document_name']
+                                if (documentName) {
+                                  return <span>Source: {String(documentName)}</span>
+                                }
+                                return null
+                              })()}
                             </div>
                           </div>
                         </div>
