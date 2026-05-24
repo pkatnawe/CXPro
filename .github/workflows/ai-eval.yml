@@ -47,7 +47,6 @@ jobs:
         run: |
           echo "Setting up test environment variables"
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
           echo "DB_HOST=localhost" >> $GITHUB_ENV
           echo "DB_PORT=5432" >> $GITHUB_ENV

@@ -206,15 +206,15 @@ class SpecExtractionValidator:
 
 # Testing and configuration
 def configure_dspy():
-    """Configure DSPy for spec extraction."""
+    """Configure DSPy with Gemini model for spec extraction (per PRD)."""
     import os
-    
-    openai_key = os.getenv('OPENAI_API_KEY')
-    if openai_key:
-        lm = dspy.OpenAI(model='gpt-3.5-turbo', api_key=openai_key)
-        dspy.settings.configure(lm=lm)
-    else:
-        print("WARNING: No OpenAI key found for DSPy configuration")
+
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY environment variable not set")
+
+    lm = dspy.LM("gemini/gemini-1.5-flash", api_key=api_key)
+    dspy.settings.configure(lm=lm)
 
 
 if __name__ == "__main__":
