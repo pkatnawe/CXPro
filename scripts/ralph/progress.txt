@@ -5,10 +5,13 @@ Started: Sun May 24 13:39:19 CDT 2026
 - Slice-01 accounts already exist; credentials are in .env.local — scaffold code and deploy autonomously
 - Use VERCEL_TOKEN env var for `vercel` CLI deploys; RAILWAY_TOKEN for `railway` CLI deploys
 - Set GitHub Actions secrets with `gh secret set`
-- Use transactional database functions for multi-table operations (create_test_procedure_with_citations)
+- Use transactional database functions for multi-table operations (create_test_procedure_with_citations, create_inbox_item_from_agent_run)
 - DSPy modules with REQUIRED field annotations enforce mandatory outputs (citations)
 - LangGraph StateGraph pattern for agent workflow orchestration
 - Mock similarity functions in test migrations when real embeddings aren't needed
+- Supabase Realtime subscriptions: use channel naming pattern `table_${userId}` for user-specific updates
+- Auto-subscription pattern: use database triggers on participations table to auto-create subscriptions based on user role
+- Inbox items need action_state field (pending/acted/dismissed) for proper lifecycle management
 
 ---
 
@@ -177,4 +180,24 @@ Started: Sun May 24 13:39:19 CDT 2026
   - Transactional database functions ensure consistency between test procedures and citations
   - Mock search_document_chunks function sufficient for testing without real embeddings
   - Agent audit trail (agent_runs) captures full execution context for debugging and compliance
+---
+
+## May 24 15:52 CDT 2026 - Slice-07 Complete
+- Successfully implemented Inbox-as-home feature with subscriptions and real-time updates
+- Created database migration 006_inbox_subscriptions.sql with subscriptions and inbox_items tables
+- Built backend inbox_subscriber.py to process AgentRunCompleted and AIRefusal events
+- Implemented frontend inbox page with Realtime subscription for live updates
+- Added auto-subscription logic triggered when OCA users join projects (via participation creation)
+- Created distinct UI treatments for AI draft items vs AI refusal items (different CTAs and badges)
+- Implemented RLS policies ensuring users only see their own inbox items
+- Created placeholder entity detail page for navigation from inbox items (full implementation in Slice-08)
+- All quality checks passing: TypeScript type-check ✓, ESLint ✓, pytest ✓
+- **Files changed:** migrations/006_inbox_subscriptions.sql, backend/inbox_subscriber.py, backend/apply_inbox_migration.py, backend/test_inbox_slice07.py, frontend/src/app/inbox/page.tsx, frontend/src/app/entity/[id]/page.tsx, frontend/src/app/page.tsx
+- **Learnings for future iterations:**
+  - Supabase Realtime channels can be scoped to specific user IDs for personalized notifications
+  - Database functions (create_inbox_item_from_agent_run) simplify complex inbox item creation logic
+  - Auto-subscription triggers on participations table work well for role-based event routing
+  - Inbox items should have action_state (pending/acted/dismissed) for proper lifecycle management
+  - AI refusal events need distinct UI treatment with "Upload more docs" CTA instead of "Review draft"
+  - Testing with real auth.users is required due to foreign key constraints (can't create mock users easily)
 ---

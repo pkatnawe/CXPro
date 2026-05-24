@@ -119,7 +119,7 @@
         "Empty state UI: 'Nothing needs your attention. Upload a document to get started.'"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/10. Blocked by Slice-06. Net-new design (not in Blueprint mockup) — keep minimal: daily bucket, in-app only, no digest/escalation."
     },
     {
