@@ -12,7 +12,8 @@ export default function Home() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (session?.user) {
-        router.push('/dashboard')
+        // Redirect to Inbox as the home page for authenticated users
+        router.push('/inbox')
       } else {
         router.push('/auth')
       }
