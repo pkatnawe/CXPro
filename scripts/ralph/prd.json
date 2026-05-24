@@ -67,7 +67,7 @@
         "Subscriber registry pattern in place: contexts register (event_type, handler) at startup"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/7. Blocked by Slice-03. No user-visible behavior; the demo is the integration test output."
     },
     {

@@ -115,3 +115,23 @@ Started: Sun May 24 13:39:19 CDT 2026
   - Project-specific pages with role-based access control create intuitive user workflows
   - Database functions (create_document_with_outbox) simplify complex transactional operations
 ---
+
+## May 24 19:35 CDT 2026 - Slice-04 Complete
+- Successfully implemented transactional outbox dispatcher system with NOTIFY/LISTEN + fallback polling
+- Built PostgreSQL infrastructure with triggers for automatic event notifications to subscribers
+- Created Python outbox dispatcher with asyncio support for exactly-once event processing per subscriber
+- Built Next.js outbox dispatcher with TypeScript types and proper error handling
+- Implemented idempotency via outbox_dispatches table preventing duplicate event processing
+- Added subscriber registry pattern allowing contexts to register (event_type, handler) at startup
+- Created comprehensive verification tests confirming all acceptance criteria including 100+ concurrent events
+- Built database functions for efficient event processing queries with proper parameter isolation
+- All quality checks pass: Python pytest, TypeScript type-check, ESLint
+- **Files changed:** migrations/003_outbox_dispatcher.sql, backend/outbox_dispatcher.py, backend/apply_outbox_migration.py, backend/verify_outbox_dispatcher.py, backend/test_outbox_dispatcher.py, backend/requirements.txt, frontend/src/lib/outbox-dispatcher.ts, frontend/scripts/start-dispatcher.ts, frontend/package.json
+- **Learnings for future iterations:**
+  - PostgreSQL NOTIFY/LISTEN provides real-time event delivery (sub-2s) with fallback polling (30s) for reliability
+  - outbox_dispatches table with (outbox_id, subscriber_name) unique constraint ensures exactly-once delivery per subscriber
+  - Subscriber registry pattern allows different contexts to register handlers for specific event types
+  - Database function parameter naming must avoid conflicts with table columns (use p_ prefix)
+  - Both Python (asyncpg) and Next.js (postgres) workers can process events independently with proper idempotency
+  - Unknown event types are gracefully handled by logging and marking as dispatched to prevent queue blockage
+---
