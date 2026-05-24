@@ -111,10 +111,11 @@ def test_spec_extraction_validation():
 def test_outbox_subscriber_integration():
     """Test that ingestion pipeline can be initialized as outbox subscriber."""
     with patch('ingestion_pipeline.asyncpg.create_pool'), \
-         patch('document_detector.configure_dspy'):
-        
+         patch('document_detector.configure_dspy'), \
+         patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+
         from ingestion_pipeline import IngestionPipeline
-        
+
         pipeline = IngestionPipeline()
         assert pipeline.detector is not None
         assert pipeline.chunker is not None
@@ -124,7 +125,11 @@ def test_database_migration_applied():
     """Verify database migration was applied successfully."""
     # This test would require database connection
     # For now, just verify the migration file exists
-    migration_file = "/Users/shlok/Desktop/SpareWork/CX/migrations/004_pdf_ingestion.sql"
+    migration_file = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "migrations",
+        "004_pdf_ingestion.sql",
+    )
     assert os.path.exists(migration_file)
     
     # Verify key content in migration
