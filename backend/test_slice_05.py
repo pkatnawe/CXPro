@@ -29,10 +29,9 @@ def test_dspy_module_initialization():
     assert extractor is not None
 
 def test_pgvector_compatibility():
-    """Verify pgvector-compatible embeddings format."""
-    from pdf_chunker import DocumentChunk
-    
-    # Create a sample chunk
+    """Verify pgvector-compatible embeddings format (768 dims for Gemini text-embedding-004)."""
+    from pdf_chunker import DocumentChunk, GEMINI_EMBEDDING_DIM
+
     chunk = DocumentChunk(
         content="test content",
         page_number=1,
@@ -40,10 +39,10 @@ def test_pgvector_compatibility():
         bbox_y=0.0,
         bbox_width=100.0,
         bbox_height=50.0,
-        embedding=[0.1] * 1536  # Standard OpenAI embedding dimension
+        embedding=[0.1] * GEMINI_EMBEDDING_DIM,
     )
-    
-    assert len(chunk.embedding) == 1536
+
+    assert len(chunk.embedding) == 768
     assert all(isinstance(x, float) for x in chunk.embedding)
 
 def test_citation_requirement_enforced():
@@ -55,25 +54,21 @@ def test_citation_requirement_enforced():
     assert 'citations' in sig_str
     assert 'REQUIRED' in sig_str
 
-@patch('pdf_chunker.openai.Embedding.create')
-def test_pdf_chunker_with_mock_embeddings(mock_embedding):
-    """Test PDF chunker with mocked embeddings."""
-    # Mock OpenAI response
-    mock_embedding.return_value = {
-        'data': [
-            {'embedding': [0.1] * 1536}
-        ]
-    }
-    
-    with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+@patch('pdf_chunker.genai.embed_content')
+@patch('pdf_chunker.genai.configure')
+def test_pdf_chunker_with_mock_embeddings(mock_configure, mock_embed):
+    """Test PDF chunker with mocked Gemini embeddings (768 dims)."""
+    mock_embed.return_value = {'embedding': [0.1] * 768}
+
+    with patch.dict(os.environ, {'GEMINI_API_KEY': 'test-key'}):
         from pdf_chunker import PDFChunker
-        
+
         chunker = PDFChunker()
-        
+
         # Test text splitting
         test_text = "This is test content for chunking. " * 20
         chunks = chunker._split_text(test_text)
-        
+
         assert len(chunks) > 0
         assert all(isinstance(chunk, str) for chunk in chunks)
 
@@ -112,7 +107,8 @@ def test_outbox_subscriber_integration():
     """Test that ingestion pipeline can be initialized as outbox subscriber."""
     with patch('ingestion_pipeline.asyncpg.create_pool'), \
          patch('ingestion_pipeline.configure_dspy'), \
-         patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+         patch('pdf_chunker.genai.configure'), \
+         patch.dict(os.environ, {'GEMINI_API_KEY': 'test-key'}):
 
         from ingestion_pipeline import IngestionPipeline
 

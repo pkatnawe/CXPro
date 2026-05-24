@@ -5,6 +5,16 @@ Started: Sun May 24 13:39:19 CDT 2026
 - Slice-01 accounts already exist; credentials are in .env.local — scaffold code and deploy autonomously
 - Use VERCEL_TOKEN env var for `vercel` CLI deploys; RAILWAY_TOKEN for `railway` CLI deploys
 - Set GitHub Actions secrets with `gh secret set`
+- Use transactional database functions for multi-table operations (create_test_procedure_with_citations, create_inbox_item_from_agent_run)
+- DSPy modules with REQUIRED field annotations enforce mandatory outputs (citations)
+- LangGraph StateGraph pattern for agent workflow orchestration
+- Mock similarity functions in test migrations when real embeddings aren't needed
+- Supabase Realtime subscriptions: use channel naming pattern `table_${userId}` for user-specific updates
+- Auto-subscription pattern: use database triggers on participations table to auto-create subscriptions based on user role
+- Inbox items need action_state field (pending/acted/dismissed) for proper lifecycle management
+- Blueprint design: use CSS custom properties for theming; Archivo + JetBrains Mono fonts
+- TypeScript: handle Record<string, unknown> metadata with bracket notation access
+- React patterns: useCallback for functions in effect dependencies; conditional rendering with ternary for unknown types
 
 ---
 
@@ -156,4 +166,103 @@ Started: Sun May 24 13:39:19 CDT 2026
   - Outbox subscriber pattern ensures exactly-once processing of DocumentUploaded events with proper idempotency
   - Database functions with pgvector enable efficient similarity queries with RLS-enforced access control
   - DSPy extractor confidence thresholds (>0.6) help ensure quality while allowing AI refusal for low-confidence extractions
+---
+
+## May 24 20:45 CDT 2026 - Slice-06 Complete
+- Successfully implemented CxExecutionAgent (LangGraph) that consumes DocumentIndexed events and generates L2 checklists
+- Created DSPy GenerateL2Checklist module with REQUIRED citations - enforces citations or refuses generation
+- Built comprehensive database schema: agent_runs for audit trail, test_procedure_instances for drafts, citations table
+- Implemented confidence-based refusal path - emits AIRefusal event when document chunks have low similarity
+- Added transactional create_test_procedure_with_citations function ensuring atomic draft + citations creation
+- AgentRunCompleted and AIRefusal events properly emitted to outbox for downstream consumption
+- **Files changed:** migrations/005_agent_execution.sql, backend/cx_execution_agent.py, backend/generate_checklist.py, backend/test_slice_06.py, backend/apply_agent_migration.py, backend/requirements.txt
+- **Learnings for future iterations:**
+  - LangGraph StateGraph provides clean workflow orchestration for multi-step agent processes
+  - DSPy REQUIRED field declarations enforce citation requirements with automatic retry logic
+  - Agent confidence thresholds (>0.7 similarity) help ensure quality while allowing graceful refusal
+  - Transactional database functions ensure consistency between test procedures and citations
+  - Mock search_document_chunks function sufficient for testing without real embeddings
+  - Agent audit trail (agent_runs) captures full execution context for debugging and compliance
+---
+
+## May 24 15:52 CDT 2026 - Slice-07 Complete
+- Successfully implemented Inbox-as-home feature with subscriptions and real-time updates
+- Created database migration 006_inbox_subscriptions.sql with subscriptions and inbox_items tables
+- Built backend inbox_subscriber.py to process AgentRunCompleted and AIRefusal events
+- Implemented frontend inbox page with Realtime subscription for live updates
+- Added auto-subscription logic triggered when OCA users join projects (via participation creation)
+- Created distinct UI treatments for AI draft items vs AI refusal items (different CTAs and badges)
+- Implemented RLS policies ensuring users only see their own inbox items
+- Created placeholder entity detail page for navigation from inbox items (full implementation in Slice-08)
+- All quality checks passing: TypeScript type-check ✓, ESLint ✓, pytest ✓
+- **Files changed:** migrations/006_inbox_subscriptions.sql, backend/inbox_subscriber.py, backend/apply_inbox_migration.py, backend/test_inbox_slice07.py, frontend/src/app/inbox/page.tsx, frontend/src/app/entity/[id]/page.tsx, frontend/src/app/page.tsx
+- **Learnings for future iterations:**
+  - Supabase Realtime channels can be scoped to specific user IDs for personalized notifications
+  - Database functions (create_inbox_item_from_agent_run) simplify complex inbox item creation logic
+  - Auto-subscription triggers on participations table work well for role-based event routing
+  - Inbox items should have action_state (pending/acted/dismissed) for proper lifecycle management
+  - AI refusal events need distinct UI treatment with "Upload more docs" CTA instead of "Review draft"
+  - Testing with real auth.users is required due to foreign key constraints (can't create mock users easily)
+---
+
+## May 24 16:13 CDT 2026 - Slice-08 Complete
+- Successfully implemented entity detail page with three-panel layout per architecture §4.2
+- Created comprehensive UI components: CitationChip, AiChatDrawer, ActivityTab, CommandPalette
+- Applied Blueprint visual design tokens (Archivo + JetBrains Mono fonts, blue+cream palette)
+- Implemented responsive design (desktop >=1024px three panels, <1024px single-scroll)
+- Added citation chips with PDF deep-linking (page + bbox coordinates)
+- Created AI Chat drawer with grounded responses and inline citations
+- Built Activity tab showing AgentRun entries with AI lightning-bolt glyph distinguishing AI from human
+- Implemented Cmd-K palette for searching Projects + Documents by name
+- Added audit_log_entries and feedback_records tables (migration 007_audit_feedback.sql)
+- **Files changed:** frontend/src/app/entity/[id]/page.tsx, frontend/src/app/entity/[id]/entity.css, frontend/src/components/CitationChip.tsx, frontend/src/components/AiChatDrawer.tsx, frontend/src/components/ActivityTab.tsx, frontend/src/components/CommandPalette.tsx, frontend/src/app/inbox/page.tsx, migrations/007_audit_feedback.sql
+- **Learnings for future iterations:**
+  - Blueprint design system uses CSS custom properties for consistent theming across light/dark modes
+  - TypeScript strict mode requires explicit handling of Record<string, unknown> metadata fields
+  - React Hook dependencies need careful management to avoid ESLint warnings (useCallback for functions in deps)
+  - Responsive drawer pattern: fixed right panel on desktop, bottom sheet on mobile
+  - Citation deep-linking requires signed URLs from Supabase Storage for PDF access
+  - Activity feed pattern: combine multiple data sources (agent_runs, test_procedure_instances) into unified timeline
+---
+
+## May 24 16:23 CDT 2026 - Slice-09 Complete
+- Successfully implemented Accept draft functionality with complete state transition and audit trail
+- Created database function accept_draft_test_procedure for atomic draft->active transition with audit logging
+- Implemented Accept button in entity detail page with OCA role-gating (hidden from cx_engineer users)
+- Added feedback UI (thumb up/down) to both AiChatDrawer messages and ActivityTab AgentRun cards
+- Created database function record_feedback for capturing user feedback on AI outputs
+- Updated inbox items to transition to 'acted' state when draft is accepted
+- Implemented TestProcedureInstanceActivated event emission to outbox for downstream processing
+- Refusal variant UI already present from Slice-08 (shows refusal card with reason and 'provide more info' CTA)
+- Created comprehensive integration test covering full pipeline from document upload through acceptance (Slices 3-9)
+- Applied migrations 007_audit_feedback.sql and 008_accept_draft.sql to production database
+- All quality checks passing: TypeScript type-check ✓, ESLint ✓, Integration tests ✓
+- **Files changed:** migrations/008_accept_draft.sql, frontend/src/app/entity/[id]/page.tsx, frontend/src/components/AiChatDrawer.tsx, frontend/src/components/ActivityTab.tsx, backend/test_slice_09_integration.py, backend/apply_accept_migration.py
+- **Learnings for future iterations:**
+  - Database functions (accept_draft_test_procedure, record_feedback) provide transactional consistency for complex operations
+  - Feedback UI pattern: inline buttons on AI-generated content with optional text input for negative feedback
+  - Role-based UI elements: OCA-specific actions should check user.role === 'OCA' before rendering
+  - Integration tests should handle cleanup gracefully even when test fails partway through
+  - Supabase RPC calls work well for invoking database functions from frontend
+  - Audit trail pattern: combine audit_log_entries table with confirmed_ai_run_id field to track human confirmations of AI work
+  - Inbox lifecycle: pending -> acted state transition removes items from daily view while preserving history
+---
+
+## May 24 16:40 CDT 2026 - Slice-10 Complete
+- Successfully implemented EvalRun harness that gates CI on AI quality
+- Created 10 seed fixtures with realistic submittal PDF data and expected outputs
+- Built pytest test harness (test_cx_execution.py) that runs fixtures through AI pipeline
+- Created eval_runs database schema for tracking evaluation results over time
+- Implemented GitHub Action (ai-eval.yml) that blocks PRs on >10% quality regression
+- Established baseline metrics (80% pass rate, 75% citation recall, 75% checklist coverage)
+- Created comprehensive README documenting the add-fixture workflow for data-network-effect
+- All acceptance criteria met: fixtures created, pytest harness working, CI configured, regression detection active
+- **Files changed:** backend/ai_service/eval/, .github/workflows/ai-eval.yml, migrations/009_eval_runs.sql, backend/apply_eval_migration.py
+- **Learnings for future iterations:**
+  - Data-network-effect pattern: every production correction becomes a test fixture
+  - Evaluation framework prevents AI quality regressions from reaching production
+  - Baseline metrics tracked per branch enable safe experimentation
+  - GitHub Actions can post PR comments with evaluation results for visibility
+  - Fixtures should include realistic submittal content with expected spec extraction and checklist items
+  - 10% regression tolerance allows minor variations while catching significant drops
 ---

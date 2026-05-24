@@ -6,9 +6,13 @@ Extracts text chunks from PDFs with positioning metadata and generates embedding
 import fitz  # PyMuPDF
 import numpy as np
 from typing import List, Dict, Any, Tuple
-import openai
+import google.generativeai as genai
 import os
 from dataclasses import dataclass
+
+# Gemini text-embedding-004 produces 768-dimensional vectors
+GEMINI_EMBEDDING_DIM = 768
+GEMINI_EMBEDDING_MODEL = "models/text-embedding-004"
 
 
 @dataclass
@@ -32,15 +36,15 @@ class PDFChunker:
     def __init__(self, chunk_size: int = 500, chunk_overlap: int = 50):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self._setup_openai()
-    
-    def _setup_openai(self):
-        """Configure OpenAI for embeddings."""
-        api_key = os.getenv('OPENAI_API_KEY')
+        self._setup_gemini()
+
+    def _setup_gemini(self):
+        """Configure Gemini for embeddings."""
+        api_key = os.getenv('GEMINI_API_KEY')
         if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable required for embeddings")
-        
-        openai.api_key = api_key
+            raise ValueError("GEMINI_API_KEY environment variable required for embeddings")
+
+        genai.configure(api_key=api_key)
     
     def process_pdf(self, pdf_path: str) -> List[DocumentChunk]:
         """
@@ -154,22 +158,25 @@ class PDFChunker:
         for chunk, embedding in zip(chunks, embeddings):
             chunk.embedding = embedding
     
-    def _get_embeddings_batch(self, texts: List[str], model: str = "text-embedding-ada-002") -> List[List[float]]:
-        """Get embeddings for a batch of texts."""
+    def _get_embeddings_batch(self, texts: List[str], model: str = GEMINI_EMBEDDING_MODEL) -> List[List[float]]:
+        """Get embeddings for a batch of texts via Gemini text-embedding-004 (768 dims)."""
+        embeddings: List[List[float]] = []
         try:
-            # OpenAI embedding API
-            response = openai.Embedding.create(
-                model=model,
-                input=texts
-            )
-            
-            return [item['embedding'] for item in response['data']]
-            
+            # Gemini's embed_content accepts a single text or a list; iterate to keep
+            # error handling per-text and tolerate large batches.
+            for text in texts:
+                response = genai.embed_content(
+                    model=model,
+                    content=text,
+                    task_type="retrieval_document",
+                )
+                embeddings.append(response["embedding"])
+            return embeddings
+
         except Exception as e:
             print(f"Error generating embeddings: {e}")
             # Return zero embeddings as fallback
-            embedding_dim = 1536  # ada-002 dimension
-            return [[0.0] * embedding_dim for _ in texts]
+            return [[0.0] * GEMINI_EMBEDDING_DIM for _ in texts]
     
     def get_chunk_metadata(self, chunk: DocumentChunk) -> Dict[str, Any]:
         """Get metadata dictionary for database storage."""

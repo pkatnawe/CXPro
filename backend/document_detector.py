@@ -106,21 +106,16 @@ class DocumentTypeDetector(dspy.Module):
 
 
 def configure_dspy():
-    """Configure DSPy with OpenAI model."""
+    """Configure DSPy with Gemini model (per PRD)."""
     import os
-    
-    api_key = os.getenv('GEMINI_API_KEY')  # Using Gemini per PRD
+
+    api_key = os.getenv('GEMINI_API_KEY')
     if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable not set")
-    
-    # For now use OpenAI (can switch to Gemini later if needed)
-    openai_key = os.getenv('OPENAI_API_KEY')
-    if openai_key:
-        lm = dspy.OpenAI(model='gpt-3.5-turbo', api_key=openai_key)
-        dspy.settings.configure(lm=lm)
-    else:
-        # Fallback to a basic configuration
-        print("WARNING: No OpenAI key found, using default DSPy configuration")
+
+    # DSPy uses LiteLLM under the hood; the "gemini/" prefix routes to Google AI Studio.
+    lm = dspy.LM("gemini/gemini-1.5-flash", api_key=api_key)
+    dspy.settings.configure(lm=lm)
 
 
 # Example usage and testing
