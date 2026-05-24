@@ -5,6 +5,10 @@ Started: Sun May 24 13:39:19 CDT 2026
 - Slice-01 accounts already exist; credentials are in .env.local — scaffold code and deploy autonomously
 - Use VERCEL_TOKEN env var for `vercel` CLI deploys; RAILWAY_TOKEN for `railway` CLI deploys
 - Set GitHub Actions secrets with `gh secret set`
+- Use transactional database functions for multi-table operations (create_test_procedure_with_citations)
+- DSPy modules with REQUIRED field annotations enforce mandatory outputs (citations)
+- LangGraph StateGraph pattern for agent workflow orchestration
+- Mock similarity functions in test migrations when real embeddings aren't needed
 
 ---
 
@@ -156,4 +160,21 @@ Started: Sun May 24 13:39:19 CDT 2026
   - Outbox subscriber pattern ensures exactly-once processing of DocumentUploaded events with proper idempotency
   - Database functions with pgvector enable efficient similarity queries with RLS-enforced access control
   - DSPy extractor confidence thresholds (>0.6) help ensure quality while allowing AI refusal for low-confidence extractions
+---
+
+## May 24 20:45 CDT 2026 - Slice-06 Complete
+- Successfully implemented CxExecutionAgent (LangGraph) that consumes DocumentIndexed events and generates L2 checklists
+- Created DSPy GenerateL2Checklist module with REQUIRED citations - enforces citations or refuses generation
+- Built comprehensive database schema: agent_runs for audit trail, test_procedure_instances for drafts, citations table
+- Implemented confidence-based refusal path - emits AIRefusal event when document chunks have low similarity
+- Added transactional create_test_procedure_with_citations function ensuring atomic draft + citations creation
+- AgentRunCompleted and AIRefusal events properly emitted to outbox for downstream consumption
+- **Files changed:** migrations/005_agent_execution.sql, backend/cx_execution_agent.py, backend/generate_checklist.py, backend/test_slice_06.py, backend/apply_agent_migration.py, backend/requirements.txt
+- **Learnings for future iterations:**
+  - LangGraph StateGraph provides clean workflow orchestration for multi-step agent processes
+  - DSPy REQUIRED field declarations enforce citation requirements with automatic retry logic
+  - Agent confidence thresholds (>0.7 similarity) help ensure quality while allowing graceful refusal
+  - Transactional database functions ensure consistency between test procedures and citations
+  - Mock search_document_chunks function sufficient for testing without real embeddings
+  - Agent audit trail (agent_runs) captures full execution context for debugging and compliance
 ---
