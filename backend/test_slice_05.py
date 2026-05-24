@@ -111,7 +111,7 @@ def test_spec_extraction_validation():
 def test_outbox_subscriber_integration():
     """Test that ingestion pipeline can be initialized as outbox subscriber."""
     with patch('ingestion_pipeline.asyncpg.create_pool'), \
-         patch('document_detector.configure_dspy'), \
+         patch('ingestion_pipeline.configure_dspy'), \
          patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
 
         from ingestion_pipeline import IngestionPipeline
