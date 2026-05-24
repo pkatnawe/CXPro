@@ -7,7 +7,6 @@ import CommandPalette from '@/components/CommandPalette'
 import AiChatDrawer from '@/components/AiChatDrawer'
 import ActivityTab from '@/components/ActivityTab'
 import CitationChip from '@/components/CitationChip'
-import './entity.css'
 
 interface TestProcedureInstance {
   id: string
@@ -224,252 +223,167 @@ export default function EntityDetailPage() {
 
   if (loading) {
     return (
-      <div className="bp-app">
-        <div className="bp-loading">Loading test procedure...</div>
-      </div>
+      <div className="bp-loading">Loading test procedure...</div>
     )
   }
 
   if (!testProcedure) {
     return (
-      <div className="bp-app">
-        <div className="bp-error">Test procedure not found</div>
-      </div>
+      <div className="bp-error">Test procedure not found</div>
     )
   }
 
   return (
-    <div className="bp-app">
-      {/* Left Sidebar Navigation */}
-      <nav className="bp-sidebar">
-        <div className="bp-brand" onClick={() => router.push('/dashboard')}>
-          <div className="bp-brand-mark">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-            </svg>
-          </div>
-          <div>
-            <div className="bp-brand-name">CX·PRO</div>
-            <div className="bp-brand-sub">COMMISSIONING</div>
-          </div>
-        </div>
-
-        <div className="bp-nav">
-          <button 
-            className="bp-nav-item"
-            onClick={() => router.push('/inbox')}
-          >
-            <span className="bp-nav-icon">📥</span>
-            <span>Inbox</span>
-          </button>
-          <button 
-            className="bp-nav-item"
-            onClick={() => router.push('/dashboard')}
-          >
-            <span className="bp-nav-icon">📊</span>
-            <span>Dashboard</span>
-          </button>
-          <button 
-            className="bp-nav-item is-active"
-          >
-            <span className="bp-nav-icon">✓</span>
-            <span>Checklists</span>
-          </button>
-          <button className="bp-nav-item">
-            <span className="bp-nav-icon">⚙️</span>
-            <span>Equipment</span>
-          </button>
-        </div>
-
-        <div className="bp-nav-bottom">
-          <button 
-            className="bp-nav-item"
-            onClick={async () => {
-              await supabase.auth.signOut()
-              router.push('/auth')
-            }}
-          >
-            <span className="bp-nav-icon">↩</span>
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Content Area */}
-      <div className="bp-main">
-        {/* Top Bar */}
-        <header className="bp-topbar">
-          <div className="bp-breadcrumb">
-            <button onClick={() => router.push('/inbox')}>Inbox</button>
-            <span className="bp-breadcrumb-sep">/</span>
-            <span>Test Procedure</span>
-          </div>
-
-          <div className="bp-topbar-right">
-            <button 
-              className="bp-search"
-              onClick={() => setCommandPaletteOpen(true)}
-            >
-              <span className="bp-search-icon">🔍</span>
-              <span className="bp-search-text">Search</span>
-              <span className="bp-kbd">⌘K</span>
-            </button>
-            <div className="bp-user-avatar">
-              {user?.email.split(' ').map(s => s[0]).join('').toUpperCase()}
+    <>
+      {/* Three-panel layout: main content + right drawer */}
+      <div className="bp-entity-layout">
+        {/* Center: Entity Detail */}
+        <div className="bp-entity-content">
+          {/* Entity Header */}
+          <div className="bp-entity-header">
+            <div className="bp-entity-meta">
+              <span className="bp-entity-type">TEST PROCEDURE</span>
+              {testProcedure.status === 'draft' && (
+                <span className="bp-status-badge bp-status-draft">DRAFT</span>
+              )}
+              {testProcedure.status === 'active' && (
+                <span className="bp-status-badge bp-status-active">ACTIVE</span>
+              )}
+              {testProcedure.actor_type === 'ai' && (
+                <span className="bp-ai-badge">
+                  <span className="bp-ai-icon">⚡</span> AI Generated
+                </span>
+              )}
             </div>
-          </div>
-        </header>
+            
+            <h1 className="bp-entity-title">
+              {testProcedure.equipment_type}
+              {testProcedure.asset_tag && (
+                <span className="bp-asset-tag bp-mono">{testProcedure.asset_tag}</span>
+              )}
+            </h1>
+            
+            <div className="bp-entity-details">
+              {testProcedure.manufacturer && (
+                <span>{testProcedure.manufacturer}</span>
+              )}
+              {testProcedure.model && (
+                <>
+                  <span className="bp-dot">•</span>
+                  <span className="bp-mono">{testProcedure.model}</span>
+                </>
+              )}
+              {document && (
+                <>
+                  <span className="bp-dot">•</span>
+                  <span>Source: {document.name}</span>
+                </>
+              )}
+            </div>
 
-        {/* Entity Content + Right Drawer */}
-        <div className="bp-entity-layout">
-          {/* Center: Entity Detail */}
-          <div className="bp-entity-content">
-            {/* Entity Header */}
-            <div className="bp-entity-header">
-              <div className="bp-entity-meta">
-                <span className="bp-entity-type">TEST PROCEDURE</span>
-                {testProcedure.status === 'draft' && (
-                  <span className="bp-status-badge bp-status-draft">DRAFT</span>
-                )}
-                {testProcedure.status === 'active' && (
-                  <span className="bp-status-badge bp-status-active">ACTIVE</span>
-                )}
-                {testProcedure.actor_type === 'ai' && (
-                  <span className="bp-ai-badge">
-                    <span className="bp-ai-icon">⚡</span> AI Generated
-                  </span>
-                )}
+            {/* Accept Draft Button (OCA only) */}
+            {testProcedure.status === 'draft' && user?.role === 'OCA' && (
+              <div className="bp-entity-actions">
+                <button 
+                  className="bp-btn-primary"
+                  onClick={handleAcceptDraft}
+                >
+                  Accept Draft
+                </button>
+                <button className="bp-btn-ghost">Request Changes</button>
               </div>
-              
-              <h1 className="bp-entity-title">
-                {testProcedure.equipment_type}
-                {testProcedure.asset_tag && (
-                  <span className="bp-asset-tag bp-mono">{testProcedure.asset_tag}</span>
-                )}
-              </h1>
-              
-              <div className="bp-entity-details">
-                {testProcedure.manufacturer && (
-                  <span>{testProcedure.manufacturer}</span>
-                )}
-                {testProcedure.model && (
-                  <>
-                    <span className="bp-dot">•</span>
-                    <span className="bp-mono">{testProcedure.model}</span>
-                  </>
-                )}
-                {document && (
-                  <>
-                    <span className="bp-dot">•</span>
-                    <span>Source: {document.name}</span>
-                  </>
-                )}
-              </div>
+            )}
 
-              {/* Accept Draft Button (OCA only) */}
-              {testProcedure.status === 'draft' && user?.role === 'OCA' && (
-                <div className="bp-entity-actions">
+            {/* Refusal State */}
+            {agentRun?.status === 'refused' && (
+              <div className="bp-refusal-card">
+                <div className="bp-refusal-icon">⚠️</div>
+                <div className="bp-refusal-content">
+                  <div className="bp-refusal-title">AI needs more information</div>
+                  <div className="bp-refusal-reason">{agentRun.refusal_reason}</div>
                   <button 
-                    className="bp-btn-primary"
-                    onClick={handleAcceptDraft}
+                    className="bp-btn-ghost"
+                    onClick={() => router.push(`/project/${testProcedure.project_id}`)}
                   >
-                    Accept Draft
+                    Provide more info →
                   </button>
-                  <button className="bp-btn-ghost">Request Changes</button>
                 </div>
-              )}
-
-              {/* Refusal State */}
-              {agentRun?.status === 'refused' && (
-                <div className="bp-refusal-card">
-                  <div className="bp-refusal-icon">⚠️</div>
-                  <div className="bp-refusal-content">
-                    <div className="bp-refusal-title">AI needs more information</div>
-                    <div className="bp-refusal-reason">{agentRun.refusal_reason}</div>
-                    <button 
-                      className="bp-btn-ghost"
-                      onClick={() => router.push(`/project/${testProcedure.project_id}`)}
-                    >
-                      Provide more info →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Checklist Sections */}
-            <div className="bp-checklist-sections">
-              {testProcedure.body.sections.map((section, sectionIdx) => (
-                <div key={sectionIdx} className="bp-checklist-section">
-                  <h2 className="bp-section-title">{section.title}</h2>
-                  
-                  <div className="bp-checklist-steps">
-                    {section.steps.map((step) => {
-                      const stepCitations = citations.filter(c => c.step_id === step.id)
-                      
-                      return (
-                        <div key={step.id} className="bp-checklist-step">
-                          <div className="bp-step-number bp-mono">{step.id}</div>
-                          <div className="bp-step-content">
-                            <div className="bp-step-text">{step.content}</div>
-                            
-                            {stepCitations.length > 0 && (
-                              <div className="bp-step-citations">
-                                {stepCitations.map(citation => (
-                                  <CitationChip
-                                    key={citation.id}
-                                    citation={citation}
-                                    document={document}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* Right: AI Chat / Activity Drawer */}
-          <div className="bp-right-drawer">
-            <div className="bp-drawer-tabs">
-              <button 
-                className={`bp-drawer-tab ${rightDrawerTab === 'chat' ? 'is-active' : ''}`}
-                onClick={() => setRightDrawerTab('chat')}
-              >
-                AI Chat
-              </button>
-              <button 
-                className={`bp-drawer-tab ${rightDrawerTab === 'activity' ? 'is-active' : ''}`}
-                onClick={() => setRightDrawerTab('activity')}
-              >
-                Activity
-              </button>
-            </div>
+          {/* Checklist Sections */}
+          <div className="bp-checklist-sections">
+            {testProcedure.body.sections.map((section, sectionIdx) => (
+              <div key={sectionIdx} className="bp-checklist-section">
+                <h2 className="bp-section-title">{section.title}</h2>
+                
+                <div className="bp-checklist-steps">
+                  {section.steps.map((step) => {
+                    const stepCitations = citations.filter(c => c.step_id === step.id)
+                    
+                    return (
+                      <div key={step.id} className="bp-checklist-step">
+                        <div className="bp-step-number bp-mono">{step.id}</div>
+                        <div className="bp-step-content">
+                          <div className="bp-step-text">{step.content}</div>
+                          
+                          {stepCitations.length > 0 && (
+                            <div className="bp-step-citations">
+                              {stepCitations.map(citation => (
+                                <CitationChip
+                                  key={citation.id}
+                                  citation={citation}
+                                  document={document}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-            <div className="bp-drawer-content">
-              {rightDrawerTab === 'chat' && (
-                <AiChatDrawer 
-                  testProcedureId={testProcedure.id}
-                  agentRunId={testProcedure.agent_run_id}
-                  orgId={testProcedure.org_id}
-                  userId={user?.id}
-                />
-              )}
-              {rightDrawerTab === 'activity' && (
-                <ActivityTab 
-                  projectId={testProcedure.project_id}
-                  testProcedureId={testProcedure.id}
-                  agentRunId={testProcedure.agent_run_id}
-                  userId={user?.id}
-                  orgId={testProcedure.org_id}
-                />
-              )}
-            </div>
+        {/* Right: AI Chat / Activity Drawer */}
+        <div className="bp-right-drawer">
+          <div className="bp-drawer-tabs">
+            <button 
+              className={`bp-drawer-tab ${rightDrawerTab === 'chat' ? 'is-active' : ''}`}
+              onClick={() => setRightDrawerTab('chat')}
+            >
+              AI Chat
+            </button>
+            <button 
+              className={`bp-drawer-tab ${rightDrawerTab === 'activity' ? 'is-active' : ''}`}
+              onClick={() => setRightDrawerTab('activity')}
+            >
+              Activity
+            </button>
+          </div>
+
+          <div className="bp-drawer-content">
+            {rightDrawerTab === 'chat' && (
+              <AiChatDrawer 
+                testProcedureId={testProcedure.id}
+                agentRunId={testProcedure.agent_run_id}
+                orgId={testProcedure.org_id}
+                userId={user?.id}
+              />
+            )}
+            {rightDrawerTab === 'activity' && (
+              <ActivityTab 
+                projectId={testProcedure.project_id}
+                testProcedureId={testProcedure.id}
+                agentRunId={testProcedure.agent_run_id}
+                userId={user?.id}
+                orgId={testProcedure.org_id}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -479,6 +393,321 @@ export default function EntityDetailPage() {
         open={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
       />
-    </div>
+
+      <style jsx>{`
+        .bp-entity-layout {
+          display: grid;
+          grid-template-columns: 1fr 400px;
+          height: calc(100vh - 60px);
+          overflow: hidden;
+        }
+
+        @media (max-width: 1024px) {
+          .bp-entity-layout {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr auto;
+          }
+
+          .bp-right-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 232px;
+            right: 0;
+            height: 40vh;
+            border-top: 2px solid var(--bp-line);
+            border-left: none !important;
+          }
+        }
+
+        .bp-entity-content {
+          overflow-y: auto;
+          padding: 24px 32px;
+        }
+
+        .bp-entity-header {
+          margin-bottom: 32px;
+        }
+
+        .bp-entity-meta {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
+        }
+
+        .bp-entity-type {
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--bp-graphite);
+          font-weight: 600;
+        }
+
+        .bp-status-badge {
+          padding: 3px 8px;
+          border-radius: 3px;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-weight: 600;
+        }
+
+        .bp-status-draft {
+          background: var(--bp-amber);
+          color: white;
+        }
+
+        .bp-status-active {
+          background: var(--bp-ok);
+          color: white;
+        }
+
+        .bp-ai-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 3px 8px;
+          background: var(--bp-blue-soft);
+          color: var(--bp-blue);
+          border-radius: 3px;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .bp-ai-icon {
+          font-size: 12px;
+        }
+
+        .bp-entity-title {
+          font-size: 28px;
+          font-weight: 700;
+          margin: 0 0 12px 0;
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+        }
+
+        .bp-asset-tag {
+          font-size: 16px;
+          color: var(--bp-graphite);
+          font-weight: 400;
+        }
+
+        .bp-entity-details {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--bp-graphite);
+          font-size: 14px;
+        }
+
+        .bp-dot {
+          color: var(--bp-dim);
+        }
+
+        .bp-entity-actions {
+          margin-top: 20px;
+          display: flex;
+          gap: 12px;
+        }
+
+        .bp-btn-primary {
+          padding: 10px 20px;
+          background: var(--bp-blue);
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          font-family: inherit;
+        }
+
+        .bp-btn-primary:hover {
+          background: #0E35D9;
+          transform: translateY(-1px);
+        }
+
+        .bp-btn-ghost {
+          padding: 10px 20px;
+          background: transparent;
+          color: var(--bp-graphite);
+          border: 1px solid var(--bp-line-soft);
+          border-radius: 4px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          font-family: inherit;
+        }
+
+        .bp-btn-ghost:hover {
+          background: var(--bp-card);
+          border-color: var(--bp-line);
+          color: var(--bp-ink);
+        }
+
+        .bp-refusal-card {
+          margin-top: 20px;
+          padding: 16px;
+          background: var(--bp-warn-soft);
+          border: 1px solid var(--bp-warn);
+          border-radius: 4px;
+          display: flex;
+          gap: 12px;
+        }
+
+        .bp-refusal-icon {
+          font-size: 24px;
+        }
+
+        .bp-refusal-content {
+          flex: 1;
+        }
+
+        .bp-refusal-title {
+          font-weight: 600;
+          margin-bottom: 4px;
+          color: var(--bp-warn);
+        }
+
+        .bp-refusal-reason {
+          color: var(--bp-ink);
+          margin-bottom: 12px;
+        }
+
+        .bp-checklist-sections {
+          margin-top: 32px;
+        }
+
+        .bp-checklist-section {
+          margin-bottom: 32px;
+        }
+
+        .bp-section-title {
+          font-size: 18px;
+          font-weight: 600;
+          margin: 0 0 16px 0;
+          padding-bottom: 8px;
+          border-bottom: 1px dashed var(--bp-line-soft);
+        }
+
+        .bp-checklist-steps {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .bp-checklist-step {
+          display: grid;
+          grid-template-columns: 48px 1fr;
+          gap: 16px;
+          padding: 16px;
+          background: var(--bp-card);
+          border: 1px solid var(--bp-line-softer);
+          border-radius: 4px;
+          transition: all 0.15s ease;
+        }
+
+        .bp-checklist-step:hover {
+          background: var(--bp-card-2);
+          border-color: var(--bp-line-soft);
+        }
+
+        .bp-step-number {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--bp-blue);
+          text-align: center;
+          line-height: 1.5;
+        }
+
+        .bp-mono {
+          font-family: "JetBrains Mono", monospace !important;
+        }
+
+        .bp-step-content {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .bp-step-text {
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--bp-ink);
+        }
+
+        .bp-step-citations {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 4px;
+        }
+
+        .bp-right-drawer {
+          display: flex;
+          flex-direction: column;
+          background: var(--bp-card);
+          border-left: 1px solid var(--bp-line-soft);
+          overflow: hidden;
+        }
+
+        .bp-drawer-tabs {
+          display: flex;
+          border-bottom: 1px solid var(--bp-line-soft);
+          background: var(--bp-paper-2);
+        }
+
+        .bp-drawer-tab {
+          flex: 1;
+          padding: 12px;
+          border: none;
+          background: transparent;
+          color: var(--bp-graphite);
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          position: relative;
+          font-family: inherit;
+        }
+
+        .bp-drawer-tab:hover {
+          background: var(--bp-card);
+          color: var(--bp-ink);
+        }
+
+        .bp-drawer-tab.is-active {
+          background: var(--bp-card);
+          color: var(--bp-blue);
+        }
+
+        .bp-drawer-tab.is-active::after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: var(--bp-blue);
+        }
+
+        .bp-drawer-content {
+          flex: 1;
+          overflow-y: auto;
+          padding: 20px;
+        }
+
+        .bp-loading, .bp-error {
+          display: grid;
+          place-items: center;
+          height: calc(100vh - 120px);
+          color: var(--bp-graphite);
+          font-size: 14px;
+        }
+      `}</style>
+    </>
   )
 }

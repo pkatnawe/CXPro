@@ -46,3 +46,16 @@ Started: Sun May 24 17:47:23 CDT 2026
   - Inbox and Dashboard are distinct concepts that must not be conflated
   - Type-check command in frontend is `npm run type-check` (not `npm run typecheck`)
 ---
+## Sun May 24 18:05 CDT 2026 - US-004
+- Added Vitest test infrastructure to frontend
+- Installed vitest, @vitest/coverage-v8, @vitejs/plugin-react, and jsdom
+- Created vitest.config.ts with jsdom environment and TypeScript path resolution
+- Added test and test:watch scripts to package.json
+- Created smoke test at frontend/src/lib/__tests__/smoke.test.ts
+- **Files changed:** frontend/package.json, frontend/vitest.config.ts, frontend/src/lib/__tests__/smoke.test.ts
+- **Learnings for future iterations:**
+  - Vitest requires @vitejs/plugin-react for React projects
+  - jsdom is required as a dependency when using jsdom environment in Vitest config
+  - Test command is `npm test` which runs `vitest run`, watch mode is `npm test:watch`
+  - Tests should be placed in __tests__ directories following the existing pattern
+---
