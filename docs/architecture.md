@@ -578,3 +578,15 @@ Every v0 feature serves this narrative. Anything that doesn't gets cut.
 - Full Cost & Commercial (Forecast, Retention, Labor cost, Budget — Year 2)
 - Pre-sales / CRM (out of CXPro entirely)
 - Pharma CQV / IQ-OQ-PQ language adaptation (Year 2)
+
+---
+
+## 15. Glossary
+
+### Equipment
+UI alias for the join of TestProcedureInstance and ExtractedSpec tables. In the user interface, "Equipment" represents test procedures paired with their extracted specifications. Note: There is no Asset table in v0; equipment metadata comes from ExtractedSpec joined to TestProcedureInstance.
+
+### Inbox vs Dashboard
+These are distinct concepts that must not be conflated:
+- **Inbox**: The OCA (Operations Control Agent) persona home page that spans across all projects. Shows items requiring attention from any project the user has access to.
+- **Dashboard**: The project-specific home page. Shows status, metrics, and recent activity for a single project context.
