@@ -85,8 +85,8 @@
         "Subscriber registered in Slice-04 dispatcher; consumes DocumentUploaded idempotently"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/8. Blocked by Slice-04."
+      "passes": true,
+      "notes": "COMPLETE. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/8. Implemented complete PDF ingestion pipeline with DSPy document detector (enum-based), PDF chunker with pgvector embeddings, ExtractedSpec extractor with REQUIRED citations, outbox subscriber for DocumentUploaded events, and comprehensive database schema with similarity search capabilities."
     },
     {
       "id": "Slice-06",

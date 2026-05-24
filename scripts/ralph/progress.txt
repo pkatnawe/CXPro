@@ -135,3 +135,25 @@ Started: Sun May 24 13:39:19 CDT 2026
   - Both Python (asyncpg) and Next.js (postgres) workers can process events independently with proper idempotency
   - Unknown event types are gracefully handled by logging and marking as dispatched to prevent queue blockage
 ---
+
+## May 24 19:45 CDT 2026 - Slice-05 Complete
+- Successfully implemented complete PDF ingestion pipeline for submittal cut sheet processing
+- Created DSPy document type detector returning enum values (not strings) to prevent parsing issues
+- Built PDF chunker with PyMuPDF that extracts text chunks with positioning metadata (bbox coordinates)
+- Implemented pgvector embeddings integration with OpenAI ada-002 for semantic similarity search
+- Created DSPy ExtractedSpec extractor with REQUIRED citations - enforces citation requirement or refuses extraction
+- Set up outbox subscriber pattern consuming DocumentUploaded events with idempotent processing
+- Applied database migration 004_pdf_ingestion.sql with document_chunks and extracted_specs tables
+- Enabled pgvector extension and created search_document_chunks similarity function
+- Built comprehensive validation ensuring citations are mandatory for spec extraction
+- All acceptance criteria met: typed DSPy modules, pgvector similarity queries, transactional status updates
+- **Files changed:** migrations/004_pdf_ingestion.sql, backend/document_detector.py, backend/pdf_chunker.py, backend/spec_extractor.py, backend/ingestion_pipeline.py, backend/apply_ingestion_migration.py, backend/test_slice_05.py, backend/requirements.txt
+- **Learnings for future iterations:**
+  - DSPy modules must declare citations as REQUIRED in signature to enforce proper extraction validation
+  - pgvector extension enables efficient semantic search with cosine similarity on 1536-dimensional embeddings
+  - Document status transitions: uploaded -> processing -> indexed (success) or failed (with failure_reason)
+  - PyMuPDF (fitz) provides reliable PDF text extraction with page coordinate metadata for citations
+  - Outbox subscriber pattern ensures exactly-once processing of DocumentUploaded events with proper idempotency
+  - Database functions with pgvector enable efficient similarity queries with RLS-enforced access control
+  - DSPy extractor confidence thresholds (>0.6) help ensure quality while allowing AI refusal for low-confidence extractions
+---
