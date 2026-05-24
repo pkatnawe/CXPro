@@ -176,7 +176,7 @@
         "README in ai_service/eval/ documents add-fixture workflow"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/13. Blocked by Slice-09. Final slice — after this, v0 demo flow is shippable and quality-gated."
     }
   ]

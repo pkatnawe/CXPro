@@ -247,3 +247,22 @@ Started: Sun May 24 13:39:19 CDT 2026
   - Audit trail pattern: combine audit_log_entries table with confirmed_ai_run_id field to track human confirmations of AI work
   - Inbox lifecycle: pending -> acted state transition removes items from daily view while preserving history
 ---
+
+## May 24 16:40 CDT 2026 - Slice-10 Complete
+- Successfully implemented EvalRun harness that gates CI on AI quality
+- Created 10 seed fixtures with realistic submittal PDF data and expected outputs
+- Built pytest test harness (test_cx_execution.py) that runs fixtures through AI pipeline
+- Created eval_runs database schema for tracking evaluation results over time
+- Implemented GitHub Action (ai-eval.yml) that blocks PRs on >10% quality regression
+- Established baseline metrics (80% pass rate, 75% citation recall, 75% checklist coverage)
+- Created comprehensive README documenting the add-fixture workflow for data-network-effect
+- All acceptance criteria met: fixtures created, pytest harness working, CI configured, regression detection active
+- **Files changed:** backend/ai_service/eval/, .github/workflows/ai-eval.yml, migrations/009_eval_runs.sql, backend/apply_eval_migration.py
+- **Learnings for future iterations:**
+  - Data-network-effect pattern: every production correction becomes a test fixture
+  - Evaluation framework prevents AI quality regressions from reaching production
+  - Baseline metrics tracked per branch enable safe experimentation
+  - GitHub Actions can post PR comments with evaluation results for visibility
+  - Fixtures should include realistic submittal content with expected spec extraction and checklist items
+  - 10% regression tolerance allows minor variations while catching significant drops
+---
