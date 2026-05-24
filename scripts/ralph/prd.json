@@ -176,8 +176,8 @@
         "README in ai_service/eval/ documents add-fixture workflow"
       ],
       "priority": 10,
-      "passes": true,
-      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/13. Blocked by Slice-09. Final slice — after this, v0 demo flow is shippable and quality-gated."
+      "passes": false,
+      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/13. Blocked by Slice-09. Ralph's first attempt generated test_cx_execution.py against a fictional API (wrong class names, wrong method signatures, no real PDFs in fixtures); the harness was removed in PR #15. Needs a real wire-up against the actual DocumentTypeDetector / SubmittalSpecExtractor / GenerateL2Checklist / CxExecutionAgent interfaces, real PDF fixtures, and an asyncpg test pool."
     }
   ]
 }
