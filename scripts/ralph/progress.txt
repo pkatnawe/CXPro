@@ -1,3 +1,22 @@
 # Ralph Progress Log
 Started: Sun May 24 17:47:23 CDT 2026
+
+## Codebase Patterns
+- Blueprint CSS uses .bp-* utility classes for consistent styling
+- Archivo is the primary font, JetBrains Mono for monospace elements
+- CSS variables --font-archivo and --font-jetbrains-mono expose the fonts
+
+---
+
+## Sun May 24 17:50 CDT 2026 - US-001
+- Copied blueprint.css verbatim from frontend-design/ to frontend/src/styles/
+- Imported blueprint.css globally in layout.tsx
+- Added Archivo and JetBrains Mono fonts via next/font/google with CSS variables
+- Updated globals.css to use Archivo as the default body font
+- All existing pages still render correctly
+- **Files changed:** frontend/src/app/layout.tsx, frontend/src/app/globals.css, frontend/src/styles/blueprint.css
+- **Learnings for future iterations:**
+  - Blueprint CSS foundation now available with .bp-* utility classes
+  - Archivo font is now the primary font, JetBrains Mono available for monospace elements
+  - CSS variables are exposed for both fonts for easy usage
 ---
