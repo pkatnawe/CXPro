@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CX Pro — Direction Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; }
+  .cmp-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #fff;
+  }
+  .cmp-tag {
+    position: absolute;
+    top: -42px; left: 0;
+    display: flex; align-items: center; gap: 12px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .cmp-tag-id {
+    font-family: "Archivo", sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: #1a1a1a;
+  }
+  .cmp-tag-pill {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    padding: 3px 8px;
+    background: #1a1a1a;
+    color: #fef4a8;
+    text-transform: uppercase;
+  }
+  .cmp-tag-desc {
+    font-family: "Archivo", sans-serif;
+    font-size: 13px;
+    color: #5a4a2a;
+  }
+  .cmp-hero {
+    text-align: center;
+    padding: 70px 40px 30px;
+    color: #2a2018;
+    font-family: "Archivo", sans-serif;
+  }
+  .cmp-hero h1 {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin: 0 0 12px;
+    line-height: 1;
+  }
+  .cmp-hero h1 em {
+    font-style: normal;
+    color: #c96442;
+  }
+  .cmp-hero p {
+    font-size: 16px;
+    max-width: 640px;
+    margin: 0 auto 8px;
+    line-height: 1.5;
+    color: #5a4a2a;
+  }
+  .cmp-hero .cmp-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #c96442;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .cmp-hero .cmp-meta {
+    display: inline-flex; gap: 14px;
+    margin-top: 16px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: #6a5a4a;
+    letter-spacing: 0.06em;
+  }
+  .cmp-hero .cmp-meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .cmp-hero .cmp-meta i {
+    width: 8px; height: 8px;
+    background: #c96442;
+    display: inline-block;
+  }
+  .cmp-open {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 6px;
+    padding: 7px 12px;
+    background: rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 3px;
+    color: #2a2018;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    pointer-events: all;
+  }
+  .cmp-open:hover { background: rgba(0,0,0,0.12); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+
+function CmpIntro() {
+  return (
+    <div className="cmp-hero">
+      <div className="cmp-eyebrow">— EXPLORATION · v1 · MAY 17, 2026</div>
+      <h1>CX <em>Pro</em></h1>
+      <p>Commissioning platform for construction teams who want to stop fighting their spreadsheets — and start pulling AI into the field.</p>
+      <p style={{maxWidth: 720, marginTop: 14, fontSize: 14, color:'#7a6a5a'}}>
+        Two strong directions for the same product. Both are fully clickable: navigate via the sidebar, toggle theme (sun/moon icon top-right), open the AI panel (top-right). Hero screen is the AHU-03 Pre-Functional Checklist. The AI panel demos three new features — generate checklists from a spec PDF, scan a nameplate, and conversational query across the project.
+      </p>
+      <div style={{display:'flex', gap: 10, justifyContent:'center', marginTop: 22}}>
+        <a className="cmp-open" href="blueprint.html" target="_blank" rel="noopener" style={{background:'#1240FF', color:'#fff', borderColor:'#1240FF'}}>▸ OPEN BLUEPRINT ↗</a>
+        <a className="cmp-open" href="site.html" target="_blank" rel="noopener" style={{background:'#0A0A0C', color:'#FF6A1A', borderColor:'#0A0A0C'}}>▸ OPEN SITE ↗</a>
+      </div>
+      <div className="cmp-meta">
+        <span><i style={{background:'#1240FF'}}/>BLUEPRINT</span>
+        <span><i style={{background:'#FF6A1A'}}/>SITE</span>
+        <span>·</span>
+        <span>1440 × 900</span>
+        <span>·</span>
+        <span>HERO: CHECKLIST EXECUTION</span>
+      </div>
+    </div>
+  );
+}
+
+function FrameTag({ id, name, desc, color, accent, openHref }) {
+  return (
+    <div className="cmp-tag">
+      <span className="cmp-tag-id">{id}</span>
+      <span className="cmp-tag-pill" style={{ background: color, color: accent }}>{name}</span>
+      <span className="cmp-tag-desc">{desc}</span>
+      <a className="cmp-open" href={openHref} target="_blank" rel="noopener">OPEN ↗</a>
+    </div>
+  );
+}
+
+function Frame({ src }) {
+  return <iframe className="cmp-frame" src={src} title={src}/>;
+}
+
+function App() {
+  return (
+    <DesignCanvas initialZoom={0.42}>
+      <DCSection id="intro" title="" subtitle="">
+        <DCArtboard id="intro" label="" width={1440} height={480}>
+          <CmpIntro/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="hero" title="Hero — Checklist Execution" subtitle="AHU-03 · Pre-Functional Checklist · the primary surface a Cx tech lives in all day.">
+        <DCArtboard id="bp-hero" label="A · Blueprint · paper, ink, blueprint blue" width={1440} height={900}>
+          <Frame src="blueprint.html"/>
+        </DCArtboard>
+        <DCArtboard id="st-hero" label="B · Site · asphalt, safety orange, brutalist" width={1440} height={900}>
+          <Frame src="site.html"/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="dash" title="Project Dashboard" subtitle="Active project overview · milestones · AI insights · live activity">
+        <DCArtboard id="bp-dash" label="A · Blueprint" width={1440} height={1100}>
+          <Frame src="blueprint.html#dashboard"/>
+        </DCArtboard>
+        <DCArtboard id="st-dash" label="B · Site" width={1440} height={1100}>
+          <Frame src="site.html#dashboard"/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="equip" title="Equipment / Assets" subtitle="The full asset inventory. Cards in Site direction, dense table in Blueprint.">
+        <DCArtboard id="bp-eq" label="A · Blueprint" width={1440} height={1100}>
+          <Frame src="blueprint.html#equipment"/>
+        </DCArtboard>
+        <DCArtboard id="st-eq" label="B · Site" width={1440} height={1200}>
+          <Frame src="site.html#equipment"/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="proj" title="Project List · Home" subtitle="Multi-project surface. Tiled tickets in Blueprint, ledger-row brutalist in Site.">
+        <DCArtboard id="bp-pl" label="A · Blueprint" width={1440} height={1000}>
+          <Frame src="blueprint.html#projects"/>
+        </DCArtboard>
+        <DCArtboard id="st-pl" label="B · Site" width={1440} height={1000}>
+          <Frame src="site.html#projects"/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="ai" title="AI Panel — Generate Checklist from Spec" subtitle="Click 'Ask CX·Pro' / 'Ask CXP' in either prototype top-right. Three modes: Ask · Generate · Scan.">
+        <DCArtboard id="bp-ai" label="A · Blueprint" width={1440} height={900}>
+          <Frame src="blueprint.html?ai=generate"/>
+        </DCArtboard>
+        <DCArtboard id="st-ai" label="B · Site" width={1440} height={900}>
+          <Frame src="site.html?ai=generate"/>
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

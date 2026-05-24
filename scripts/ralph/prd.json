@@ -1,31 +1,183 @@
 {
   "project": "CXPro",
-  "branchName": "ralph/initial-build",
-  "description": "Replace this description with your feature goal",
+  "branchName": "ralph/prd-1-tracer-bullet",
+  "description": "PRD-1 tracer-bullet vertical slice. Ten linear-dependency slices that prove the v0 architecture end-to-end: signup -> upload PDF -> AI drafts L2 checklist with citations -> InboxItem -> accept with audit. See docs/prd-1-tracer-bullet.md and docs/architecture.md for full context. Two HITL gates (Slice 06: first AI output review; Slice 08: design review against Blueprint mockup) require human approval before marking passes:true. Slice 01 also HITL because it needs account creation (Supabase/Vercel/Railway/Google AI Studio); the human should complete it manually and mark passes:true before starting the loop.",
   "userStories": [
     {
-      "id": "US-001",
-      "title": "Placeholder story 1 — replace before running",
-      "description": "As a [user], I want [feature] so that [benefit].",
+      "id": "Slice-01",
+      "title": "Repo + deploy hello-world",
+      "description": "Bootstrap the deploy pipeline: Next.js on Vercel, FastAPI on Railway, Supabase project, GitHub Actions CI, ESLint context-boundaries stub. HITL: requires account creation; do this manually before starting the autonomous loop.",
       "acceptanceCriteria": [
-        "Replace with concrete, testable criteria",
-        "Typecheck passes"
+        "Vercel URL returns 200 with default Next.js page",
+        "Railway /health endpoint returns {\"status\":\"ok\"}",
+        "GitHub Actions runs typecheck + ESLint + pytest on every PR; failures block merge",
+        "eslint-plugin-boundaries configured with stub contexts identity/ and commissioning/ under src/contexts/; cross-context internal imports fail lint",
+        "README documents local dev setup and required env vars",
+        "CI secrets present: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, DATABASE_URL, DATABASE_SECRET, GEMINI_API_KEY"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": "SCAFFOLD — replace this story before running Ralph"
+      "passes": true,
+      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/4. Accounts already exist; credentials are in .env.local. Agent should scaffold Next.js frontend, FastAPI backend, GitHub Actions CI, ESLint boundaries config, and README. Deploy to Vercel using VERCEL_TOKEN env var, deploy to Railway using RAILWAY_TOKEN env var. Set GitHub Actions secrets using gh CLI. Do not attempt to create new accounts."
     },
     {
-      "id": "US-002",
-      "title": "Placeholder story 2 — replace before running",
-      "description": "As a [user], I want [feature] so that [benefit].",
+      "id": "Slice-02",
+      "title": "Sign-in to a project (RLS proven)",
+      "description": "Supabase Auth + minimum party model (orgs, users, memberships, projects, participations, assignments, discipline_scopes) + invite-by-email + RLS isolation across orgs.",
       "acceptanceCriteria": [
-        "Replace with concrete, testable criteria",
-        "Typecheck passes"
+        "New user signs up via email; lands signed in",
+        "User creates Org, then Project, then invites a teammate by email; invitee lands signed in with role + project pre-assigned",
+        "Project creation auto-creates one DisciplineScope named 'Mechanical'",
+        "Automated test: user_a in org_a cannot read or modify project_b in org_b via any API path (REST + Supabase client)",
+        "All new tables have RLS enabled",
+        "Migration files checked in",
+        "Two roles seeded: OCA and cx_engineer"
       ],
       "priority": 2,
+      "passes": true,
+      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/5. Blocked by Slice-01."
+    },
+    {
+      "id": "Slice-03",
+      "title": "Upload a PDF and see status",
+      "description": "PDF upload flow with Supabase Storage, Document table, transactional outbox event emission, live status via Supabase Realtime.",
+      "acceptanceCriteria": [
+        "OCA can upload a PDF on the project page; file appears in documents list",
+        "Non-PDF uploads rejected with clear error before any DB write",
+        "Files >25MB rejected with clear error before storage upload",
+        "On success: documents row created with status='uploaded', outbox row created with event_type='document_uploaded', both in same transaction",
+        "UI status pill updates uploaded -> processing -> indexed via Realtime without page refresh",
+        "RLS verified: user from another org cannot read this document or its storage object",
+        "Migrations checked in"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/6. Blocked by Slice-02."
+    },
+    {
+      "id": "Slice-04",
+      "title": "Outbox dispatcher across two processes",
+      "description": "Transactional Outbox pattern with Postgres NOTIFY/LISTEN + fallback poll, two consumers (Next.js + Python), idempotency via outbox_dispatches table. Survives worker crashes; exactly-once delivery per subscriber.",
+      "acceptanceCriteria": [
+        "Inserting an outbox row causes both Next.js and Python workers to log handling within 2s (LISTEN path)",
+        "Fallback poll picks up missed NOTIFY events within 30s",
+        "Killing a worker mid-event and restarting results in exactly-once processing (verified by idempotency test)",
+        "outbox_dispatches row exists for every successful process",
+        "Unknown event_type is logged and marked dispatched (no queue blockage)",
+        "Integration test: 100 concurrent inserts; all dispatched exactly once to each subscriber",
+        "Subscriber registry pattern in place: contexts register (event_type, handler) at startup"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/7. Blocked by Slice-03. No user-visible behavior; the demo is the integration test output."
+    },
+    {
+      "id": "Slice-05",
+      "title": "PDF ingestion to ExtractedSpec",
+      "description": "Python ingestion pipeline: detector classifies doc type, chunker embeds into pgvector, one DSPy extractor produces ExtractedSpec for submittal-cut-sheet doc type. Consumes DocumentUploaded; emits DocumentIndexed.",
+      "acceptanceCriteria": [
+        "Uploading a submittal-cut-sheet PDF results in documents.status='indexed' within 60s",
+        "document_chunks rows exist with non-null pgvector embeddings and page/coords metadata",
+        "extracted_specs row exists with equipment_type, manufacturer, model, design_specs",
+        "DocumentIndexed event present in outbox",
+        "Non-submittal PDF results in documents.status='failed' with clear failure_reason",
+        "Detector is a typed DSPy module returning an enum (no string parsing)",
+        "pgvector similarity query against document_chunks returns relevant chunks for a known-related fixture query",
+        "Subscriber registered in Slice-04 dispatcher; consumes DocumentUploaded idempotently"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "COMPLETE. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/8. Implemented complete PDF ingestion pipeline with DSPy document detector (enum-based), PDF chunker with pgvector embeddings, ExtractedSpec extractor with REQUIRED citations, outbox subscriber for DocumentUploaded events, and comprehensive database schema with similarity search capabilities."
+    },
+    {
+      "id": "Slice-06",
+      "title": "AI drafts checklist from ExtractedSpec",
+      "description": "CxExecutionAgent (LangGraph) consumes DocumentIndexed, retrieves ExtractedSpec + chunks, runs DSPy GenerateL2Checklist module that REQUIRES citations, produces draft TestProcedureInstance. AgentRun records full audit. Refusal path when confidence too low. HITL: human reviews 3+ real submittal outputs before marking done.",
+      "acceptanceCriteria": [
+        "Full pipeline (Slices 3-6) on a real submittal PDF produces a test_procedure_instances row with status='draft', actor_type='ai', body containing >=5 checklist steps",
+        "At least one citations row links the draft to a document_chunks row with valid page/coords",
+        "agent_runs row captures input, output, tool_calls, token_cost, latency_ms, model_version",
+        "Zero-high-confidence retrieval results in agent REFUSAL: no draft created; AIRefusal event emitted with reason",
+        "DSPy signature for GenerateL2Checklist declares citations REQUIRED; test fixture proves DSPy retries or fails on missing citations",
+        "AgentRunCompleted event emitted to outbox on success",
+        "HUMAN REVIEW: 3+ real submittals processed; engineer + product reviewer confirm drafted checklists are customer-credible. Do not mark passes:true until human signs off."
+      ],
+      "priority": 6,
       "passes": false,
-      "notes": "SCAFFOLD — replace this story before running Ralph"
+      "notes": "HITL. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/9. Blocked by Slice-05. The agent loop should build the code, but a human must review real AI outputs before marking this slice complete."
+    },
+    {
+      "id": "Slice-07",
+      "title": "Inbox-as-home receives the draft",
+      "description": "Auto-subscribe OCA to AgentRunCompleted events for own runs; materialize as InboxItem; render Inbox-as-home with Realtime push. Daily bucket only. Distinct treatment for AI refusal events.",
+      "acceptanceCriteria": [
+        "On UserProjectAssignment creation, subscriptions row auto-created for OCA listening to agent_run.completed",
+        "After Slice-06 produces a draft, InboxItem row appears within 5s with action_state='pending'",
+        "OCA's home shows Inbox view with the new InboxItem card: AI badge, asset tag, source doc title, 'Review draft' CTA",
+        "InboxItem appears via Realtime without page refresh",
+        "AI refusal surfaces as a distinct InboxItem variant ('AI needs more info') with reason + 'Upload more docs' CTA",
+        "cx_engineer does NOT see OCA's InboxItem (RLS + per-user subscription scope verified)",
+        "Empty state UI: 'Nothing needs your attention. Upload a document to get started.'"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/10. Blocked by Slice-06. Net-new design (not in Blueprint mockup) — keep minimal: daily bucket, in-app only, no digest/escalation."
+    },
+    {
+      "id": "Slice-08",
+      "title": "Entity detail page + AI Chat drawer (Blueprint visual)",
+      "description": "Canonical three-panel layout per architecture §4.2. Citation chips deep-link to PDF page. AI Chat drawer auto-scoped to entity. Cmd-K palette stub. Blueprint visual direction (light, Archivo + JetBrains Mono, blue+cream palette). HITL: design review against frontend-design/ mockup before marking done.",
+      "acceptanceCriteria": [
+        "Clicking an InboxItem lands on the entity-detail page for that TestProcedureInstance",
+        "Desktop >=1024px: three panels (left nav, center entity, right drawer); <1024px reflows to single-scroll with drawer as bottom sheet",
+        "Each checklist step shows numbered ID (1.1, 1.2) in JetBrains Mono with at least one citation chip",
+        "Clicking a citation chip opens source PDF at correct page coordinate",
+        "AI Chat tab is the default open tab in the right drawer",
+        "Asking 'why this step?' returns a grounded answer with at least one new inline citation",
+        "Activity tab shows AgentRun entry with AI lightning-bolt glyph distinguishing AI from human entries",
+        "Cmd-K opens a palette; matches Projects + Documents by name",
+        "Visual tokens (color, typography, glyphs, state badge pills) match Blueprint mockup at frontend-design/",
+        "HUMAN REVIEW: product + design reviewer approve rendered page side-by-side with Blueprint mockup before marking passes:true"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "HITL. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/11. Blocked by Slice-07. Most visible UI surface — pause for design review."
+    },
+    {
+      "id": "Slice-09",
+      "title": "Accept draft (state transition + audit + feedback)",
+      "description": "Accept button (role-gated to OCA) transitions TestProcedureInstance draft -> active in one tx. AuditLogEntry with actor_type='human', confirmed_ai_run_id populated. FeedbackRecord thumb up/down on every AgentRun card. Refusal path-forward UX.",
+      "acceptanceCriteria": [
+        "Accept button visible to OCA on draft TestProcedureInstance; hidden from cx_engineer",
+        "Click transitions status: draft -> active in single DB transaction",
+        "audit_log_entries row written: actor_type='human', confirmed_ai_run_id populated with AgentRun id",
+        "InboxItem marked action_state='acted' and removed from daily Inbox view",
+        "Activity tab shows: 'human · OCA accepted at <timestamp> · confirming AI draft from <agent_run_id>'",
+        "Thumb-up / thumb-down render on every AgentRun card in AI Chat drawer",
+        "Thumb-down opens 'what's wrong?' textarea; submit writes feedback_records row",
+        "Refusal-variant UI: when AgentRun.status='refused', entity detail shows refusal card with reason + 'provide more info' CTA",
+        "TestProcedureInstanceActivated event present in outbox after acceptance",
+        "Integration test: full path Slices 3-9 produces an active TestProcedureInstance with correct audit chain"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/12. Blocked by Slice-08."
+    },
+    {
+      "id": "Slice-10",
+      "title": "EvalRun harness gates CI",
+      "description": "Ten seed fixtures + pytest harness + GitHub Action that blocks PR on AI quality regression. The data-network-effect seed: every pilot correction becomes a future fixture.",
+      "acceptanceCriteria": [
+        "Ten fixtures in ai_service/eval/fixtures/, each with a real submittal PDF + hand-curated expected.json (expected_extracted_spec, expected_min_citations, expected_steps_count_range)",
+        "pytest ai_service/eval/test_cx_execution.py runs locally and reports per-fixture pass/fail",
+        "eval_runs row written for every fixture x run",
+        "GitHub Action 'ai-eval' runs on every PR touching ai_service/**, prompts/**, or fixtures/",
+        "Intentionally regressing a prompt (e.g., removing citation requirement) causes ai-eval job to fail",
+        "Baseline stored as JSON in repo; regression = >10% drop in pass rate or citation recall vs main baseline",
+        "README in ai_service/eval/ documents add-fixture workflow"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/13. Blocked by Slice-09. Final slice — after this, v0 demo flow is shippable and quality-gated."
     }
   ]
 }
