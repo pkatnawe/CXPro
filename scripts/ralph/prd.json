@@ -50,7 +50,7 @@
         "Migrations checked in"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/6. Blocked by Slice-02."
     },
     {

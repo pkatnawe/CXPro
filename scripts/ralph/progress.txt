@@ -95,3 +95,23 @@ Started: Sun May 24 13:39:19 CDT 2026
   - Auto-triggers on auth.users table ensure seamless user profile creation on signup
   - Party model with orgs->memberships->projects->discipline_scopes provides proper hierarchical access control
 ---
+
+## May 24 19:25 CDT 2026 - Slice-03 Complete
+- Successfully implemented PDF upload flow with Supabase Storage and real-time status tracking
+- Created documents table with comprehensive status tracking (uploaded/processing/indexed/failed)
+- Implemented transactional outbox pattern ensuring document creation and event emission happen atomically
+- Built project-specific UI with PDF upload functionality restricted to OCA role
+- Added file validation preventing non-PDF uploads and files >25MB before any database writes
+- Set up Supabase Storage bucket with proper RLS policies ensuring cross-org document isolation
+- Implemented real-time status updates via Supabase Realtime for live UI feedback without page refresh
+- Created comprehensive TypeScript types for type-safe document management
+- All acceptance criteria verified: OCA upload workflow, file validation, transactional consistency, RLS isolation
+- **Files changed:** migrations/002_documents_outbox.sql, frontend/src/app/project/[id]/page.tsx, frontend/src/lib/storage.ts, frontend/src/lib/supabase.ts, backend/setup_storage.py, backend/verify_rls_policies.py
+- **Learnings for future iterations:**
+  - Transactional outbox pattern with database functions ensures consistency between document records and events
+  - Supabase Storage RLS policies provide file-level security isolation based on project membership
+  - Real-time subscriptions work seamlessly with table updates for live UI feedback
+  - File validation at multiple layers (client + server) provides robust error handling
+  - Project-specific pages with role-based access control create intuitive user workflows
+  - Database functions (create_document_with_outbox) simplify complex transactional operations
+---
