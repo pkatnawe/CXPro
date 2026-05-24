@@ -1,0 +1,34 @@
+{
+  "id": "fixture_010_heat_pump",
+  "name": "Water Source Heat Pump - Model WSHP-5T",
+  "description": "Water source heat pump for zone conditioning",
+  "pdf_content": "WATER SOURCE HEAT PUMP SUBMITTAL\nProject: Residential Tower Mechanical Systems\n\nEQUIPMENT IDENTIFICATION\nManufacturer: ThermalComfort Inc.\nModel Number: WSHP-5T-VR\nType: Vertical Water Source Heat Pump\nNominal Capacity: 5 tons (60,000 BTH)\n\nCOOLING PERFORMANCE (ISO 13256-1)\nTotal Cooling: 61,200 BTH @ 86°F EWT\nSensible Cooling: 45,900 BTH\nEER: 13.5\nWater Flow Rate: 15 GPM\nWater Pressure Drop: 8.2 ft\nAirflow: 2,000 CFM\n\nHEATING PERFORMANCE\nHeating Capacity: 72,000 BTH @ 70°F EWT\nCOP: 4.2\nWater Flow Rate: 15 GPM\nWater Pressure Drop: 8.5 ft\nAirflow: 2,000 CFM\n\nCOMPRESSOR\nType: Scroll, R-410A refrigerant\nQuantity: Single\nCapacity Control: 2-stage\nCrankcase Heater: 40W\n\nFAN/MOTOR\nType: Direct drive centrifugal\nMotor: ECM variable speed\nHorsepower: 1 HP\nExternal Static: 0.75\" w.g. available\n\nHEAT EXCHANGER\nType: Coaxial, cupro-nickel\nDesign Pressure: 450 PSI\nWater Connections: 1-1/4\" FPT\nRefrigerant Charge: 8.5 lbs R-410A\n\nAIR SIDE\nFilter: 2\" MERV 8 pleated\nAuxiliary Heat: 10 kW electric (emergency)\nSupply Air: Horizontal or downflow\n\nELECTRICAL\nVoltage: 208-230V/1PH/60Hz\nMCA: 35A\nMOCP: 50A\nControl Voltage: 24VAC\n\nCONTROLS\nThermostat: Programmable, 2H/2C\nAquastat: High/low water temperature\nFlow Switch: Paddle type\nSafety Controls: High/low pressure, freeze stat\nDiagnostics: LED fault indicators\n\nCOMMISSIONING CHECKLIST\n□ Verify unit model and capacity\n□ Check water flow rate and temperature\n□ Measure water pressure drop across unit\n□ Verify refrigerant charge (superheat/subcooling)\n□ Test compressor operation in both stages\n□ Check airflow and external static pressure\n□ Verify heating and cooling capacities\n□ Test changeover from cooling to heating mode\n□ Calibrate thermostat and verify setpoints\n□ Test auxiliary heat operation\n□ Verify safety control operation\n□ Check unit sound and vibration levels\n□ Document performance test results\n\nCompliance: AHRI 320/325/330\nSubmittal Date: March 1, 2024\nSubmitted By: Mechanical Systems Inc.",
+  "expected": {
+    "extracted_spec": {
+      "equipment_type": "Water Source Heat Pump",
+      "manufacturer": "ThermalComfort Inc.",
+      "model": "WSHP-5T-VR",
+      "design_specs": {
+        "nominal_capacity": "5 tons",
+        "cooling_capacity": "61,200 BTH @ 86°F EWT",
+        "heating_capacity": "72,000 BTH @ 70°F EWT",
+        "eer": "13.5",
+        "cop": "4.2",
+        "compressor": "Scroll, R-410A",
+        "water_flow": "15 GPM"
+      }
+    },
+    "expected_min_citations": 5,
+    "expected_steps_count_range": [10, 13],
+    "expected_checklist_items": [
+      "water flow rate",
+      "refrigerant charge",
+      "compressor operation",
+      "airflow measurement",
+      "changeover test",
+      "thermostat calibration",
+      "auxiliary heat",
+      "safety controls"
+    ]
+  }
+}

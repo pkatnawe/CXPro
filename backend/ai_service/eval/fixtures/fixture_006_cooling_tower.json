@@ -1,0 +1,32 @@
+{
+  "id": "fixture_006_cooling_tower",
+  "name": "Cooling Tower - Model CT-400",
+  "description": "Induced draft crossflow cooling tower for condenser water system",
+  "pdf_content": "COOLING TOWER SUBMITTAL DATA\nProject: Data Center Cooling Infrastructure\n\nEQUIPMENT DATA\nManufacturer: TowerCool Industries\nModel: CT-400-IX\nType: Induced Draft Crossflow Cooling Tower\nConstruction: Fiberglass with SS hardware\n\nTHERMAL PERFORMANCE\nHeat Rejection: 400 tons @ 95°F/85°F/78°F (EWT/LWT/WB)\nWater Flow Rate: 1,200 GPM\nApproach Temperature: 7°F\nDesign Wet Bulb: 78°F\nDrift Loss: 0.001% of circulating flow\n\nFAN SYSTEM\nFan Type: Axial propeller, belt drive\nFan Diameter: 12 feet\nMotor: 30 HP, 1800 RPM, TEFC\nVoltage: 460V/3PH/60Hz\nSound Level: 82 dBA at 50 ft\nVibration Switch: Standard\n\nWATER DISTRIBUTION\nDistribution Type: Gravity flow with nozzles\nNozzle Material: PVC\nHot Water Basin: Fiberglass with SS weirs\nCold Water Basin: Concrete with epoxy coating\nBasin Capacity: 450 gallons\nMakeup Water: 2\" float valve\nOverflow: 4\" connection\nDrain: 3\" connection\n\nFILL MEDIA\nType: PVC film fill\nThickness: 12 inches\nFlame Spread: <25 per ASTM E-84\n\nCOMMISSIONING REQUIREMENTS\n• Verify structural installation and anchor bolts\n• Check fan rotation and belt tension\n• Adjust water distribution for uniform flow\n• Verify drift eliminator installation\n• Test basin level controls and float valve\n• Measure fan motor current draw\n• Check vibration levels at design flow\n• Verify chemical treatment system operation\n• Test basin heater operation (freeze protection)\n• Perform thermal performance test\n• Adjust bleed rate for cycles of concentration\n• Document water treatment parameters\n\nQUALITY ASSURANCE\nCTI Certified Performance\nFM Approved for fire protection\nASHRAE 90.1 compliant\n\nSubmitted: February 10, 2024\nBy: MEP Contractor\nPage 1 of 3",
+  "expected": {
+    "extracted_spec": {
+      "equipment_type": "Cooling Tower",
+      "manufacturer": "TowerCool Industries",
+      "model": "CT-400-IX",
+      "design_specs": {
+        "heat_rejection": "400 tons",
+        "water_flow": "1,200 GPM",
+        "approach_temp": "7°F",
+        "fan_motor": "30 HP, 1800 RPM",
+        "sound_level": "82 dBA at 50 ft",
+        "basin_capacity": "450 gallons"
+      }
+    },
+    "expected_min_citations": 5,
+    "expected_steps_count_range": [8, 12],
+    "expected_checklist_items": [
+      "fan rotation",
+      "water distribution",
+      "drift eliminator",
+      "basin level",
+      "vibration levels",
+      "thermal performance",
+      "chemical treatment"
+    ]
+  }
+}

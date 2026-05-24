@@ -1,0 +1,31 @@
+{
+  "id": "fixture_002_chiller",
+  "name": "Air-Cooled Chiller - Model ACC-1200",
+  "description": "High-efficiency air-cooled chiller for commercial HVAC application",
+  "pdf_content": "SUBMITTAL DATA SHEET\nProject: Office Tower Mechanical Upgrade\n\nEQUIPMENT IDENTIFICATION\nManufacturer: ChillMax Corporation\nModel Number: ACC-1200\nEquipment Type: Air-Cooled Screw Chiller\n\nPERFORMANCE DATA\nNominal Cooling Capacity: 120 tons\nFull Load Efficiency: 1.05 kW/ton\nIPLV: 0.75 kW/ton\nEvaporator Leaving Water Temp: 44°F\nCondenser Entering Air Temp: 95°F\nRefrigerant: R-134a\nCompressor Type: Twin rotary screw\n\nELECTRICAL SPECIFICATIONS\nVoltage: 460V/3PH/60Hz\nFull Load Amps: 145A per compressor\nMinimum Circuit Ampacity: 195A\nMaximum Overcurrent Protection: 250A\nControl Voltage: 115V/1PH/60Hz\n\nPHYSICAL SPECIFICATIONS\nDimensions: 144\"L x 88\"W x 94\"H\nOperating Weight: 8,500 lbs\nShipping Weight: 7,800 lbs\nRefrigerant Charge: 185 lbs R-134a\nEvaporator Water Volume: 45 gallons\n\nCOMMISSIONING CHECKLIST\n□ Verify proper refrigerant charge\n□ Check and adjust superheat settings\n□ Calibrate all temperature and pressure sensors\n□ Test capacity control from 25% to 100%\n□ Verify proper oil level and pressure\n□ Check vibration isolation effectiveness\n□ Test all safety controls and alarms\n□ Perform full-load and part-load performance test\n□ Verify BAS integration and point mapping\n□ Document refrigerant leak test results\n\nSubmitted: January 20, 2024\nPage 1 of 3",
+  "expected": {
+    "extracted_spec": {
+      "equipment_type": "Air-Cooled Chiller",
+      "manufacturer": "ChillMax Corporation",
+      "model": "ACC-1200",
+      "design_specs": {
+        "cooling_capacity": "120 tons",
+        "efficiency": "1.05 kW/ton",
+        "iplv": "0.75 kW/ton",
+        "voltage": "460V/3PH/60Hz",
+        "refrigerant": "R-134a",
+        "weight": "8,500 lbs"
+      }
+    },
+    "expected_min_citations": 4,
+    "expected_steps_count_range": [8, 10],
+    "expected_checklist_items": [
+      "refrigerant charge",
+      "superheat settings",
+      "temperature sensors",
+      "capacity control",
+      "safety controls",
+      "performance test"
+    ]
+  }
+}

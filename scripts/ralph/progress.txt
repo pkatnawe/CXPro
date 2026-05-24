@@ -224,3 +224,26 @@ Started: Sun May 24 13:39:19 CDT 2026
   - Citation deep-linking requires signed URLs from Supabase Storage for PDF access
   - Activity feed pattern: combine multiple data sources (agent_runs, test_procedure_instances) into unified timeline
 ---
+
+## May 24 16:23 CDT 2026 - Slice-09 Complete
+- Successfully implemented Accept draft functionality with complete state transition and audit trail
+- Created database function accept_draft_test_procedure for atomic draft->active transition with audit logging
+- Implemented Accept button in entity detail page with OCA role-gating (hidden from cx_engineer users)
+- Added feedback UI (thumb up/down) to both AiChatDrawer messages and ActivityTab AgentRun cards
+- Created database function record_feedback for capturing user feedback on AI outputs
+- Updated inbox items to transition to 'acted' state when draft is accepted
+- Implemented TestProcedureInstanceActivated event emission to outbox for downstream processing
+- Refusal variant UI already present from Slice-08 (shows refusal card with reason and 'provide more info' CTA)
+- Created comprehensive integration test covering full pipeline from document upload through acceptance (Slices 3-9)
+- Applied migrations 007_audit_feedback.sql and 008_accept_draft.sql to production database
+- All quality checks passing: TypeScript type-check ✓, ESLint ✓, Integration tests ✓
+- **Files changed:** migrations/008_accept_draft.sql, frontend/src/app/entity/[id]/page.tsx, frontend/src/components/AiChatDrawer.tsx, frontend/src/components/ActivityTab.tsx, backend/test_slice_09_integration.py, backend/apply_accept_migration.py
+- **Learnings for future iterations:**
+  - Database functions (accept_draft_test_procedure, record_feedback) provide transactional consistency for complex operations
+  - Feedback UI pattern: inline buttons on AI-generated content with optional text input for negative feedback
+  - Role-based UI elements: OCA-specific actions should check user.role === 'OCA' before rendering
+  - Integration tests should handle cleanup gracefully even when test fails partway through
+  - Supabase RPC calls work well for invoking database functions from frontend
+  - Audit trail pattern: combine audit_log_entries table with confirmed_ai_run_id field to track human confirmations of AI work
+  - Inbox lifecycle: pending -> acted state transition removes items from daily view while preserving history
+---

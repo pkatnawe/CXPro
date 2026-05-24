@@ -1,0 +1,29 @@
+{
+  "id": "fixture_001_pump",
+  "name": "Centrifugal Pump - Model CP-500",
+  "description": "High-efficiency centrifugal pump submittal for HVAC chilled water system",
+  "pdf_content": "SUBMITTAL SHEET\nProject: Central Plant Upgrade\nEquipment: Centrifugal Pump\n\nMANUFACTURER: FlowTech Industries\nMODEL: CP-500\nTYPE: End-suction centrifugal pump\n\nDESIGN SPECIFICATIONS:\n- Flow Rate: 500 GPM @ 75 ft head\n- Motor: 20 HP, 1750 RPM, 460V/3PH/60Hz\n- Efficiency: 82% at design point\n- Impeller Diameter: 10.5 inches\n- NPSH Required: 12 ft\n- Maximum Operating Pressure: 175 PSI\n- Operating Temperature Range: 40°F to 200°F\n- Pump Casing: Cast iron with epoxy coating\n- Mechanical Seal: Carbon/ceramic, EPDM elastomers\n- Shaft: 316 stainless steel\n\nTESTING & COMMISSIONING REQUIREMENTS:\n1. Verify pump rotation direction before operation\n2. Check alignment between pump and motor\n3. Measure and record vibration levels at design flow\n4. Verify flow rate using calibrated flow meter\n5. Check pressure differential across pump\n6. Verify motor current draw is within nameplate FLA\n7. Test variable frequency drive (if applicable) through full speed range\n8. Document all test results in commissioning report\n\nSUBMITTED BY: John Smith, PE\nDATE: 2024-01-15\nPAGE: 1 of 2",
+  "expected": {
+    "extracted_spec": {
+      "equipment_type": "Centrifugal Pump",
+      "manufacturer": "FlowTech Industries",
+      "model": "CP-500",
+      "design_specs": {
+        "flow_rate": "500 GPM @ 75 ft head",
+        "motor": "20 HP, 1750 RPM, 460V/3PH/60Hz",
+        "efficiency": "82%",
+        "operating_pressure": "175 PSI",
+        "temperature_range": "40°F to 200°F"
+      }
+    },
+    "expected_min_citations": 3,
+    "expected_steps_count_range": [5, 8],
+    "expected_checklist_items": [
+      "rotation direction",
+      "alignment",
+      "vibration levels",
+      "flow rate",
+      "pressure differential"
+    ]
+  }
+}

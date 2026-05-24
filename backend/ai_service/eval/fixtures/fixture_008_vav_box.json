@@ -1,0 +1,32 @@
+{
+  "id": "fixture_008_vav_box",
+  "name": "VAV Terminal Unit - Model VAV-16R",
+  "description": "Variable air volume terminal unit with hot water reheat",
+  "pdf_content": "VAV TERMINAL UNIT SUBMITTAL\nProject: Medical Office Building\n\nTERMINAL UNIT DATA\nManufacturer: AirControl Technologies\nModel: VAV-16R-HW\nType: Single Duct VAV with Hot Water Reheat\nSize: 16\" inlet\n\nAIRFLOW CHARACTERISTICS\nMaximum CFM: 2,000\nMinimum CFM: 400 (20% of max)\nInlet Pressure Range: 0.5\" to 3.0\" w.g.\nNoise Criteria: NC-30 at max flow\nPressure Drop: 0.15\" w.g. at max flow\nLeakage: <2% at 3\" w.g.\n\nDAMPER SPECIFICATIONS\nDamper Type: Opposed blade\nActuator: Electronic, 24VAC, proportional\nActuator Torque: 35 in-lb\nControl Signal: 2-10VDC\nFail Position: Normally open\n\nREHEAT COIL\nCoil Type: 2-row hot water\nCapacity: 45 MBH at 180°F EWT\nWater Flow: 4.5 GPM\nPressure Drop: 2.5 ft water\nConnection Size: 3/4\" copper\nControl Valve: 2-way modulating, Cv=4.0\n\nCONSTRUCTION\nCasing: 22-gauge galvanized steel\nInsulation: 1\" fiberglass, R-4.2\nLiner: Perforated galvanized\nAccess Door: Hinged, gasketed\nHanger Brackets: Included\n\nCONTROLS INTEGRATION\nController: DDC VAV controller\nProtocol: BACnet MS/TP\nPoints List:\n- Space Temperature (input)\n- Damper Position (output)\n- Reheat Valve Position (output)\n- Airflow Measurement (input)\n- Discharge Air Temperature (input)\n\nCOMMISSIONING PROCEDURE\n1. Verify installation per manufacturer guidelines\n2. Check damper rotation range (0-90°)\n3. Calibrate airflow sensor using traverse\n4. Set maximum and minimum CFM setpoints\n5. Verify damper response to control signal\n6. Test reheat coil operation and capacity\n7. Perform air balance at design conditions\n8. Verify BAS communication and point mapping\n9. Test morning warm-up sequence\n10. Check acoustical performance\n11. Document control sequence of operation\n\nSubmitted: February 20, 2024\nPrepared By: Temperature Controls Inc.\nPage 1 of 2",
+  "expected": {
+    "extracted_spec": {
+      "equipment_type": "VAV Terminal Unit",
+      "manufacturer": "AirControl Technologies",
+      "model": "VAV-16R-HW",
+      "design_specs": {
+        "max_airflow": "2,000 CFM",
+        "min_airflow": "400 CFM",
+        "inlet_pressure": "0.5\" to 3.0\" w.g.",
+        "reheat_capacity": "45 MBH",
+        "water_flow": "4.5 GPM",
+        "control_protocol": "BACnet MS/TP"
+      }
+    },
+    "expected_min_citations": 4,
+    "expected_steps_count_range": [8, 11],
+    "expected_checklist_items": [
+      "damper rotation",
+      "airflow sensor",
+      "CFM setpoints",
+      "reheat coil",
+      "air balance",
+      "BAS communication",
+      "control sequence"
+    ]
+  }
+}

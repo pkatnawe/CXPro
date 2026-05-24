@@ -1,0 +1,32 @@
+{
+  "id": "fixture_004_boiler",
+  "name": "Condensing Boiler - Model CB-850",
+  "description": "High-efficiency condensing boiler for heating hot water system",
+  "pdf_content": "SUBMITTAL DOCUMENTATION\nProject: Academic Building Central Plant\n\nBOILER SPECIFICATIONS\nManufacturer: HeatMaster Technologies\nModel Number: CB-850-HE\nType: Condensing Fire-Tube Boiler\nFuel Type: Natural Gas\n\nPERFORMANCE RATINGS\nInput Rating: 850,000 BTU/hr\nOutput Rating: 807,500 BTU/hr\nAFUE Efficiency: 95%\nTurndown Ratio: 10:1\nMinimum Return Water Temperature: 80°F (condensing mode)\nMaximum Supply Water Temperature: 180°F\nDesign Water Flow Rate: 34 GPM\nPressure Drop @ Design Flow: 4.2 ft\n\nCOMBUSTION SYSTEM\nBurner Type: Premix modulating\nNOx Emissions: <20 ppm @ 3% O2\nCO Emissions: <50 ppm @ 3% O2\nGas Inlet Pressure: 7\" W.C. minimum\nGas Connection: 2\" NPT\n\nELECTRICAL REQUIREMENTS\nPower Supply: 115V/1PH/60Hz\nFull Load Amps: 8.5A\nControl Interface: Modbus RTU\nSafety Controls: ASME CSD-1 compliant\n\nPHYSICAL CHARACTERISTICS\nDimensions: 48\"W x 36\"D x 72\"H\nDry Weight: 850 lbs\nWater Content: 28 gallons\nVent Size: 4\" PVC/CPVC\nCombustion Air: 4\" PVC\n\nSTARTUP CHECKLIST\n• Verify gas pressure at inlet\n• Check combustion air and vent piping\n• Fill and purge hydronic system\n• Verify water flow through boiler\n• Perform combustion analysis at high and low fire\n• Adjust gas/air ratio for optimal combustion\n• Test all operating and safety controls\n• Verify modulation control signal operation\n• Check condensate drain and neutralizer\n• Program outdoor reset curve\n• Test low water cutoff operation\n• Document startup report with all readings\n\nSubmitted By: Mechanical Contractor\nDate: January 30, 2024\nPage 1 of 2",
+  "expected": {
+    "extracted_spec": {
+      "equipment_type": "Condensing Boiler",
+      "manufacturer": "HeatMaster Technologies",
+      "model": "CB-850-HE",
+      "design_specs": {
+        "input_rating": "850,000 BTU/hr",
+        "efficiency": "95% AFUE",
+        "turndown_ratio": "10:1",
+        "max_supply_temp": "180°F",
+        "nox_emissions": "<20 ppm",
+        "gas_pressure": "7\" W.C. minimum"
+      }
+    },
+    "expected_min_citations": 4,
+    "expected_steps_count_range": [8, 12],
+    "expected_checklist_items": [
+      "gas pressure",
+      "combustion air",
+      "water flow",
+      "combustion analysis",
+      "safety controls",
+      "condensate drain",
+      "low water cutoff"
+    ]
+  }
+}

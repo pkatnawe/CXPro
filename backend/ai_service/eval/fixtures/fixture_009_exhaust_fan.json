@@ -1,0 +1,33 @@
+{
+  "id": "fixture_009_exhaust_fan",
+  "name": "Laboratory Exhaust Fan - Model LEF-3000",
+  "description": "High plume dilution exhaust fan for laboratory fume hood exhaust",
+  "pdf_content": "LABORATORY EXHAUST FAN SUBMITTAL\nProject: University Science Building\n\nFAN SPECIFICATIONS\nManufacturer: LabVent Corporation\nModel: LEF-3000-HPD\nType: Centrifugal Upblast Exhaust Fan\nApplication: Laboratory Fume Hood Exhaust\n\nPERFORMANCE DATA\nAirflow: 3,000 CFM @ 2.5\" w.g. ESP\nFan Speed: 1,750 RPM\nOutlet Velocity: 3,500 FPM minimum\nPlume Height: 2.0 x building height\nStack Height: 10 feet above roof\n\nMOTOR SPECIFICATIONS\nHorsepower: 5 HP\nVoltage: 460V/3PH/60Hz\nEfficiency: Premium efficient, 93.0%\nEnclosure: TEFC, chemical duty\nVFD Compatible: Inverter duty rated\nService Factor: 1.15\n\nCONSTRUCTION MATERIALS\nFan Housing: FRP (fiberglass reinforced plastic)\nImpeller: FRP with Hastelloy shaft\nBearings: Sealed, L10 life >100,000 hrs\nVibration Isolation: Spring isolators, 95% efficiency\nDrain Connection: 1\" CPVC with trap\nAccess Door: Gasketed, lockable\n\nSAFETY FEATURES\nBelt Guard: OSHA compliant\nVibration Switch: Shuts down at 0.5\"/sec\nBearing Temperature Sensors: RTD type\nDifferential Pressure Monitor: Across fan\nMotor Overload Protection: Built-in\n\nCHEMICAL RESISTANCE\nCorrosion Resistance: Suitable for acids, bases\nTemperature Limit: 140°F continuous\nSpecial Coating: Vinyl ester resin\n\nSOUND DATA\nSound Power Level: 85 dBA\nSound Pressure @ 10 ft: 72 dBA\n\nCOMMISSIONING REQUIREMENTS\n• Verify fan rotation and check for reverse flow\n• Measure exhaust airflow using duct traverse\n• Verify minimum stack outlet velocity (3,500 FPM)\n• Check vibration levels (<0.15 in/sec)\n• Test VFD operation from minimum to maximum speed\n• Verify interlock with laboratory controls\n• Test failure mode (fan failure alarm)\n• Check bearing temperatures at full load\n• Verify drainage system functionality\n• Perform plume dilution study\n• Test emergency bypass operation\n• Document TAB report with certified measurements\n\nCompliance: ANSI/AIHA Z9.5, NFPA 45\nSubmittal Date: February 25, 2024\nBy: Laboratory Systems Contractor",
+  "expected": {
+    "extracted_spec": {
+      "equipment_type": "Laboratory Exhaust Fan",
+      "manufacturer": "LabVent Corporation",
+      "model": "LEF-3000-HPD",
+      "design_specs": {
+        "airflow": "3,000 CFM @ 2.5\" w.g.",
+        "outlet_velocity": "3,500 FPM minimum",
+        "motor": "5 HP, 460V/3PH/60Hz",
+        "construction": "FRP housing and impeller",
+        "sound_level": "85 dBA power, 72 dBA at 10 ft",
+        "temperature_limit": "140°F continuous"
+      }
+    },
+    "expected_min_citations": 5,
+    "expected_steps_count_range": [9, 12],
+    "expected_checklist_items": [
+      "fan rotation",
+      "exhaust airflow",
+      "stack velocity",
+      "vibration levels",
+      "VFD operation",
+      "laboratory interlock",
+      "bearing temperatures",
+      "plume dilution"
+    ]
+  }
+}

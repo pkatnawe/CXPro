@@ -159,8 +159,8 @@
         "Integration test: full path Slices 3-9 produces an active TestProcedureInstance with correct audit chain"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "AFK. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/12. Blocked by Slice-08."
+      "passes": true,
+      "notes": "COMPLETE. GitHub issue: https://github.com/shlokpatel1998/CXPro/issues/12. Implemented Accept button with OCA role-gating, database transaction for draft->active transition with audit logging, inbox item state management, feedback UI for AI responses, refusal variant UI, and TestProcedureInstanceActivated event emission. All quality checks pass."
     },
     {
       "id": "Slice-10",

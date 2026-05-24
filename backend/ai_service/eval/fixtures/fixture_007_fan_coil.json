@@ -1,0 +1,32 @@
+{
+  "id": "fixture_007_fan_coil",
+  "name": "Fan Coil Unit - Model FCU-200",
+  "description": "Horizontal fan coil unit for conference room conditioning",
+  "pdf_content": "FAN COIL UNIT SUBMITTAL\nProject: Corporate Office Renovation\n\nUNIT IDENTIFICATION\nManufacturer: ComfortAir Systems\nModel: FCU-200-H4\nType: 4-Pipe Horizontal Fan Coil Unit\nLocation: Conference Room 301\n\nPERFORMANCE DATA\nTotal Cooling Capacity: 24,000 BTH @ 45°F EWT\nSensible Cooling: 18,000 BTH\nHeating Capacity: 30,000 BTH @ 140°F EWT\nAirflow: 800 CFM @ 0.3\" ESP\n\nFAN DATA\nFan Type: Forward curved centrifugal\nMotor: PSC, 1/4 HP, 115V/1PH/60Hz\nSpeed Settings: 3-speed (High/Med/Low)\nPower Consumption: 145W on high speed\nSound Level: NC-35 at high speed\n\nCOIL SPECIFICATIONS\nCooling Coil: 4-row, 12 FPI\nHeating Coil: 2-row, 10 FPI\nCoil Material: Copper tubes, aluminum fins\nDesign Pressure: 300 PSI\nConnections: 1/2\" copper sweat\n\nFILTRATION\nFilter Type: 1\" throwaway\nFilter Size: 16\" x 20\"\nMERV Rating: MERV 7\n\nCONTROLS\nThermostat: Wall-mounted, 7-day programmable\nValve Package: 2-way modulating valves\nControl Signal: 0-10VDC\nFan Control: Thermostat activated\nAuto Changeover: Yes\n\nCONSTRUCTION\nCasing: 20-gauge galvanized steel\nInsulation: 1/2\" dual density\nDrain Pan: Stainless steel, sloped\nDrain Connection: 3/4\" PVC\nAccess Panel: Hinged with quarter-turn latches\n\nCOMMISSIONING CHECKLIST\n□ Verify unit level and secure mounting\n□ Check condensate drain pitch and trap\n□ Flush coils before operation\n□ Verify fan rotation direction\n□ Measure airflow at each speed setting\n□ Check entering water temperatures\n□ Verify cooling and heating capacity\n□ Test thermostat operation and setpoints\n□ Calibrate control valves\n□ Check for air in hydronic piping\n□ Measure unit sound levels\n□ Verify filter fit and seal\n\nSubmittal Date: February 15, 2024\nSubmitted By: HVAC Subcontractor",
+  "expected": {
+    "extracted_spec": {
+      "equipment_type": "Fan Coil Unit",
+      "manufacturer": "ComfortAir Systems",
+      "model": "FCU-200-H4",
+      "design_specs": {
+        "cooling_capacity": "24,000 BTH",
+        "heating_capacity": "30,000 BTH",
+        "airflow": "800 CFM @ 0.3\" ESP",
+        "motor": "PSC, 1/4 HP",
+        "sound_level": "NC-35",
+        "filter": "MERV 7"
+      }
+    },
+    "expected_min_citations": 3,
+    "expected_steps_count_range": [8, 12],
+    "expected_checklist_items": [
+      "unit level",
+      "condensate drain",
+      "fan rotation",
+      "airflow measurement",
+      "water temperatures",
+      "thermostat operation",
+      "control valves"
+    ]
+  }
+}

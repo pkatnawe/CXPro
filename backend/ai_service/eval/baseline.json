@@ -1,0 +1,11 @@
+{
+  "run_id": "baseline",
+  "timestamp": "2024-03-01T00:00:00Z",
+  "fixtures_passed": 8,
+  "fixtures_total": 10,
+  "pass_rate": 0.8,
+  "avg_citation_recall": 0.75,
+  "avg_checklist_coverage": 0.75,
+  "total_execution_time_ms": 15000,
+  "git_commit": "baseline"
+}
