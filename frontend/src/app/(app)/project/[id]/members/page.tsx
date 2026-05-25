@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase, type DisciplineScope } from '@/lib/supabase'
+import { getMembersForProject, getPendingInvitesForProject, type ProjectMember, type PendingInvite } from '@/lib/members'
 
 export default function MembersPage() {
   const params = useParams()
@@ -18,6 +19,9 @@ export default function MembersPage() {
   })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [members, setMembers] = useState<ProjectMember[]>([])
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([])
+  const [membersLoading, setMembersLoading] = useState(true)
 
   // Check authentication and load disciplines
   useEffect(() => {
@@ -51,6 +55,29 @@ export default function MembersPage() {
 
     initialize()
   }, [projectId, router])
+
+  // Load members and pending invites
+  useEffect(() => {
+    const loadMembersData = async () => {
+      setMembersLoading(true)
+      try {
+        const [membersData, invitesData] = await Promise.all([
+          getMembersForProject(projectId),
+          getPendingInvitesForProject(projectId)
+        ])
+        setMembers(membersData)
+        setPendingInvites(invitesData)
+      } catch (error) {
+        console.error('Error loading members data:', error)
+      } finally {
+        setMembersLoading(false)
+      }
+    }
+
+    if (projectId) {
+      loadMembersData()
+    }
+  }, [projectId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -109,6 +136,10 @@ export default function MembersPage() {
         discipline_scope_id: disciplines[0]?.id || ''
       })
       setSuccess(`Invitation sent successfully to ${formData.email}`)
+      
+      // Reload pending invites to show the new one
+      const invitesData = await getPendingInvitesForProject(projectId)
+      setPendingInvites(invitesData)
       
     } catch (err) {
       console.error('Error sending invitation:', err)
@@ -197,6 +228,110 @@ export default function MembersPage() {
             {loading ? 'Sending...' : 'Send Invitation'}
           </button>
         </form>
+      </div>
+
+      {/* Members Table */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Current Members</h2>
+        
+        {membersLoading ? (
+          <div className="text-gray-500">Loading members...</div>
+        ) : members.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Discipline
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {members.map((member) => (
+                  <tr key={member.user_id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {member.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {member.role}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {member.discipline_name || '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-gray-500 py-8 text-center">
+            No members yet. Use the form above to invite team members.
+          </div>
+        )}
+      </div>
+
+      {/* Pending Invitations Table */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Pending Invitations</h2>
+        
+        {membersLoading ? (
+          <div className="text-gray-500">Loading invitations...</div>
+        ) : pendingInvites.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Discipline
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Invited By
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Expires At
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {pendingInvites.map((invite) => (
+                  <tr key={invite.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {invite.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {invite.role}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {invite.discipline_name || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {invite.invited_by}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {new Date(invite.expires_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-gray-500 py-8 text-center">
+            No pending invitations.
+          </div>
+        )}
       </div>
     </div>
   )
