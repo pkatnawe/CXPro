@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase, type DisciplineScope } from '@/lib/supabase'
 import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, type ProjectMember, type PendingInvite } from '@/lib/members'
+import { getErrorMessage } from '@/lib/error'
 
 export default function MembersPage() {
   const params = useParams()
@@ -160,7 +161,7 @@ export default function MembersPage() {
       
     } catch (err) {
       console.error('Error sending invitation:', err)
-      setError(err instanceof Error ? err.message : 'Failed to send invitation')
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }
