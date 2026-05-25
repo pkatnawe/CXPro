@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase, type Org, type Project, type Membership } from '@/lib/supabase'
+import { getErrorMessage } from '@/lib/error'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
@@ -12,7 +13,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [showOrgForm, setShowOrgForm] = useState(false)
   const [showProjectForm, setShowProjectForm] = useState(false)
-  const [showInviteForm, setShowInviteForm] = useState(false)
   const router = useRouter()
 
   // Form states
@@ -20,10 +20,7 @@ export default function DashboardPage() {
   const [orgSlug, setOrgSlug] = useState('')
   const [projectName, setProjectName] = useState('')
   const [projectDescription, setProjectDescription] = useState('')
-  const [inviteEmail, setInviteEmail] = useState('')
   const [selectedOrgForProject, setSelectedOrgForProject] = useState('')
-  const [selectedOrgForInvite, setSelectedOrgForInvite] = useState('')
-  const [selectedProjectForInvite, setSelectedProjectForInvite] = useState('')
 
   const loadUserData = async () => {
     try {
@@ -85,7 +82,7 @@ export default function DashboardPage() {
       setShowOrgForm(false)
       await loadUserData()
     } catch (error) {
-      alert('Error creating organization: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      alert('Error creating organization: ' + getErrorMessage(error))
     }
   }
 
@@ -107,30 +104,7 @@ export default function DashboardPage() {
       setShowProjectForm(false)
       await loadUserData()
     } catch (error) {
-      alert('Error creating project: ' + (error instanceof Error ? error.message : 'Unknown error'))
-    }
-  }
-
-  const handleInviteUser = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
-      const { error } = await supabase.rpc('invite_user_by_email', {
-        invite_email: inviteEmail,
-        org_id: selectedOrgForInvite,
-        project_id: selectedProjectForInvite
-      })
-
-      if (error) throw error
-
-      setInviteEmail('')
-      setSelectedOrgForInvite('')
-      setSelectedProjectForInvite('')
-      setShowInviteForm(false)
-      alert('User invited successfully!')
-      await loadUserData()
-    } catch (error) {
-      alert('Error inviting user: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      alert('Error creating project: ' + getErrorMessage(error))
     }
   }
 
@@ -304,6 +278,7 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                   {projects.map(project => {
                     const org = orgs.find(o => o.id === project.org_id)
+                    const isOca = getUserRole(project.org_id) === 'OCA'
                     return (
                       <div key={project.id} className="p-3 border rounded hover:bg-gray-50">
                         <div className="flex justify-between items-start">
@@ -314,12 +289,22 @@ export default function DashboardPage() {
                               <p className="text-sm text-gray-500 mt-1">{project.description}</p>
                             )}
                           </div>
-                          <button
-                            onClick={() => router.push(`/project/${project.id}`)}
-                            className="ml-4 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                          >
-                            View
-                          </button>
+                          <div className="ml-4 flex space-x-2">
+                            <button
+                              onClick={() => router.push(`/project/${project.id}`)}
+                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                            >
+                              View
+                            </button>
+                            {isOca && (
+                              <button
+                                onClick={() => router.push(`/project/${project.id}/members`)}
+                                className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                              >
+                                Manage Team
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )
@@ -331,78 +316,6 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-
-          {/* Invite Users */}
-          {ocaMemberships.length > 0 && projects.length > 0 && (
-            <div className="mt-6 bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Invite Users</h3>
-                  <button
-                    onClick={() => setShowInviteForm(!showInviteForm)}
-                    className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
-                  >
-                    Send Invite
-                  </button>
-                </div>
-
-                {showInviteForm && (
-                  <form onSubmit={handleInviteUser} className="p-4 bg-gray-50 rounded">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <input
-                        type="email"
-                        placeholder="Email address"
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                        required
-                        className="px-3 py-2 border rounded"
-                      />
-                      <select
-                        value={selectedOrgForInvite}
-                        onChange={(e) => {
-                          setSelectedOrgForInvite(e.target.value)
-                          setSelectedProjectForInvite('')
-                        }}
-                        required
-                        className="px-3 py-2 border rounded"
-                      >
-                        <option value="">Select Organization</option>
-                        {orgs.filter(org => getUserRole(org.id) === 'OCA').map(org => (
-                          <option key={org.id} value={org.id}>{org.name}</option>
-                        ))}
-                      </select>
-                      <select
-                        value={selectedProjectForInvite}
-                        onChange={(e) => setSelectedProjectForInvite(e.target.value)}
-                        required
-                        className="px-3 py-2 border rounded"
-                        disabled={!selectedOrgForInvite}
-                      >
-                        <option value="">Select Project</option>
-                        {projects
-                          .filter(p => p.org_id === selectedOrgForInvite)
-                          .map(project => (
-                            <option key={project.id} value={project.id}>{project.name}</option>
-                          ))}
-                      </select>
-                    </div>
-                    <div className="flex space-x-2 mt-3">
-                      <button type="submit" className="bg-green-600 text-white px-3 py-1 rounded text-sm">
-                        Send Invite
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowInviteForm(false)}
-                        className="bg-gray-600 text-white px-3 py-1 rounded text-sm"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </div>

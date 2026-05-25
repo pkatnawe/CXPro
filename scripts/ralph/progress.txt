@@ -1,285 +1,198 @@
 # Ralph Progress Log
-Started: Sun May 24 17:47:23 CDT 2026
+Started: Mon May 25 00:43:16 CDT 2026
+---
+
+## 2026-05-25 06:30:00 - US-005
+- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
+- **Learnings for future iterations:**
+  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
+  - JWT token from Supabase session is passed as Bearer token in Authorization header
+  - Form components follow React controlled component pattern with useState
+  - Error and success states are managed with local state and displayed inline
+  - Discipline scopes must be fetched from database for the current project
+  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
+  - Browser testing was skipped as browser tools not available
+---
+
+## 2026-05-25 06:00:00 - US-003
+- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
+- Files changed:
+  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
+  - backend/apply_redeem_invitations_migration.py (created migration application script)
+  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
+- **Learnings for future iterations:**
+  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
+  - Integration tests should use asyncpg for async database operations
+  - When testing database triggers, be aware of automatic execution flow
+  - Pending invitations need unique tokens to avoid conflicts
+  - Test cleanup must be thorough to avoid data persistence between runs
+---
+
+## 2026-05-25 06:30:00 - US-005
+- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
+- **Learnings for future iterations:**
+  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
+  - JWT token from Supabase session is passed as Bearer token in Authorization header
+  - Form components follow React controlled component pattern with useState
+  - Error and success states are managed with local state and displayed inline
+  - Discipline scopes must be fetched from database for the current project
+  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
+  - Browser testing was skipped as browser tools not available
+---
 
 ## Codebase Patterns
-- Blueprint CSS uses .bp-* utility classes for consistent styling
-- Archivo is the primary font, JetBrains Mono for monospace elements
-- CSS variables --font-archivo and --font-jetbrains-mono expose the fonts
-- Always use styled-jsx for component-scoped Blueprint styles
-- AI elements use lightning bolt symbol (⚡) consistently
-- Status badges follow bp-status-* pattern (info/warning/error/success)
-- Equipment is UI alias for TestProcedureInstance + ExtractedSpec join
-- lib/ modules follow typed-export pattern with dedicated test files
-- Mock Supabase chains in tests with vi.mocked() as any pattern
-- Route groups use (app) parentheses syntax for layout inheritance
+- Database migrations are applied using Python scripts in backend/ directory (e.g., apply_migration.py)
+- The function signature of Postgres functions should remain unchanged when updating their body
+- Test database functions by calling them directly with SQL via psycopg2
+- TypeScript type checking is done with `npm run type-check` in frontend directory
+- Integration tests use asyncpg for async database operations
+- The handle_new_user trigger fires AFTER INSERT on auth.users and automatically redeems pending invitations
+- FastAPI endpoints: Use `Depends(security)` with HTTPBearer for JWT auth, pydantic BaseModel for request bodies
+- Supabase client setup: Create with `create_client(url, service_key)`, methods are synchronous (not async)
+- Backend services: Create service classes that accept supabase client and db connection in __init__
+- Test with unique identifiers (e.g., 'test-org-inv' instead of 'test-org') to avoid conflicts
+- Frontend API calls: Use fetch() with `http://localhost:8000` base URL, pass JWT as `Bearer ${session.access_token}`
+- Frontend forms: Use controlled components with useState, inline error/success display patterns
 
+## 2026-05-25 00:45:00 - US-001
+- What was implemented: Updated create_project_with_discipline function to auto-seed all four canonical disciplines (Mechanical, Electrical, Controls, General Construction) when a new project is created
+- Files changed:
+  - migrations/009_auto_seed_disciplines.sql (created new migration)
+- **Learnings for future iterations:**
+  - The create_project_with_discipline function is defined in migrations/001_party_model.sql
+  - Database migrations live in the migrations/ directory and are applied using Python scripts
+  - Testing database functions requires connecting with psycopg2 and executing SQL directly
+  - The four canonical disciplines are: Mechanical, Electrical, Controls, General Construction
 ---
 
-## Sun May 24 17:50 CDT 2026 - US-001
-- Copied blueprint.css verbatim from frontend-design/ to frontend/src/styles/
-- Imported blueprint.css globally in layout.tsx
-- Added Archivo and JetBrains Mono fonts via next/font/google with CSS variables
-- Updated globals.css to use Archivo as the default body font
-- All existing pages still render correctly
-- **Files changed:** frontend/src/app/layout.tsx, frontend/src/app/globals.css, frontend/src/styles/blueprint.css
+## 2026-05-25 06:30:00 - US-005
+- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
 - **Learnings for future iterations:**
-  - Blueprint CSS foundation now available with .bp-* utility classes
-  - Archivo font is now the primary font, JetBrains Mono available for monospace elements
-  - CSS variables are exposed for both fonts for easy usage
+  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
+  - JWT token from Supabase session is passed as Bearer token in Authorization header
+  - Form components follow React controlled component pattern with useState
+  - Error and success states are managed with local state and displayed inline
+  - Discipline scopes must be fetched from database for the current project
+  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
+  - Browser testing was skipped as browser tools not available
 ---
-## Sun May 24 17:54 CDT 2026 - US-002
-- Created (app) route group with Blueprint shell layout
-- Implemented sidebar with Inbox, Projects nav items and theme toggle
-- Added conditional Equipment nav item that appears only in project context
-- Implemented topbar with breadcrumb navigation and user avatar
-- Moved dashboard, inbox, project, entity pages under (app) route group
-- Auth route remains outside the shell as required
-- Theme toggle persists to localStorage and updates data-theme attribute
-- **Files changed:** frontend/src/app/(app)/layout.tsx (created), moved existing pages to (app) directory
+
+## 2026-05-25 06:00:00 - US-003
+- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
+- Files changed:
+  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
+  - backend/apply_redeem_invitations_migration.py (created migration application script)
+  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
 - **Learnings for future iterations:**
-  - Route groups in Next.js use parentheses syntax: (app)
-  - Theme persistence uses localStorage and data-theme attribute on documentElement
-  - Conditional navigation items can be based on pathname matching
-  - Blueprint shell uses .bp-app grid with 232px sidebar + main area
+  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
+  - Integration tests should use asyncpg for async database operations
+  - When testing database triggers, be aware of automatic execution flow
+  - Pending invitations need unique tokens to avoid conflicts
+  - Test cleanup must be thorough to avoid data persistence between runs
 ---
-## Sun May 24 18:02 CDT 2026 - US-003
-- Created ADR-0001 documenting the CSS strategy decision to copy blueprint.css wholesale
-- Added Glossary section to architecture.md defining Equipment and Inbox vs Dashboard concepts
-- All documentation deliverables completed
-- **Files changed:** docs/adr/0001-css-strategy-blueprint.md (created), docs/architecture.md (updated)
+
+## 2026-05-25 06:30:00 - US-005
+- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
 - **Learnings for future iterations:**
-  - ADR directory was created at docs/adr/ for architecture decision records
-  - Equipment is the UI alias for TestProcedureInstance + ExtractedSpec join (no Asset table in v0)
-  - Inbox and Dashboard are distinct concepts that must not be conflated
-  - Type-check command in frontend is `npm run type-check` (not `npm run typecheck`)
+  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
+  - JWT token from Supabase session is passed as Bearer token in Authorization header
+  - Form components follow React controlled component pattern with useState
+  - Error and success states are managed with local state and displayed inline
+  - Discipline scopes must be fetched from database for the current project
+  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
+  - Browser testing was skipped as browser tools not available
 ---
-## Sun May 24 18:05 CDT 2026 - US-004
-- Added Vitest test infrastructure to frontend
-- Installed vitest, @vitest/coverage-v8, @vitejs/plugin-react, and jsdom
-- Created vitest.config.ts with jsdom environment and TypeScript path resolution
-- Added test and test:watch scripts to package.json
-- Created smoke test at frontend/src/lib/__tests__/smoke.test.ts
-- **Files changed:** frontend/package.json, frontend/vitest.config.ts, frontend/src/lib/__tests__/smoke.test.ts
+
+## 2026-05-25 06:10:00 - US-004
+- What was implemented: Created InvitationService module with create_invitation method and POST /invites FastAPI endpoint for issuing invitations and triggering Supabase Auth magic-link emails
+- Files changed:
+  - backend/invitation_service.py (created - InvitationService class with create_invitation method)
+  - backend/main.py (updated - added POST /invites endpoint with JWT auth)
+  - backend/test_invitation_service.py (created - comprehensive integration test)
+  - backend/test_invitation_service_simple.py (created - simplified unit tests)
 - **Learnings for future iterations:**
-  - Vitest requires @vitejs/plugin-react for React projects
-  - jsdom is required as a dependency when using jsdom environment in Vitest config
-  - Test command is `npm test` which runs `vitest run`, watch mode is `npm test:watch`
-  - Tests should be placed in __tests__ directories following the existing pattern
+  - Patterns discovered: FastAPI endpoints use Depends(security) for JWT auth, HTTPBearer for token extraction
+  - Supabase Python client methods are synchronous, not async - no await needed
+  - For testing with mocks, use MagicMock for sync methods, AsyncMock for async database operations
+  - Environment variables for backend: DATABASE_URL for postgres connection, DATABASE_SECRET for Supabase service key
+  - Backend test files should handle unique constraint violations by using unique test data identifiers
+  - The supabase.auth.admin.invite_user_by_email() sends invitations for new users
+  - The supabase.auth.sign_in_with_otp() sends magic links for existing users
 ---
-## Sun May 24 18:09 CDT 2026 - US-005
-- Restyled entity/[id]/page.tsx to use Blueprint three-panel layout
-- Removed duplicate sidebar (now handled by app layout)
-- Replaced all inline styles with Blueprint .bp-* utility classes
-- Implemented proper three-panel responsive layout (center content + right drawer)
-- Applied .bp-mono class to numbered step IDs for consistent typography
-- Added responsive reflow for mobile (drawer becomes bottom sheet <1024px)
-- Removed entity.css file as styles are now inline with styled-jsx
-- **Files changed:** frontend/src/app/(app)/entity/[id]/page.tsx (rewrote), deleted entity.css
+
+## 2026-05-25 06:30:00 - US-005
+- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
 - **Learnings for future iterations:**
-  - The app layout already handles the main sidebar, entity pages only need content + drawer
-  - Three-panel layout uses grid: 1fr 400px for desktop, stacks for mobile
-  - .bp-mono class must be applied for JetBrains Mono font on step numbers
-  - All Slice-08 behaviors preserved: citations clickable, drawer functional, status badges visible
+  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
+  - JWT token from Supabase session is passed as Bearer token in Authorization header
+  - Form components follow React controlled component pattern with useState
+  - Error and success states are managed with local state and displayed inline
+  - Discipline scopes must be fetched from database for the current project
+  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
+  - Browser testing was skipped as browser tools not available
 ---
-## Sun May 24 19:06 CDT 2026 - US-006
-- Verified AiChatDrawer and ActivityTab components already have Blueprint styling
-- Both components already use Blueprint .bp-* classes throughout
-- AI lightning bolt icon (⚡) already implemented in both components
-- AI Chat is default tab in entity page drawer as required
-- All acceptance criteria already met - components were pre-styled correctly
-- **Files changed:** No changes needed - components already properly styled
+
+## 2026-05-25 00:50:00 - US-002
+- What was implemented: Created pending_invitations table with all required columns, constraints, indexes, and RLS policies for storing unredeemed invites
+- Files changed:
+  - migrations/010_pending_invitations.sql (created new migration)
+  - backend/apply_pending_invitations_migration.py (created migration script)
 - **Learnings for future iterations:**
-  - Always check if work might already be done before making changes
-  - AiChatDrawer and ActivityTab inject their own styles via style tags
-  - Components follow the Blueprint pattern from blueprint-app.jsx::AiPanel
-  - Entity page uses bp-drawer-tabs and bp-drawer-content for tab switching
+  - Patterns discovered: Migration scripts in backend/ follow pattern of apply_<name>_migration.py
+  - Tables need both migration SQL files and corresponding Python application scripts
+  - RLS policies should be defined for both SELECT and INSERT operations for OCA roles
+  - Unique constraints are automatically named by Postgres (e.g., pending_invitations_token_key)
+  - Project structure has backend files in root directory, not in a backend/ subdirectory
 ---
-## Sun May 24 19:08 CDT 2026 - US-007
-- Verified CitationChip and CommandPalette components already properly restyled
-- Both components already use Blueprint .bp-* classes throughout
-- CitationChip uses .bp-citation-* classes with Blueprint styling
-- CommandPalette uses .bp-cmd-* classes for all elements
-- All acceptance criteria already met: Cmd-K opens palette, citations clickable with PDF opening
-- **Files changed:** No changes needed - components were already properly styled
+
+## 2026-05-25 06:30:00 - US-005
+- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
 - **Learnings for future iterations:**
-  - Always verify if work might already be complete before making changes
-  - CitationChip properly opens PDFs at page coordinates with bbox highlighting
-  - CommandPalette searches Projects, Documents, and TestProcedureInstances
-  - Keyboard shortcuts (Cmd-K) properly preserved in entity page
+  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
+  - JWT token from Supabase session is passed as Bearer token in Authorization header
+  - Form components follow React controlled component pattern with useState
+  - Error and success states are managed with local state and displayed inline
+  - Discipline scopes must be fetched from database for the current project
+  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
+  - Browser testing was skipped as browser tools not available
 ---
-## Sun May 24 19:15 CDT 2026 - US-008
-- Created lib/dashboard.ts with getProjectDashboard function
-- Implemented DashboardSummary type with status_counts, recent_agent_runs, and document_count
-- Query joins agent_runs to test_procedure_instances to get project-scoped agent runs
-- Gets latest 5 agent runs ordered by created_at descending
-- Follows typed-export pattern from storage.ts module
-- **Files changed:** frontend/src/lib/dashboard.ts (created)
+
+## 2026-05-25 06:00:00 - US-003
+- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
+- Files changed:
+  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
+  - backend/apply_redeem_invitations_migration.py (created migration application script)
+  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
 - **Learnings for future iterations:**
-  - Supabase joins use !inner syntax for foreign key relationships
-  - Count queries use { count: 'exact', head: true } options
-  - Agent runs are linked to projects through test_procedure_instances table
-  - Use `any` type for complex Supabase join results to avoid TypeScript issues
+  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
+  - Integration tests should use asyncpg for async database operations
+  - When testing database triggers, be aware of automatic execution flow
+  - Pending invitations need unique tokens to avoid conflicts
+  - Test cleanup must be thorough to avoid data persistence between runs
 ---
-## Sun May 24 19:15 CDT 2026 - US-009
-- Created comprehensive unit tests for lib/dashboard.ts using Vitest
-- Implemented typed in-memory fake for Supabase client with no live network calls
-- Test coverage includes: status_counts grouping, recent_agent_runs ordering and limiting, document_count aggregation
-- Mock handles complex join queries between agent_runs and test_procedure_instances tables
-- All 7 test cases pass covering edge cases including null statuses and empty data
-- **Files changed:** frontend/src/lib/__tests__/dashboard.test.ts (created)
+
+## 2026-05-25 06:30:00 - US-005
+- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
 - **Learnings for future iterations:**
-  - Mock Supabase from() method returns a chain of methods - must mock entire chain
-  - Use 'as any' type casting for vi.mocked() to avoid TypeScript issues with complex mock chains
-  - Count queries in Supabase use select('id', { count: 'exact', head: true }) pattern
-  - Test data relationships carefully - agent_runs filter through joined test_procedure_instances
----
-## Sun May 24 19:20 CDT 2026 - US-010
-- Created UploadModal component with Blueprint styling  
-- Reused validateFile, generateStoragePath, and uploadPDF from lib/storage.ts
-- Modal validates PDF and 25MB size limit before upload
-- Uses existing document_uploaded outbox event flow via uploadPDF
-- Styled with Blueprint .bp-* classes and CSS-in-JS
-- Modal overlay, transitions, and responsive design implemented
-- **Files changed:** frontend/src/components/UploadModal.tsx (created)
-- **Learnings for future iterations:**
-  - uploadPDF from lib/storage.ts already handles the document_uploaded outbox event
-  - Blueprint modals use overlay pattern with stopPropagation on modal content
-  - CSS-in-JS with styled-jsx works well for component-scoped Blueprint styles
-  - File validation should happen on select, not just on upload
----
-## Sun May 24 19:26 CDT 2026 - US-011
-- Rewrote project/[id]/page.tsx as Blueprint Dashboard using getProjectDashboard from lib/dashboard.ts
-- Integrated UploadModal component with "Upload submittal" button in top-right for OCA users
-- Dashboard displays project name, TPI status counts, recent AgentRuns list, and document count
-- Implemented three stat cards: Equipment Progress (with percentage), Equipment Status, and Documents
-- Added Recent Agent Activity section showing latest 5 agent runs with AI lightning bolt icons
-- Preserved Realtime subscriptions for TPIs, agent_runs, and documents to auto-update dashboard
-- All styled with Blueprint .bp-* classes matching blueprint-app.jsx::DashboardScreen pattern
-- **Files changed:** frontend/src/app/(app)/project/[id]/page.tsx (complete rewrite)
-- **Learnings for future iterations:**
-  - Dashboard uses getProjectDashboard function for all data fetching - no direct queries
-  - Real-time updates require three separate channel subscriptions for TPIs, agent_runs, and documents
-  - styled-jsx works well for component-scoped Blueprint styling
-  - bp-stat-card pattern with progress bars uses absolute positioning for the bar
-  - Status badges follow bp-status-* pattern with success/warning/error/neutral variants
----
-## Sun May 24 19:28 CDT 2026 - US-012
-- Created lib/equipment.ts with getEquipmentForProject function
-- Implemented EquipmentRow type with all required fields (tpi_id, asset_tag, equipment_type, manufacturer, model, status)
-- Query left-joins test_procedure_instances to extracted_specs with fallback logic
-- Uses extracted_specs manufacturer/model when available, falls back to TPI fields if not
-- Created comprehensive unit tests in __tests__/equipment.test.ts
-- All tests pass (4 test cases covering all scenarios)
-- **Files changed:** frontend/src/lib/equipment.ts (created), frontend/src/lib/__tests__/equipment.test.ts (created)
-- **Learnings for future iterations:**
-  - Equipment is the join of test_procedure_instances + extracted_specs tables
-  - Left join pattern ensures rows without extracted_specs still appear (in-progress ingestion)
-  - Priority logic: use extracted_specs data if available, otherwise use TPI data, otherwise null
-  - Follows same typed-export pattern as storage.ts and dashboard.ts modules
----
-## Sun May 24 19:31 CDT 2026 - US-013
-- Updated equipment.test.ts with comprehensive test coverage
-- Added typed in-memory fake for Supabase client (no live network calls)
-- Test coverage includes all required scenarios:
-  - Returns rows for a project the user can access
-  - Returns empty for a project in another org (RLS-scoping behavior)
-  - Returns row with null metadata fields when ExtractedSpec missing
-  - Returns empty when no TPIs exist
-  - Handles database errors appropriately
-- All 5 test cases pass
-- **Files changed:** frontend/src/lib/__tests__/equipment.test.ts (updated)
-- **Learnings for future iterations:**
-  - RLS policies return empty arrays for unauthorized access, not errors
-  - Test names should match acceptance criteria language exactly
-  - In-memory fakes prevent network calls during testing
-  - Mock chain pattern needed for Supabase's fluent API (.from().select().eq().order())
----
-## Sun May 24 19:35 CDT 2026 - US-014
-- Created project/[id]/equipment/page.tsx as Blueprint EquipmentScreen
-- Implemented EquipGlyph component with icons for different equipment types (AHU, Chiller, Pump, Boiler, default)
-- Implemented ProgCell component to show equipment status (0%, 50%, 100%, done checkmark)
-- Equipment page fetches data using getEquipmentForProject from lib/equipment.ts
-- Table-like grid layout with columns: tag, type, manufacturer, model, status
-- Each row links to /entity/<tpi_id> for ChecklistDetail view
-- Styled entirely with Blueprint .bp-* classes and styled-jsx
-- Handles loading, error, and empty states appropriately
-- **Files changed:** frontend/src/app/(app)/project/[id]/equipment/page.tsx (created)
-- **Learnings for future iterations:**
-  - Equipment icons are SVG components defined inline to match blueprint-app.jsx
-  - Status progress uses bp-prog classes with inline width style for percentage bars
-  - Equipment table uses CSS Grid with fixed column widths for consistent layout
-  - Links wrapped around entire row for better UX (full row clickable)
-  - Supabase client is imported as named export `supabase` from lib/supabase.ts
----
-## Sun May 24 21:35 CDT 2026 - US-015
-- Equipment sidebar nav item was already implemented in US-002
-- Verified conditional rendering logic: item appears only when pathname starts with /project/
-- Equipment nav links correctly to /project/[projectId]/equipment
-- Active state properly handled with bp-nav-active class
-- All acceptance criteria already met - no changes needed
-- **Files changed:** None - functionality already implemented
-- **Learnings for future iterations:**
-  - Check if work might already be complete before making changes
-  - US-002 shell layout implementation was comprehensive and included project-scoped nav
-  - Equipment nav item correctly uses isProjectRoute condition for visibility
----
-## Sun May 24 21:40 CDT 2026 - US-016
-- Created lib/projects.ts module with getProjectsForUser function
-- Implemented ProjectCard type with all required fields (project_id, name, org_name, description, created_at)
-- Query joins projects to orgs table to get organization name
-- RLS policies ensure only projects the user has membership access to are returned
-- Follows typed-export pattern from lib/storage.ts and lib/dashboard.ts
-- **Files changed:** frontend/src/lib/projects.ts (created)
-- **Learnings for future iterations:**
-  - Projects are linked to organizations via org_id foreign key
-  - Supabase join syntax uses !inner for required joins
-  - RLS (Row Level Security) automatically filters results based on user's membership
-  - Order projects by created_at descending to show newest first
----
-## Sun May 24 21:43 CDT 2026 - US-017
-- Created comprehensive unit tests for lib/projects.ts using Vitest
-- Implemented typed in-memory fake for Supabase client with no live network calls
-- Test coverage includes all required scenarios:
-  - User in one org sees only that org's projects
-  - User in two orgs sees projects from both
-  - User with no memberships sees empty list
-  - Database error handling
-  - Empty database case
-- All 5 test cases pass
-- **Files changed:** frontend/src/lib/__tests__/projects.test.ts (created)
-- **Learnings for future iterations:**
-  - Mock Supabase chains require mocking select().order() pattern for projects queries
-  - Simulate RLS by filtering based on membership data in mock
-  - Test names should match acceptance criteria language exactly
-  - Projects are sorted by created_at descending in the actual implementation
----
-## Sun May 24 21:46 CDT 2026 - US-018
-- Created /projects route (Blueprint ProjectsScreen) using getProjectsForUser
-- Implemented ProjectThumb SVG component matching blueprint-app.jsx pattern
-- Created Blueprint card grid layout with project tiles
-- Each card links to /project/[project_id] dashboard page
-- Projects sidebar nav item already correctly linked to /projects from US-002
-- Styled entirely with Blueprint .bp-* classes and styled-jsx
-- Handles loading, error, and empty states appropriately
-- **Files changed:** frontend/src/app/(app)/projects/page.tsx (created)
-- **Learnings for future iterations:**
-  - ProjectThumb SVG uses different color palettes rotated by project index
-  - Blueprint card grid uses auto-fill with minmax for responsive layout
-  - Projects page shows org name and description as metadata
-  - Projects nav already configured correctly in shell layout from US-002
----
-## Sun May 24 21:49 CDT 2026 - US-019
-- Restyled /inbox page with Blueprint .bp-* classes replacing all Tailwind
-- Daily-bucket layout preserved with "Today's Items" header
-- InboxItem cards styled with AI lightning bolt badge (⚡) for AI drafts
-- AI-refusal variant styling with warning badge and border accent
-- Empty state message: "Nothing needs your attention. Upload a document to get started."
-- Realtime push behavior fully preserved (no page refresh required)
-- All Slice-07 acceptance behaviors maintained
-- **Files changed:** frontend/src/app/(app)/inbox/page.tsx (restyled)
-- **Learnings for future iterations:**
-  - AI badge uses lightning bolt symbol (⚡) consistently across the app
-  - Status badges follow bp-status-* pattern with info/warning/error variants
-  - Refusal cards use border-left accent with warning color
-  - styled-jsx is the pattern for component-scoped Blueprint styles
+  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
+  - JWT token from Supabase session is passed as Bearer token in Authorization header
+  - Form components follow React controlled component pattern with useState
+  - Error and success states are managed with local state and displayed inline
+  - Discipline scopes must be fetched from database for the current project
+  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
+  - Browser testing was skipped as browser tools not available
 ---

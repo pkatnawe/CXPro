@@ -1,0 +1,4 @@
+# Ralph Progress Log
+Started: 2026-05-25 (PRD-3 v0 Teams)
+
+## Codebase Patterns

@@ -332,7 +332,7 @@ The User × Organization relationship.
 The Organization × Project × Role-in-project relationship.
 
 **UserProjectAssignment**:
-The User × Project × Role × DisciplineScope(s) × authority relationship. The keystone of project-level access.
+The User × Project × Role × DisciplineScope(s) × authority relationship. The keystone of project-level access. Implemented as a logical aggregate spanning two physical tables: `participations` (User × Project — the project-level RLS gate) and `assignments` (User × DisciplineScope — the discipline seat). Treat as one concept in domain conversation; the two-table shape is an implementation detail.
 
 **Role**:
 A named bundle of Permissions assignable to a user in a project.
