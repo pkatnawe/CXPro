@@ -36,8 +36,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Frontend updated to query through test_procedure_instances.agent_run_id per architecture"
     },
     {
       "id": "US-003",
@@ -55,8 +55,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Migration 016 created to fix accept_draft_test_procedure function, reading role from memberships table instead of non-existent assignments.role"
     },
     {
       "id": "US-004",
