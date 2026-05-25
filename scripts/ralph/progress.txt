@@ -1,198 +1,73 @@
 # Ralph Progress Log
-Started: Mon May 25 00:43:16 CDT 2026
----
-
-## 2026-05-25 06:30:00 - US-005
-- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
-- Files changed:
-  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
-- **Learnings for future iterations:**
-  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
-  - JWT token from Supabase session is passed as Bearer token in Authorization header
-  - Form components follow React controlled component pattern with useState
-  - Error and success states are managed with local state and displayed inline
-  - Discipline scopes must be fetched from database for the current project
-  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
-  - Browser testing was skipped as browser tools not available
----
-
-## 2026-05-25 06:00:00 - US-003
-- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
-- Files changed:
-  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
-  - backend/apply_redeem_invitations_migration.py (created migration application script)
-  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
-- **Learnings for future iterations:**
-  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
-  - Integration tests should use asyncpg for async database operations
-  - When testing database triggers, be aware of automatic execution flow
-  - Pending invitations need unique tokens to avoid conflicts
-  - Test cleanup must be thorough to avoid data persistence between runs
----
-
-## 2026-05-25 06:30:00 - US-005
-- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
-- Files changed:
-  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
-- **Learnings for future iterations:**
-  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
-  - JWT token from Supabase session is passed as Bearer token in Authorization header
-  - Form components follow React controlled component pattern with useState
-  - Error and success states are managed with local state and displayed inline
-  - Discipline scopes must be fetched from database for the current project
-  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
-  - Browser testing was skipped as browser tools not available
----
+Started: Mon May 25 14:18:52 CDT 2026
 
 ## Codebase Patterns
-- Database migrations are applied using Python scripts in backend/ directory (e.g., apply_migration.py)
-- The function signature of Postgres functions should remain unchanged when updating their body
-- Test database functions by calling them directly with SQL via psycopg2
-- TypeScript type checking is done with `npm run type-check` in frontend directory
-- Integration tests use asyncpg for async database operations
-- The handle_new_user trigger fires AFTER INSERT on auth.users and automatically redeems pending invitations
-- FastAPI endpoints: Use `Depends(security)` with HTTPBearer for JWT auth, pydantic BaseModel for request bodies
-- Supabase client setup: Create with `create_client(url, service_key)`, methods are synchronous (not async)
-- Backend services: Create service classes that accept supabase client and db connection in __init__
-- Test with unique identifiers (e.g., 'test-org-inv' instead of 'test-org') to avoid conflicts
-- Frontend API calls: Use fetch() with `http://localhost:8000` base URL, pass JWT as `Bearer ${session.access_token}`
-- Frontend forms: Use controlled components with useState, inline error/success display patterns
-
-## 2026-05-25 00:45:00 - US-001
-- What was implemented: Updated create_project_with_discipline function to auto-seed all four canonical disciplines (Mechanical, Electrical, Controls, General Construction) when a new project is created
-- Files changed:
-  - migrations/009_auto_seed_disciplines.sql (created new migration)
-- **Learnings for future iterations:**
-  - The create_project_with_discipline function is defined in migrations/001_party_model.sql
-  - Database migrations live in the migrations/ directory and are applied using Python scripts
-  - Testing database functions requires connecting with psycopg2 and executing SQL directly
-  - The four canonical disciplines are: Mechanical, Electrical, Controls, General Construction
+- Use vitest imports (describe, test, expect) in test files
+- Frontend test files go in src/lib/__tests__/
+- Type-check command is: npm run type-check (not typecheck)
+- Use bp-* CSS class names for all UI elements — no raw Tailwind color classes
+- Supabase relational joins only work through actual FKs — use multi-step queries + JS join when tables share user_id but have no direct FK
+- Theme state lives in layout.tsx (localStorage + data-theme on documentElement)
+- NEXT_PUBLIC_API_URL env var for all backend fetch calls (fallback: http://localhost:8000)
+- Auth check pattern: supabase.auth.getSession() → if no session redirect to /auth
+- getErrorMessage from @/lib/error for all error display — no instanceof Error pattern
+- maybeSingle() for queries that may legitimately return zero rows; single() only when row must exist
 ---
 
-## 2026-05-25 06:30:00 - US-005
-- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+## Mon May 25 14:22:00 CDT 2026 - US-001
+- Implemented getInitials pure function in frontend/src/lib/identity.ts
+- Created comprehensive test file in frontend/src/lib/__tests__/identity.test.ts
 - Files changed:
-  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
+  - frontend/src/lib/identity.ts (new)
+  - frontend/src/lib/__tests__/identity.test.ts (new)
 - **Learnings for future iterations:**
-  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
-  - JWT token from Supabase session is passed as Bearer token in Authorization header
-  - Form components follow React controlled component pattern with useState
-  - Error and success states are managed with local state and displayed inline
-  - Discipline scopes must be fetched from database for the current project
-  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
-  - Browser testing was skipped as browser tools not available
+  - Vitest test files need to import describe, test, expect from 'vitest'
+  - Type check command is npm run type-check, not npm run typecheck
+  - Test files successfully run with: npm test -- <path>
 ---
 
-## 2026-05-25 06:00:00 - US-003
-- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
-- Files changed:
-  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
-  - backend/apply_redeem_invitations_migration.py (created migration application script)
-  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
+## Mon May 25 14:35:45 CDT 2026 - US-002
+- Found that US-002 was already implemented in previous iteration
+- getMembersForProject already uses 6 sequential queries as specified
+- Tests including org isolation test already passing
+- Files already changed:
+  - src/lib/members.ts (already has multi-step query implementation)
+  - src/lib/__tests__/members.test.ts (already has org isolation test)
 - **Learnings for future iterations:**
-  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
-  - Integration tests should use asyncpg for async database operations
-  - When testing database triggers, be aware of automatic execution flow
-  - Pending invitations need unique tokens to avoid conflicts
-  - Test cleanup must be thorough to avoid data persistence between runs
+  - Always verify current implementation state before starting work
+  - The frontend directory is the root (not ./frontend from project root)
+  - Working directory is /Users/shlok/Desktop/SpareWork/CX/frontend
 ---
 
-## 2026-05-25 06:30:00 - US-005
-- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
+## Mon May 25 14:37:30 CDT 2026 - US-003
+- Implemented UserMenu dropdown component with initials avatar
+- Avatar displays user initials from full_name or email using getInitials
+- Dropdown opens on click, closes on outside click
+- Theme toggle moved from sidebar to dropdown
+- Manage Team link appears when projectId is present
+- Sign Out button calls supabase.auth.signOut()
 - Files changed:
-  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
+  - src/components/UserMenu.tsx (new)
+  - src/app/(app)/layout.tsx (updated to use UserMenu, removed sidebar theme toggle)
+  - src/styles/blueprint.css (added dropdown styles)
 - **Learnings for future iterations:**
-  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
-  - JWT token from Supabase session is passed as Bearer token in Authorization header
-  - Form components follow React controlled component pattern with useState
-  - Error and success states are managed with local state and displayed inline
-  - Discipline scopes must be fetched from database for the current project
-  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
-  - Browser testing was skipped as browser tools not available
+  - UserMenu needs position: relative parent (.bp-user-menu) for dropdown positioning
+  - Use document mousedown listener for outside click detection
+  - Supabase user metadata stored in user.user_metadata.full_name
+  - Next.js build shows JSX errors when running tsc directly without config
 ---
 
-## 2026-05-25 06:10:00 - US-004
-- What was implemented: Created InvitationService module with create_invitation method and POST /invites FastAPI endpoint for issuing invitations and triggering Supabase Auth magic-link emails
+## Mon May 25 14:43:00 CDT 2026 - US-004
+- Implemented getCurrentUserRole function to check user's role in a project's org
+- Added OCA gate to the invite form on members page
+- Non-OCA users see "Only OCAs can invite members" notice
 - Files changed:
-  - backend/invitation_service.py (created - InvitationService class with create_invitation method)
-  - backend/main.py (updated - added POST /invites endpoint with JWT auth)
-  - backend/test_invitation_service.py (created - comprehensive integration test)
-  - backend/test_invitation_service_simple.py (created - simplified unit tests)
+  - src/lib/members.ts (added getCurrentUserRole function)
+  - src/lib/__tests__/members.test.ts (added tests for getCurrentUserRole)
+  - src/app/(app)/project/[id]/members/page.tsx (added OCA check and conditional rendering)
 - **Learnings for future iterations:**
-  - Patterns discovered: FastAPI endpoints use Depends(security) for JWT auth, HTTPBearer for token extraction
-  - Supabase Python client methods are synchronous, not async - no await needed
-  - For testing with mocks, use MagicMock for sync methods, AsyncMock for async database operations
-  - Environment variables for backend: DATABASE_URL for postgres connection, DATABASE_SECRET for Supabase service key
-  - Backend test files should handle unique constraint violations by using unique test data identifiers
-  - The supabase.auth.admin.invite_user_by_email() sends invitations for new users
-  - The supabase.auth.sign_in_with_otp() sends magic links for existing users
----
-
-## 2026-05-25 06:30:00 - US-005
-- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
-- Files changed:
-  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
-- **Learnings for future iterations:**
-  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
-  - JWT token from Supabase session is passed as Bearer token in Authorization header
-  - Form components follow React controlled component pattern with useState
-  - Error and success states are managed with local state and displayed inline
-  - Discipline scopes must be fetched from database for the current project
-  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
-  - Browser testing was skipped as browser tools not available
----
-
-## 2026-05-25 00:50:00 - US-002
-- What was implemented: Created pending_invitations table with all required columns, constraints, indexes, and RLS policies for storing unredeemed invites
-- Files changed:
-  - migrations/010_pending_invitations.sql (created new migration)
-  - backend/apply_pending_invitations_migration.py (created migration script)
-- **Learnings for future iterations:**
-  - Patterns discovered: Migration scripts in backend/ follow pattern of apply_<name>_migration.py
-  - Tables need both migration SQL files and corresponding Python application scripts
-  - RLS policies should be defined for both SELECT and INSERT operations for OCA roles
-  - Unique constraints are automatically named by Postgres (e.g., pending_invitations_token_key)
-  - Project structure has backend files in root directory, not in a backend/ subdirectory
----
-
-## 2026-05-25 06:30:00 - US-005
-- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
-- Files changed:
-  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
-- **Learnings for future iterations:**
-  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
-  - JWT token from Supabase session is passed as Bearer token in Authorization header
-  - Form components follow React controlled component pattern with useState
-  - Error and success states are managed with local state and displayed inline
-  - Discipline scopes must be fetched from database for the current project
-  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
-  - Browser testing was skipped as browser tools not available
----
-
-## 2026-05-25 06:00:00 - US-003
-- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
-- Files changed:
-  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
-  - backend/apply_redeem_invitations_migration.py (created migration application script)
-  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
-- **Learnings for future iterations:**
-  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
-  - Integration tests should use asyncpg for async database operations
-  - When testing database triggers, be aware of automatic execution flow
-  - Pending invitations need unique tokens to avoid conflicts
-  - Test cleanup must be thorough to avoid data persistence between runs
----
-
-## 2026-05-25 06:30:00 - US-005
-- What was implemented: Built minimal invite form on the /project/[id]/members page with email, role, and discipline fields that submits to POST /invites endpoint
-- Files changed:
-  - frontend/src/app/(app)/project/[id]/members/page.tsx (created - invite form component)
-- **Learnings for future iterations:**
-  - Frontend API calls to backend use fetch() with http://localhost:8000 as base URL
-  - JWT token from Supabase session is passed as Bearer token in Authorization header
-  - Form components follow React controlled component pattern with useState
-  - Error and success states are managed with local state and displayed inline
-  - Discipline scopes must be fetched from database for the current project
-  - The backend API expects specific shape: {email, org_id, project_id, role, discipline_scope_id}
-  - Browser testing was skipped as browser tools not available
+  - Use maybeSingle() instead of single() when membership might not exist
+  - Gate features by checking role before render, not just disabling
+  - Always test role checks with null case (user not in org)
+  - Tests all passing: 13 tests in members.test.ts
 ---

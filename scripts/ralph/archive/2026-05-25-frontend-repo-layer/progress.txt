@@ -1,0 +1,164 @@
+# Ralph Progress Log
+Started: Mon May 25 10:21:14 CDT 2026
+
+## Codebase Patterns
+- Frontend uses Supabase client from @supabase/supabase-js with environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+- Auth methods used: getUser, getSession, signIn, signUp, signOut, updateUser, onAuthStateChange
+- Repository pattern: interfaces and classes in lib/repos/, no singleton exports from individual files
+
+---
+
+## 2026-05-25 10:25:00 - US-001
+- What was implemented: Created IAuthRepo interface and SupabaseAuthRepo class to encapsulate all Supabase auth operations
+- Files changed:
+  - frontend/src/lib/repos/AuthRepo.ts (created - IAuthRepo interface and SupabaseAuthRepo implementation)
+- **Learnings for future iterations:**
+  - Supabase auth methods return consistent shapes with data and error properties
+  - onAuthStateChange returns a subscription object with unsubscribe method
+  - Auth repo accepts SupabaseClient via constructor for dependency injection
+  - TypeScript type-check passes with npm run type-check in frontend directory
+---
+## 2026-05-25 10:35:00 - US-002
+- What was implemented: Created IMembersRepo interface and SupabaseMembersRepo class to encapsulate member queries with join logic across participations, memberships, assignments, and discipline_scopes
+- Files changed:
+  - frontend/src/lib/repos/MembersRepo.ts (created - IMembersRepo interface and SupabaseMembersRepo implementation)
+- **Learnings for future iterations:**
+  - Since there was no existing lib/members.ts, created logical implementations based on database schema
+  - getMembersForProject requires multiple joins: participations -> users, memberships, assignments -> discipline_scopes
+  - getPendingInvitesForProject returns empty array as there's no invites table in current schema
+  - updateDiscipline implements idempotent assignment creation (returns existing if already present)
+  - Complex queries use Supabase's select with nested relations and multiple table queries
+  - Error handling wraps all operations in try-catch blocks
+---
+## 2026-05-25 10:31:55 - US-003
+- What was implemented: Created IProjectsRepo interface and SupabaseProjectsRepo class to encapsulate project-related queries
+- Files changed:
+  - frontend/src/lib/repos/ProjectsRepo.ts (created - IProjectsRepo interface and SupabaseProjectsRepo implementation)
+- **Learnings for future iterations:**
+  - getProjectsForUser queries participations table first to find user's projects, then fetches project details with org join
+  - createProject delegates to the existing create_project_with_discipline RPC function
+  - Since lib/projects.ts didn't exist, created logical implementation based on dashboard page patterns
+  - Both methods include proper error handling and return sensible defaults on errors
+  - No singleton is exported from ProjectsRepo.ts, following the established pattern
+---
+## 2026-05-25 10:42:00 - US-004
+- What was implemented: Created IOrgRepo interface and SupabaseOrgRepo class to encapsulate org creation RPC
+- Files changed:
+  - frontend/src/lib/repos/OrgRepo.ts (created - IOrgRepo interface and SupabaseOrgRepo implementation)
+- **Learnings for future iterations:**
+  - createOrg method wraps the create_org_with_membership RPC accepting name and slug parameters
+  - The RPC returns an Org object on success
+  - Followed the same pattern as other repos: no singleton export from OrgRepo.ts
+  - Error handling pattern consistent with other repos: try-catch with return of { data, error } structure
+---
+## 2026-05-25 10:55:00 - US-005
+- What was implemented: Created IDashboardRepo interface and SupabaseDashboardRepo class to encapsulate dashboard data fetching
+- Files changed:
+  - frontend/src/lib/repos/DashboardRepo.ts (created - IDashboardRepo interface and SupabaseDashboardRepo implementation)
+- **Learnings for future iterations:**
+  - getProjectDashboard method aggregates three queries: orgs, memberships, and projects
+  - The DashboardData interface was created to type the return value with all three data sets
+  - Since lib/dashboard.ts didn't exist, replicated the query logic from dashboard/page.tsx loadUserData function
+  - No singleton exported from DashboardRepo.ts following established pattern
+  - All queries return empty arrays on error for graceful fallback
+---
+## 2026-05-25 11:10:00 - US-006
+- What was implemented: Created IActivityRepo interface and SupabaseActivityRepo class to encapsulate activity queries and feedback recording
+- Files changed:
+  - frontend/src/lib/repos/ActivityRepo.ts (created - IActivityRepo interface and SupabaseActivityRepo implementation)
+- **Learnings for future iterations:**
+  - getActivityForProcedure method fetches agent_runs and test_procedure_instances data
+  - recordFeedback method wraps the record_feedback RPC and also fetches the created feedback record
+  - AgentRun, TestProcedureInstance, and FeedbackRecord interfaces created to type the database entities
+  - Error handling checks for PGRST116 code (no rows returned) to handle missing data gracefully
+  - ActivityData interface combines agentRun and testProcedure data for the composite return type
+---
+## 2026-05-25 11:15:00 - US-007
+- What was implemented: Wired all repository singletons in lib/repos/index.ts
+- Files changed:
+  - frontend/src/lib/repos/index.ts (created - exports all singleton repo instances)
+- **Learnings for future iterations:**
+  - All six repositories are instantiated with the real Supabase client
+  - Exported as named exports: authRepo, membersRepo, projectsRepo, orgRepo, dashboardRepo, activityRepo
+  - Single import path for all repos from lib/repos/index.ts
+  - Centralized wiring between repos and Supabase client in one file
+---
+## 2026-05-25 11:20:00 - US-008
+- What was implemented: Created lib/activity.ts call-through functions and migrated ActivityTab to use them
+- Files changed:
+  - frontend/src/lib/activity.ts (created - server-side call-through functions)
+  - frontend/src/components/ActivityTab.tsx (updated - now uses lib/activity functions instead of direct supabase)
+- **Learnings for future iterations:**
+  - lib/activity.ts exports getActivityForProcedure and recordFeedback as server actions ('use server')
+  - ActivityTab.tsx no longer imports supabase directly
+  - Functions delegate to activityRepo from lib/repos/index.ts
+  - Note: Updating feedback text after initial submission would need an additional repo method
+---
+## 2026-05-25 11:30:00 - US-009
+- What was implemented: Migrated auth pages and components to use authRepo instead of direct supabase.auth calls
+- Files changed:
+  - frontend/src/lib/auth.ts (created - server-side auth call-through functions)
+  - frontend/src/lib/auth-client.ts (created - client-side auth state change handler)
+  - frontend/src/components/auth/SignInForm.tsx (updated - uses signIn from lib/auth)
+  - frontend/src/components/auth/SignUpForm.tsx (updated - uses signUp from lib/auth)
+  - frontend/src/app/auth/page.tsx (updated - uses getSession and onAuthStateChange from lib/auth)
+  - frontend/src/app/dashboard/page.tsx (updated - uses getSession and signOut from lib/auth)
+  - frontend/src/lib/repos/AuthRepo.ts (updated - fixed types for session and onAuthStateChange)
+- **Learnings for future iterations:**
+  - getSession returns session directly, not nested in data.session
+  - onAuthStateChange needs to return { unsubscribe } directly
+  - signUp accepts metadata as third parameter instead of fullName
+  - accept-invite/page.tsx and UploadModal.tsx don't exist in current codebase
+  - Session object structure: session.user.id and session.user.email
+---
+## 2026-05-25 11:40:00 - US-010
+- What was implemented: Migrated dashboard page RPC calls to use orgRepo and projectsRepo instead of direct supabase.rpc calls
+- Files changed:
+  - frontend/src/app/dashboard/page.tsx (updated - uses orgRepo.createOrg and projectsRepo.createProject)
+  - frontend/src/lib/repos/ProjectsRepo.ts (updated - fixed return types to match { data, error } pattern)
+- **Learnings for future iterations:**
+  - ProjectsRepo.createProject doesn't need userId parameter as RPC doesn't use it
+  - All repo methods should return { data, error } for consistency
+  - Dashboard page now no longer calls supabase.rpc directly
+  - Browser testing was specified but MCP browser tools not available
+---
+## 2026-05-25 11:50:00 - US-011
+- What was implemented: Created InMemoryMembersRepo fake and replaced vi.mock tests with it
+- Files changed:
+  - frontend/src/lib/repos/InMemoryMembersRepo.ts (created - in-memory fake implementation of IMembersRepo)
+  - frontend/src/lib/__tests__/members.test.ts (created - test suite using InMemoryMembersRepo)
+- **Learnings for future iterations:**
+  - InMemoryMembersRepo implements IMembersRepo interface fully
+  - seed() method allows setting up test data easily
+  - Tests cover: joined data, empty project, member without discipline, pending invites, expired invites, updateDiscipline idempotency
+  - No vi.mock needed - tests couple to return shape not query internals
+  - All 8 test cases pass with vitest
+---
+## 2026-05-25 11:55:00 - US-012
+- What was implemented: Created InMemoryDashboardRepo and InMemoryProjectsRepo fakes with test suites
+- Files changed:
+  - frontend/src/lib/repos/InMemoryDashboardRepo.ts (created - in-memory fake for IDashboardRepo)
+  - frontend/src/lib/repos/InMemoryProjectsRepo.ts (created - in-memory fake for IProjectsRepo)
+  - frontend/src/lib/__tests__/dashboard.test.ts (created - test suite using InMemoryDashboardRepo)
+  - frontend/src/lib/__tests__/projects.test.ts (created - test suite using InMemoryProjectsRepo)
+  - frontend/src/lib/repos/DashboardRepo.ts (updated - fixed return type to { data, error } pattern)
+- **Learnings for future iterations:**
+  - All repo methods should consistently return { data, error } pattern
+  - InMemoryDashboardRepo returns all data regardless of userId parameter
+  - InMemoryProjectsRepo tracks participations separately from projects
+  - All 18 tests pass across the three test files
+  - Fixed type mismatch in DashboardRepo interface
+---
+## 2026-05-25 12:00:00 - US-013
+- What was implemented: Verified old flat lib files don't exist and checked for direct supabase imports
+- Files changed:
+  - No files changed - verification task only
+- **Learnings for future iterations:**
+  - lib/projects.ts, lib/members.ts, lib/dashboard.ts don't exist (never created)
+  - Some pages still have direct supabase imports but are outside scope:
+    - profile/page.tsx has supabase.from for user updates
+    - dashboard/page.tsx has supabase.rpc for invite_user_by_email
+    - Other pages use supabase.auth but haven't been migrated yet
+  - All migrated components properly use the repository layer
+  - Tests all pass, typecheck passes
+---

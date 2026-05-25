@@ -1,0 +1,9 @@
+# Ralph Progress Log
+Started: 2026-05-25 (PRD-5 v0 Stabilization)
+
+## Codebase Patterns
+- Every CREATE OR REPLACE FUNCTION in migrations must restore OWNER TO postgres AND SET search_path = public (canonical safeguard recorded in migration 012). Skipping this re-introduces the "Database error saving new user" class of bug.
+- Frontend errors must surface via getErrorMessage() from lib/error.ts. `instanceof Error` is false for Supabase RPC error objects.
+- .single() throws on zero rows; use .maybeSingle() unless the row must exist.
+
+---

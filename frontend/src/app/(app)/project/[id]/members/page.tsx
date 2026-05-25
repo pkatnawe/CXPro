@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase, type DisciplineScope } from '@/lib/supabase'
-import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, type ProjectMember, type PendingInvite } from '@/lib/members'
+import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole, type ProjectMember, type PendingInvite } from '@/lib/members'
+import { getErrorMessage } from '@/lib/error'
 
 export default function MembersPage() {
   const params = useParams()
@@ -23,6 +24,8 @@ export default function MembersPage() {
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([])
   const [membersLoading, setMembersLoading] = useState(true)
   const [updatingDiscipline, setUpdatingDiscipline] = useState<string | null>(null)
+  const [isOCA, setIsOCA] = useState(false)
+  const [roleLoading, setRoleLoading] = useState(true)
 
   // Check authentication and load disciplines
   useEffect(() => {
@@ -33,6 +36,17 @@ export default function MembersPage() {
       if (!session?.user) {
         router.push('/auth')
         return
+      }
+
+      // Check if user is OCA
+      try {
+        const role = await getCurrentUserRole(session.user.id, projectId)
+        setIsOCA(role === 'OCA')
+      } catch (error) {
+        console.error('Error checking user role:', error)
+        setIsOCA(false)
+      } finally {
+        setRoleLoading(false)
       }
 
       // Load discipline scopes for this project
@@ -124,7 +138,8 @@ export default function MembersPage() {
       }
 
       // Call the backend API
-      const response = await fetch('http://localhost:8000/invites', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/invites`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +175,7 @@ export default function MembersPage() {
       
     } catch (err) {
       console.error('Error sending invitation:', err)
-      setError(err instanceof Error ? err.message : 'Failed to send invitation')
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -170,10 +185,15 @@ export default function MembersPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Project Members</h1>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Invite Team Member</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {roleLoading ? (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <div className="text-gray-500">Loading permissions...</div>
+        </div>
+      ) : isOCA ? (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Invite Team Member</h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email Address
@@ -244,8 +264,15 @@ export default function MembersPage() {
           >
             {loading ? 'Sending...' : 'Send Invitation'}
           </button>
-        </form>
-      </div>
+          </form>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <div className="text-gray-500 text-center py-4">
+            Only OCAs can invite members
+          </div>
+        </div>
+      )}
 
       {/* Members Table */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">

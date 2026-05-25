@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getMembersForProject, getPendingInvitesForProject, updateDiscipline } from '../members'
+import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole } from '../members'
 
 // Mock the supabase module
 vi.mock('../supabase', () => ({
@@ -21,6 +21,7 @@ describe('getMembersForProject', () => {
     participations: any[]
     assignments: any[]
     discipline_scopes: any[]
+    projects: any[]
     currentUserId: string
   }
 
@@ -34,6 +35,7 @@ describe('getMembersForProject', () => {
       participations: [],
       assignments: [],
       discipline_scopes: [],
+      projects: [],
       currentUserId: 'user-1'
     }
 
@@ -47,47 +49,110 @@ describe('getMembersForProject', () => {
             return {
               eq: vi.fn().mockImplementation((column: string, value: any) => {
                 if (column === 'project_id') {
-                  // Get participations for the project
                   const projectParticipations = mockData.participations.filter(
                     p => p.project_id === value
                   )
-                  
-                  // Join with users, memberships, assignments, and discipline_scopes
-                  const membersData = projectParticipations.map(participation => {
-                    const user = mockData.users.find(u => u.id === participation.user_id)
-                    const membership = mockData.memberships.find(
-                      m => m.user_id === participation.user_id && 
-                          m.org_id === participation.org_id
-                    )
-                    const assignment = mockData.assignments.find(
-                      a => a.user_id === participation.user_id &&
-                          mockData.discipline_scopes.find(
-                            ds => ds.id === a.discipline_scope_id && 
-                                  ds.project_id === value
-                          )
-                    )
-                    const disciplineScope = assignment 
-                      ? mockData.discipline_scopes.find(ds => ds.id === assignment.discipline_scope_id)
-                      : null
-                    
-                    return {
-                      user_id: participation.user_id,
-                      users: user ? { email: user.email } : null,
-                      memberships: membership ? { role: membership.role } : null,
-                      assignments: assignment && disciplineScope ? {
-                        discipline_scopes: {
-                          name: disciplineScope.name
-                        }
-                      } : null
-                    }
-                  })
-                  
-                  return {
-                    data: membersData,
-                    error: null
-                  }
+                  const data = projectParticipations.map(p => ({ user_id: p.user_id }))
+                  return { data, error: null }
                 }
                 return { data: [], error: null }
+              })
+            }
+          })
+        }
+      }
+      
+      if (table === 'projects') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                return {
+                  single: vi.fn().mockImplementation(() => {
+                    const project = mockData.projects.find(p => p.id === value)
+                    return { data: project ? { org_id: project.org_id } : null, error: null }
+                  })
+                }
+              })
+            }
+          })
+        }
+      }
+      
+      if (table === 'users') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              in: vi.fn().mockImplementation((column: string, values: any[]) => {
+                const users = mockData.users.filter(u => values.includes(u.id))
+                const data = users.map(u => ({ 
+                  id: u.id, 
+                  email: u.email, 
+                  full_name: u.full_name 
+                }))
+                return { data, error: null }
+              })
+            }
+          })
+        }
+      }
+      
+      if (table === 'memberships') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              in: vi.fn().mockImplementation((column: string, values: any[]) => {
+                return {
+                  eq: vi.fn().mockImplementation((column2: string, value2: any) => {
+                    const memberships = mockData.memberships.filter(
+                      m => values.includes(m.user_id) && m.org_id === value2
+                    )
+                    const data = memberships.map(m => ({ 
+                      user_id: m.user_id, 
+                      role: m.role 
+                    }))
+                    return { data, error: null }
+                  })
+                }
+              })
+            }
+          })
+        }
+      }
+      
+      if (table === 'discipline_scopes') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                const scopes = mockData.discipline_scopes.filter(
+                  ds => ds.project_id === value
+                )
+                const data = scopes.map(ds => ({ id: ds.id, name: ds.name }))
+                return { data, error: null }
+              })
+            }
+          })
+        }
+      }
+      
+      if (table === 'assignments') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              in: vi.fn().mockImplementation((column: string, values: any[]) => {
+                return {
+                  in: vi.fn().mockImplementation((column2: string, values2: any[]) => {
+                    const assignments = mockData.assignments.filter(
+                      a => values.includes(a.user_id) && values2.includes(a.discipline_scope_id)
+                    )
+                    const data = assignments.map(a => ({ 
+                      user_id: a.user_id, 
+                      discipline_scope_id: a.discipline_scope_id 
+                    }))
+                    return { data, error: null }
+                  })
+                }
               })
             }
           })
@@ -97,6 +162,7 @@ describe('getMembersForProject', () => {
       return {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
+        in: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis()
       }
     })
@@ -104,10 +170,15 @@ describe('getMembersForProject', () => {
 
   it('returns joined rows with email, role, and discipline for project members', async () => {
     // Setup test data
+    mockData.projects = [
+      { id: 'project-1', org_id: 'org-1' },
+      { id: 'project-2', org_id: 'org-2' }
+    ]
+    
     mockData.users = [
-      { id: 'user-1', email: 'alice@example.com' },
-      { id: 'user-2', email: 'bob@example.com' },
-      { id: 'user-3', email: 'charlie@example.com' }
+      { id: 'user-1', email: 'alice@example.com', full_name: 'Alice Smith' },
+      { id: 'user-2', email: 'bob@example.com', full_name: 'Bob Johnson' },
+      { id: 'user-3', email: 'charlie@example.com', full_name: 'Charlie Brown' }
     ]
     
     mockData.memberships = [
@@ -140,12 +211,14 @@ describe('getMembersForProject', () => {
     expect(result).toContainEqual({
       user_id: 'user-1',
       email: 'alice@example.com',
+      full_name: 'Alice Smith',
       role: 'OCA',
       discipline_name: 'Mechanical'
     })
     expect(result).toContainEqual({
       user_id: 'user-2',
       email: 'bob@example.com',
+      full_name: 'Bob Johnson',
       role: 'cx_engineer',
       discipline_name: 'Electrical'
     })
@@ -160,8 +233,12 @@ describe('getMembersForProject', () => {
   })
 
   it('handles members without discipline assignments', async () => {
+    mockData.projects = [
+      { id: 'project-1', org_id: 'org-1' }
+    ]
+    
     mockData.users = [
-      { id: 'user-1', email: 'alice@example.com' }
+      { id: 'user-1', email: 'alice@example.com', full_name: 'Alice Smith' }
     ]
     
     mockData.memberships = [
@@ -179,7 +256,56 @@ describe('getMembersForProject', () => {
     expect(result).toEqual([{
       user_id: 'user-1',
       email: 'alice@example.com',
+      full_name: 'Alice Smith',
       role: 'OCA',
+      discipline_name: null
+    }])
+  })
+
+  it('verifies org isolation - returns org-A role for user in both orgs when querying org-A project', async () => {
+    // Setup: user is member of both org-A and org-B with different roles
+    mockData.projects = [
+      { id: 'project-a1', org_id: 'org-a' },
+      { id: 'project-b1', org_id: 'org-b' }
+    ]
+    
+    mockData.users = [
+      { id: 'user-1', email: 'alice@example.com', full_name: 'Alice Smith' }
+    ]
+    
+    mockData.memberships = [
+      { user_id: 'user-1', org_id: 'org-a', role: 'OCA' }, // OCA in org-A
+      { user_id: 'user-1', org_id: 'org-b', role: 'cx_engineer' } // cx_engineer in org-B
+    ]
+    
+    mockData.participations = [
+      { user_id: 'user-1', project_id: 'project-a1', org_id: 'org-a' },
+      { user_id: 'user-1', project_id: 'project-b1', org_id: 'org-b' }
+    ]
+    
+    mockData.discipline_scopes = []
+    mockData.assignments = []
+    
+    // Query project-a1 (belongs to org-a)
+    const result = await getMembersForProject('project-a1')
+    
+    // Should get OCA role from org-a membership, NOT cx_engineer from org-b
+    expect(result).toEqual([{
+      user_id: 'user-1',
+      email: 'alice@example.com',
+      full_name: 'Alice Smith',
+      role: 'OCA', // Should be OCA, not cx_engineer
+      discipline_name: null
+    }])
+    
+    // Also verify the opposite: querying project-b1 should return cx_engineer role
+    const resultB = await getMembersForProject('project-b1')
+    
+    expect(resultB).toEqual([{
+      user_id: 'user-1',
+      email: 'alice@example.com',
+      full_name: 'Alice Smith',
+      role: 'cx_engineer', // Should be cx_engineer for org-b project
       discipline_name: null
     }])
   })
@@ -581,5 +707,118 @@ describe('updateDiscipline', () => {
     expect(mockData.assignments).toContainEqual(
       { user_id: 'user-1', discipline_scope_id: 'ds-1' }
     )
+  })
+})
+
+describe('getCurrentUserRole', () => {
+  let mockData: {
+    projects: any[]
+    memberships: any[]
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    
+    mockData = {
+      projects: [],
+      memberships: []
+    }
+
+    const mockFrom = vi.mocked(supabase.from) as any
+    
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'projects') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                return {
+                  single: vi.fn().mockImplementation(() => {
+                    const project = mockData.projects.find(p => p.id === value)
+                    if (!project) {
+                      return { data: null, error: new Error('Project not found') }
+                    }
+                    return { data: { org_id: project.org_id }, error: null }
+                  })
+                }
+              })
+            }
+          })
+        }
+      }
+      
+      if (table === 'memberships') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            let filters: any = {}
+            const queryBuilder = {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                filters[column] = value
+                return queryBuilder
+              }),
+              maybeSingle: vi.fn().mockImplementation(() => {
+                const membership = mockData.memberships.find(
+                  m => m.user_id === filters.user_id && m.org_id === filters.org_id
+                )
+                if (!membership) {
+                  return { data: null, error: null }
+                }
+                return { data: { role: membership.role }, error: null }
+              })
+            }
+            return queryBuilder
+          })
+        }
+      }
+      
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockReturnThis()
+      }
+    })
+  })
+
+  it('returns OCA for a user with OCA role', async () => {
+    mockData.projects = [
+      { id: 'project-1', org_id: 'org-1' }
+    ]
+    
+    mockData.memberships = [
+      { user_id: 'user-1', org_id: 'org-1', role: 'OCA' }
+    ]
+    
+    const result = await getCurrentUserRole('user-1', 'project-1')
+    
+    expect(result).toBe('OCA')
+  })
+
+  it('returns cx_engineer for a user with cx_engineer role', async () => {
+    mockData.projects = [
+      { id: 'project-1', org_id: 'org-1' }
+    ]
+    
+    mockData.memberships = [
+      { user_id: 'user-2', org_id: 'org-1', role: 'cx_engineer' }
+    ]
+    
+    const result = await getCurrentUserRole('user-2', 'project-1')
+    
+    expect(result).toBe('cx_engineer')
+  })
+
+  it('returns null when user has no membership in the project org', async () => {
+    mockData.projects = [
+      { id: 'project-1', org_id: 'org-1' }
+    ]
+    
+    mockData.memberships = [
+      { user_id: 'user-3', org_id: 'org-2', role: 'OCA' } // Different org
+    ]
+    
+    const result = await getCurrentUserRole('user-3', 'project-1')
+    
+    expect(result).toBe(null)
   })
 })

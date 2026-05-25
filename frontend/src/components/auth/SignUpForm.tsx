@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getErrorMessage } from '@/lib/error'
 
 interface SignUpFormProps {
   onSuccess?: () => void
@@ -34,7 +35,7 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
 
       onSuccess?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }

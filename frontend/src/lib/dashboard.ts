@@ -8,7 +8,7 @@ export interface DashboardSummary {
 
 export interface AgentRunSummary {
   id: string
-  test_procedure_instance_id: string | null
+  test_procedure_instances: { id: string; equipment_type: string | null }[]
   equipment_type: string | null
   status: 'pending' | 'running' | 'completed' | 'failed'
   model_version: string
@@ -35,21 +35,21 @@ export async function getProjectDashboard(projectId: string): Promise<DashboardS
     }
 
     // Get recent agent runs (latest 5, ordered by created_at desc)
+    // Architecture note: agent_runs is target-agnostic, so we query through test_procedure_instances
     const { data: agentRunsData, error: agentRunsError } = await supabase
       .from('agent_runs')
       .select(`
         id,
-        test_procedure_instance_id,
         status,
         model_version,
         created_at,
         completed_at,
-        test_procedure_instances!inner(
-          project_id,
+        test_procedure_instances(
+          id,
           equipment_type
         )
       `)
-      .eq('test_procedure_instances.project_id', projectId)
+      .eq('project_id', projectId)
       .order('created_at', { ascending: false })
       .limit(5)
 
@@ -57,8 +57,8 @@ export async function getProjectDashboard(projectId: string): Promise<DashboardS
 
     const recent_agent_runs: AgentRunSummary[] = agentRunsData?.map((run: any) => ({
       id: run.id,
-      test_procedure_instance_id: run.test_procedure_instance_id,
-      equipment_type: run.test_procedure_instances?.equipment_type || null,
+      test_procedure_instances: run.test_procedure_instances || [],
+      equipment_type: run.test_procedure_instances?.[0]?.equipment_type || null,
       status: run.status,
       model_version: run.model_version,
       created_at: run.created_at,

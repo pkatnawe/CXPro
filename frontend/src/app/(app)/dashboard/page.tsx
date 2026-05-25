@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [showOrgForm, setShowOrgForm] = useState(false)
   const [showProjectForm, setShowProjectForm] = useState(false)
   const router = useRouter()
@@ -24,26 +25,34 @@ export default function DashboardPage() {
 
   const loadUserData = async () => {
     try {
+      setLoadError(null)
+      
       // Load orgs
-      const { data: orgsData } = await supabase
+      const { data: orgsData, error: orgsError } = await supabase
         .from('orgs')
         .select('*')
 
       // Load memberships
-      const { data: membershipsData } = await supabase
+      const { data: membershipsData, error: membershipsError } = await supabase
         .from('memberships')
         .select('*')
 
       // Load projects
-      const { data: projectsData } = await supabase
+      const { data: projectsData, error: projectsError } = await supabase
         .from('projects')
         .select('*')
 
-      setOrgs(orgsData || [])
-      setMemberships(membershipsData || [])
-      setProjects(projectsData || [])
+      if (orgsError || membershipsError || projectsError) {
+        const error = orgsError || membershipsError || projectsError
+        setLoadError(getErrorMessage(error))
+      } else {
+        setOrgs(orgsData || [])
+        setMemberships(membershipsData || [])
+        setProjects(projectsData || [])
+      }
     } catch (error) {
       console.error('Error loading user data:', error)
+      setLoadError(getErrorMessage(error))
     } finally {
       setLoading(false)
     }
@@ -276,6 +285,7 @@ export default function DashboardPage() {
                 )}
 
                 <div className="space-y-2">
+                  {/* Show projects if available */}
                   {projects.map(project => {
                     const org = orgs.find(o => o.id === project.org_id)
                     const isOca = getUserRole(project.org_id) === 'OCA'
@@ -309,8 +319,29 @@ export default function DashboardPage() {
                       </div>
                     )
                   })}
+                  
+                  {/* Empty state logic based on memberships, projects, and loadError */}
                   {projects.length === 0 && (
-                    <p className="text-gray-500 text-sm">No projects yet. Create one to get started!</p>
+                    <div className="text-gray-500 text-sm">
+                      {memberships.length === 0 ? (
+                        <p>Create your organization to get started</p>
+                      ) : loadError ? (
+                        <div>
+                          <p>Could not load your projects</p>
+                          <button
+                            onClick={async () => {
+                              setLoading(true)
+                              await loadUserData()
+                            }}
+                            className="mt-2 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      ) : (
+                        <p>No projects yet. Create one to get started</p>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

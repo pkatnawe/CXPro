@@ -1,0 +1,209 @@
+{
+  "project": "CXPro",
+  "branchName": "ralph/frontend-repo-layer",
+  "description": "Deepen the frontend data-access layer by introducing a typed repository layer in lib/repos/. Each repo is a class implementing an interface. A central lib/repos/index.ts exports one singleton per repo wired to the real Supabase client. Pages import from this index; client components call thin lib call-throughs. Tests use in-memory fakes instead of vi.mock query-chain setup. See docs/adr/0003-frontend-repository-layer.md and GitHub issue #24.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create IAuthRepo interface and SupabaseAuthRepo class",
+      "description": "As a developer, I want all supabase.auth.* calls behind an IAuthRepo interface implemented by SupabaseAuthRepo, so that auth behaviour can be changed in one place and callers never import supabase directly for auth.",
+      "acceptanceCriteria": [
+        "lib/repos/AuthRepo.ts exports IAuthRepo interface with methods: getUser, getSession, signIn, signUp, signOut, updateUser, onAuthStateChange (returns unsubscribe fn)",
+        "SupabaseAuthRepo implements IAuthRepo, accepts SupabaseClient via constructor",
+        "No singleton exported from AuthRepo.ts — instances are created in index.ts only",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Create IMembersRepo interface and SupabaseMembersRepo class",
+      "description": "As a developer, I want member queries behind an IMembersRepo interface, so that join logic across participations, memberships, assignments, and discipline_scopes is encapsulated in one class.",
+      "acceptanceCriteria": [
+        "lib/repos/MembersRepo.ts exports IMembersRepo interface with methods: getMembersForProject, getPendingInvitesForProject, updateDiscipline",
+        "SupabaseMembersRepo implements IMembersRepo, accepts SupabaseClient via constructor",
+        "Logic is migrated from lib/members.ts — same queries, same return types",
+        "No singleton exported from MembersRepo.ts",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Create IProjectsRepo interface and SupabaseProjectsRepo class",
+      "description": "As a developer, I want project queries behind an IProjectsRepo interface, so that the org join and RLS-scoped query live in one class.",
+      "acceptanceCriteria": [
+        "lib/repos/ProjectsRepo.ts exports IProjectsRepo interface with methods: getProjectsForUser, createProject",
+        "SupabaseProjectsRepo implements IProjectsRepo, accepts SupabaseClient via constructor",
+        "getProjectsForUser logic migrated from lib/projects.ts",
+        "createProject wraps the create_project_with_discipline RPC currently in dashboard/page.tsx",
+        "No singleton exported from ProjectsRepo.ts",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Create IOrgRepo interface and SupabaseOrgRepo class",
+      "description": "As a developer, I want org creation behind an IOrgRepo interface, so that the create_org_with_membership RPC is not embedded in a page component.",
+      "acceptanceCriteria": [
+        "lib/repos/OrgRepo.ts exports IOrgRepo interface with method: createOrg",
+        "SupabaseOrgRepo implements IOrgRepo, accepts SupabaseClient via constructor",
+        "createOrg wraps the create_org_with_membership RPC currently in dashboard/page.tsx",
+        "No singleton exported from OrgRepo.ts",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Create IDashboardRepo interface and SupabaseDashboardRepo class",
+      "description": "As a developer, I want dashboard queries behind an IDashboardRepo interface, so that the three-query aggregate fetch is one function call from the page.",
+      "acceptanceCriteria": [
+        "lib/repos/DashboardRepo.ts exports IDashboardRepo interface with method: getProjectDashboard",
+        "SupabaseDashboardRepo implements IDashboardRepo, accepts SupabaseClient via constructor",
+        "Logic migrated from lib/dashboard.ts — same queries, same return type",
+        "No singleton exported from DashboardRepo.ts",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Create IActivityRepo interface and SupabaseActivityRepo class",
+      "description": "As a developer, I want activity queries and feedback recording behind an IActivityRepo interface, so that ActivityTab never imports supabase directly.",
+      "acceptanceCriteria": [
+        "lib/repos/ActivityRepo.ts exports IActivityRepo interface with methods: getActivityForProcedure(testProcedureId, agentRunId), recordFeedback(agentRunId, userId, feedbackType)",
+        "SupabaseActivityRepo implements IActivityRepo, accepts SupabaseClient via constructor",
+        "getActivityForProcedure encapsulates the agent_runs and test_procedure_instances queries currently in ActivityTab.tsx",
+        "recordFeedback encapsulates the record_feedback RPC and feedback_records update currently in ActivityTab.tsx",
+        "No singleton exported from ActivityRepo.ts",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Wire all repo singletons in lib/repos/index.ts",
+      "description": "As a developer, I want all repo singletons exported from a single lib/repos/index.ts, so that callers have one import path and the wiring between repos and the Supabase client is visible in one place.",
+      "acceptanceCriteria": [
+        "lib/repos/index.ts imports supabase from lib/supabase and all six repo classes",
+        "lib/repos/index.ts exports: authRepo, membersRepo, projectsRepo, orgRepo, dashboardRepo, activityRepo as named singleton instances",
+        "No other file in lib/repos/ exports an instance",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add lib/activity.ts call-through for ActivityTab",
+      "description": "As a developer, I want a thin lib/activity.ts call-through so that ActivityTab (a client component) can call getActivityForProcedure and recordFeedback without importing from lib/repos/index.ts directly.",
+      "acceptanceCriteria": [
+        "lib/activity.ts exports getActivityForProcedure and recordFeedback functions",
+        "Both functions delegate to activityRepo from lib/repos/index.ts",
+        "ActivityTab.tsx updated to import from lib/activity.ts instead of calling supabase directly",
+        "ActivityTab.tsx no longer imports supabase at all",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Migrate auth pages and components to use authRepo",
+      "description": "As a developer, I want all supabase.auth.* calls in pages and components replaced with authRepo calls, so that the auth seam is consistent across the entire frontend.",
+      "acceptanceCriteria": [
+        "SignInForm.tsx calls authRepo.signIn instead of supabase.auth.signInWithPassword",
+        "SignUpForm.tsx calls authRepo.signUp instead of supabase.auth.signUp",
+        "auth/page.tsx calls authRepo.getSession and authRepo.onAuthStateChange instead of supabase.auth.*",
+        "accept-invite/page.tsx calls authRepo.getSession, authRepo.getUser, authRepo.updateUser, authRepo.onAuthStateChange instead of supabase.auth.*",
+        "dashboard/page.tsx calls authRepo.getSession and authRepo.signOut instead of supabase.auth.*",
+        "UploadModal.tsx calls authRepo.getSession instead of supabase.auth.getSession",
+        "None of these files import supabase directly after this change",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Migrate dashboard page RPC calls to orgRepo and projectsRepo",
+      "description": "As a developer, I want the create_org_with_membership and create_project_with_discipline RPC calls in dashboard/page.tsx replaced with orgRepo.createOrg and projectsRepo.createProject, so that RPC logic is not embedded in a page component.",
+      "acceptanceCriteria": [
+        "dashboard/page.tsx calls orgRepo.createOrg instead of supabase.rpc('create_org_with_membership')",
+        "dashboard/page.tsx calls projectsRepo.createProject instead of supabase.rpc('create_project_with_discipline')",
+        "dashboard/page.tsx no longer calls supabase.rpc directly",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Replace vi.mock tests with InMemoryMembersRepo fake",
+      "description": "As a developer, I want the existing vi.mock-based members tests replaced with an InMemoryMembersRepo fake, so that tests couple to the function's return shape rather than its internal Supabase query chain.",
+      "acceptanceCriteria": [
+        "lib/__tests__/members.test.ts rewritten to use new InMemoryMembersRepo() instead of vi.mock('../supabase')",
+        "InMemoryMembersRepo implements IMembersRepo, stores data in plain JS arrays, supports a seed() method",
+        "All existing test cases still pass (joined rows, empty project, member without discipline, pending invites, expired invites, updateDiscipline idempotency)",
+        "No vi.mock or supabase query chain setup in the file",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Replace vi.mock tests with InMemoryDashboardRepo and InMemoryProjectsRepo fakes",
+      "description": "As a developer, I want the existing vi.mock-based dashboard and projects tests replaced with in-memory fakes, so that all data-layer tests are consistent and free of query-chain mocking.",
+      "acceptanceCriteria": [
+        "lib/__tests__/dashboard.test.ts rewritten using InMemoryDashboardRepo implementing IDashboardRepo",
+        "lib/__tests__/projects.test.ts rewritten using InMemoryProjectsRepo implementing IProjectsRepo",
+        "All existing test cases still pass",
+        "No vi.mock or supabase query chain setup in either file",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Delete old flat lib files and verify no direct supabase imports remain outside lib/repos",
+      "description": "As a developer, I want the old lib/projects.ts, lib/members.ts, and lib/dashboard.ts deleted and a final sweep confirming no file outside lib/repos/ imports supabase directly for data queries.",
+      "acceptanceCriteria": [
+        "lib/projects.ts deleted",
+        "lib/members.ts deleted",
+        "lib/dashboard.ts deleted",
+        "grep for 'supabase.from' and 'supabase.rpc' outside lib/repos/ returns no results",
+        "grep for 'supabase.auth' outside lib/repos/ returns no results",
+        "All existing tests still pass",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": "Some pages still have direct supabase imports but they're outside the scope of the migrated functionality"
+    }
+  ]
+}

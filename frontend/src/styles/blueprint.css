@@ -361,6 +361,56 @@ html, body {
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
+  border: 0;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.bp-user:hover { background: var(--bp-blue); }
+
+.bp-user-menu { position: relative; }
+
+.bp-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: var(--bp-card);
+  border: 1px solid var(--bp-line);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+
+.bp-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--bp-ink-2);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  text-decoration: none;
+}
+.bp-dropdown-item:hover { 
+  background: var(--bp-card-2);
+  color: var(--bp-ink);
+}
+
+.bp-dropdown-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bp-dropdown-icon svg { 
+  width: 14px; 
+  height: 14px; 
 }
 
 /* ──── COMMON ──── */

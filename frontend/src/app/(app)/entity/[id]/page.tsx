@@ -7,6 +7,7 @@ import CommandPalette from '@/components/CommandPalette'
 import AiChatDrawer from '@/components/AiChatDrawer'
 import ActivityTab from '@/components/ActivityTab'
 import CitationChip from '@/components/CitationChip'
+import { getErrorMessage } from '@/lib/error'
 
 interface TestProcedureInstance {
   id: string
@@ -108,16 +109,23 @@ export default function EntityDetailPage() {
         }
 
         // Get user role
-        const { data: participation } = await supabase
+        const { data: participation, error: participationError } = await supabase
           .from('participations')
           .select('role')
           .eq('user_id', session.user.id)
-          .single()
+          .maybeSingle()
+
+        // If participation is null, the user doesn't have access to this entity
+        if (!participation) {
+          console.error('No participation found:', participationError)
+          // Don't default to cx_engineer - show access error instead
+          return
+        }
 
         setUser({
           id: session.user.id,
           email: session.user.email || '',
-          role: participation?.role || 'cx_engineer'
+          role: participation.role
         })
 
         // Load test procedure instance
@@ -145,24 +153,32 @@ export default function EntityDetailPage() {
 
         // Load document if exists
         if (testProc.document_id) {
-          const { data: doc } = await supabase
+          const { data: doc, error: docError } = await supabase
             .from('documents')
             .select('id, name, file_path')
             .eq('id', testProc.document_id)
             .single()
 
-          setDocument(doc)
+          if (docError) {
+            console.error('Error loading document:', getErrorMessage(docError))
+          } else {
+            setDocument(doc)
+          }
         }
 
         // Load agent run if exists
         if (testProc.agent_run_id) {
-          const { data: run } = await supabase
+          const { data: run, error: runError } = await supabase
             .from('agent_runs')
             .select('*')
             .eq('id', testProc.agent_run_id)
             .single()
 
-          setAgentRun(run)
+          if (runError) {
+            console.error('Error loading agent run:', getErrorMessage(runError))
+          } else {
+            setAgentRun(run)
+          }
         }
 
       } catch (error) {
@@ -198,7 +214,7 @@ export default function EntityDetailPage() {
         .select('id')
         .eq('test_procedure_instance_id', testProcedure.id)
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       // Call the database function to handle the transaction
       const { error } = await supabase
@@ -224,6 +240,13 @@ export default function EntityDetailPage() {
   if (loading) {
     return (
       <div className="bp-loading">Loading test procedure...</div>
+    )
+  }
+
+  // If no user after loading, they don't have access
+  if (!user) {
+    return (
+      <div className="bp-error">You do not have access to this entity</div>
     )
   }
 

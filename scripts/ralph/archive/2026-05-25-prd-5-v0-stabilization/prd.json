@@ -19,7 +19,7 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -36,7 +36,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -58,7 +58,7 @@
         "Verify in browser using dev-browser skill: avatar shows correct initials, dropdown opens and closes, theme toggle switches theme, sign out redirects to /auth"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
@@ -77,7 +77,7 @@
         "Verify in browser using dev-browser skill: sign in as a cx_engineer user, navigate to a project members page, confirm the invite form is absent and the notice is shown"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     }
   ]

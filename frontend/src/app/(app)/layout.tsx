@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import UserMenu from "@/components/UserMenu";
 
 export default function AppLayout({
   children,
@@ -24,8 +25,8 @@ export default function AppLayout({
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  const handleThemeChange = (newTheme: "light" | "dark") => {
+    setTheme(newTheme);
   };
 
   const isProjectRoute = pathname.startsWith("/project/");
@@ -92,27 +93,6 @@ export default function AppLayout({
           )}
         </nav>
 
-        <div className="bp-nav-bottom">
-          <button
-            onClick={toggleTheme}
-            className="bp-nav-item"
-            title="Toggle theme"
-          >
-            <span className="bp-nav-icon">
-              {theme === "light" ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="12" cy="12" r="4"/>
-                  <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>
-                </svg>
-              )}
-            </span>
-            <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
-          </button>
-        </div>
       </aside>
 
       <div className="bp-main">
@@ -126,9 +106,7 @@ export default function AppLayout({
           </div>
           
           <div className="bp-topbar-tools">
-            <div className="bp-user">
-              <span>U</span>
-            </div>
+            <UserMenu projectId={projectId} theme={theme} onThemeChange={handleThemeChange} />
           </div>
         </div>
 
