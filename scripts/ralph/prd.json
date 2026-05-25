@@ -89,8 +89,8 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed: Updated entity and project pages to use maybeSingle(), properly handle null cases with meaningful error messages"
     },
     {
       "id": "US-006",

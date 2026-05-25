@@ -62,3 +62,16 @@ Started: Mon May 25 13:05:22 CDT 2026
   - Test suite has some unrelated failing tests in dashboard.test.ts (pre-existing)
   - Frontend uses npm run type-check instead of npm run typecheck for type validation
 ---
+
+## 2026-05-25 13:39 - US-005
+- Bounded every .single() query that may return zero rows with maybeSingle()
+- Files changed:
+  - frontend/src/app/(app)/entity/[id]/page.tsx (updated participation, document, agent_run queries)
+  - frontend/src/app/(app)/project/[id]/page.tsx (updated project and membership queries)
+- **Learnings for future iterations:**
+  - Profile page mentioned in PRD doesn't exist - some listed files may be outdated references
+  - Use maybeSingle() when zero rows is a legitimate possibility (e.g., user has no access)
+  - Don't default to fallback roles when user has no participation - show access error instead
+  - Import getErrorMessage helper to surface Supabase errors properly
+  - TypeScript build has pre-existing errors for missing page files (unrelated to our changes)
+---
