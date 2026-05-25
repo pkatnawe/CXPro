@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { supabase, type Project } from '@/lib/supabase'
 import { getProjectDashboard, type DashboardSummary, type AgentRunSummary } from '@/lib/dashboard'
 import UploadModal from '@/components/UploadModal'
+import { getErrorMessage } from '@/lib/error'
 
 export default function DashboardPage() {
   const params = useParams()
@@ -27,11 +28,12 @@ export default function DashboardPage() {
         .from('projects')
         .select('*')
         .eq('id', projectId)
-        .single()
+        .maybeSingle()
 
-      if (projectError) {
-        console.error('Project load error:', projectError)
-        router.push('/dashboard')
+      if (!projectData) {
+        console.error('Project not found or no access:', getErrorMessage(projectError))
+        // Don't redirect - show error message instead
+        setProject(null)
         return
       }
 
@@ -43,11 +45,12 @@ export default function DashboardPage() {
         .select('role')
         .eq('user_id', userId)
         .eq('org_id', projectData.org_id)
-        .single()
+        .maybeSingle()
 
-      if (membershipError) {
-        console.error('Membership load error:', membershipError)
-        router.push('/dashboard')
+      if (!membershipData) {
+        console.error('Membership not found:', getErrorMessage(membershipError))
+        // Don't redirect - show error message instead
+        setUserRole(null)
         return
       }
 
@@ -228,7 +231,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (!project || !dashboard) {
+  if (!project || !userRole) {
     return (
       <div className="bp-screen">
         <style jsx>{`
@@ -261,13 +264,37 @@ export default function DashboardPage() {
           }
         `}</style>
         <div>
-          <p className="bp-error-text">Project not found</p>
-          <button 
-            onClick={() => router.push('/dashboard')}
+          <p className="bp-error-text">You do not have access to this project</p>
+          <a 
+            href="/dashboard"
             className="bp-btn-ghost"
           >
             Back to Dashboard
-          </button>
+          </a>
+        </div>
+      </div>
+    )
+  }
+
+  if (!dashboard) {
+    return (
+      <div className="bp-screen">
+        <style jsx>{`
+          .bp-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+          }
+          .bp-error-text {
+            font-size: 1.25rem;
+            color: var(--bp-text-secondary);
+            margin-bottom: 24px;
+          }
+        `}</style>
+        <div>
+          <p className="bp-error-text">Unable to load project data</p>
         </div>
       </div>
     )

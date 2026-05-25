@@ -49,3 +49,16 @@ Started: Mon May 25 13:05:22 CDT 2026
   - The outbox table referenced in migration 008 doesn't exist yet - skip event emission for now
   - Use asyncpg.exceptions.RaiseError (not RaiseException) for catching Postgres RAISE exceptions
 ---
+
+## 2026-05-25 13:34 - US-004
+- Implemented getErrorMessage helper replacement across all frontend auth and member components
+- Files changed:
+  - frontend/src/lib/__tests__/error.test.ts (new test file with 5 test cases)
+  - frontend/src/components/auth/SignInForm.tsx (replaced instanceof Error pattern)
+  - frontend/src/components/auth/SignUpForm.tsx (replaced instanceof Error pattern)
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (replaced instanceof Error pattern)
+- **Learnings for future iterations:**
+  - The getErrorMessage helper already handles multiple error formats including Supabase errors
+  - Test suite has some unrelated failing tests in dashboard.test.ts (pre-existing)
+  - Frontend uses npm run type-check instead of npm run typecheck for type validation
+---
