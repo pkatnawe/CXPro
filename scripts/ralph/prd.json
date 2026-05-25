@@ -240,7 +240,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17 Slice D."
     },
     {
@@ -255,7 +255,7 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17 Slice E. Deep module per PRD."
     },
     {
@@ -271,7 +271,7 @@
         "Tests pass"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17."
     },
     {
@@ -288,7 +288,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17 Slice E."
     },
     {
@@ -305,7 +305,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17 Slice E. Final story."
     }
   ]

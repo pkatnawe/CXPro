@@ -5,6 +5,13 @@ Started: Sun May 24 17:47:23 CDT 2026
 - Blueprint CSS uses .bp-* utility classes for consistent styling
 - Archivo is the primary font, JetBrains Mono for monospace elements
 - CSS variables --font-archivo and --font-jetbrains-mono expose the fonts
+- Always use styled-jsx for component-scoped Blueprint styles
+- AI elements use lightning bolt symbol (⚡) consistently
+- Status badges follow bp-status-* pattern (info/warning/error/success)
+- Equipment is UI alias for TestProcedureInstance + ExtractedSpec join
+- lib/ modules follow typed-export pattern with dedicated test files
+- Mock Supabase chains in tests with vi.mocked() as any pattern
+- Route groups use (app) parentheses syntax for layout inheritance
 
 ---
 
@@ -186,4 +193,93 @@ Started: Sun May 24 17:47:23 CDT 2026
   - Test names should match acceptance criteria language exactly
   - In-memory fakes prevent network calls during testing
   - Mock chain pattern needed for Supabase's fluent API (.from().select().eq().order())
+---
+## Sun May 24 19:35 CDT 2026 - US-014
+- Created project/[id]/equipment/page.tsx as Blueprint EquipmentScreen
+- Implemented EquipGlyph component with icons for different equipment types (AHU, Chiller, Pump, Boiler, default)
+- Implemented ProgCell component to show equipment status (0%, 50%, 100%, done checkmark)
+- Equipment page fetches data using getEquipmentForProject from lib/equipment.ts
+- Table-like grid layout with columns: tag, type, manufacturer, model, status
+- Each row links to /entity/<tpi_id> for ChecklistDetail view
+- Styled entirely with Blueprint .bp-* classes and styled-jsx
+- Handles loading, error, and empty states appropriately
+- **Files changed:** frontend/src/app/(app)/project/[id]/equipment/page.tsx (created)
+- **Learnings for future iterations:**
+  - Equipment icons are SVG components defined inline to match blueprint-app.jsx
+  - Status progress uses bp-prog classes with inline width style for percentage bars
+  - Equipment table uses CSS Grid with fixed column widths for consistent layout
+  - Links wrapped around entire row for better UX (full row clickable)
+  - Supabase client is imported as named export `supabase` from lib/supabase.ts
+---
+## Sun May 24 21:35 CDT 2026 - US-015
+- Equipment sidebar nav item was already implemented in US-002
+- Verified conditional rendering logic: item appears only when pathname starts with /project/
+- Equipment nav links correctly to /project/[projectId]/equipment
+- Active state properly handled with bp-nav-active class
+- All acceptance criteria already met - no changes needed
+- **Files changed:** None - functionality already implemented
+- **Learnings for future iterations:**
+  - Check if work might already be complete before making changes
+  - US-002 shell layout implementation was comprehensive and included project-scoped nav
+  - Equipment nav item correctly uses isProjectRoute condition for visibility
+---
+## Sun May 24 21:40 CDT 2026 - US-016
+- Created lib/projects.ts module with getProjectsForUser function
+- Implemented ProjectCard type with all required fields (project_id, name, org_name, description, created_at)
+- Query joins projects to orgs table to get organization name
+- RLS policies ensure only projects the user has membership access to are returned
+- Follows typed-export pattern from lib/storage.ts and lib/dashboard.ts
+- **Files changed:** frontend/src/lib/projects.ts (created)
+- **Learnings for future iterations:**
+  - Projects are linked to organizations via org_id foreign key
+  - Supabase join syntax uses !inner for required joins
+  - RLS (Row Level Security) automatically filters results based on user's membership
+  - Order projects by created_at descending to show newest first
+---
+## Sun May 24 21:43 CDT 2026 - US-017
+- Created comprehensive unit tests for lib/projects.ts using Vitest
+- Implemented typed in-memory fake for Supabase client with no live network calls
+- Test coverage includes all required scenarios:
+  - User in one org sees only that org's projects
+  - User in two orgs sees projects from both
+  - User with no memberships sees empty list
+  - Database error handling
+  - Empty database case
+- All 5 test cases pass
+- **Files changed:** frontend/src/lib/__tests__/projects.test.ts (created)
+- **Learnings for future iterations:**
+  - Mock Supabase chains require mocking select().order() pattern for projects queries
+  - Simulate RLS by filtering based on membership data in mock
+  - Test names should match acceptance criteria language exactly
+  - Projects are sorted by created_at descending in the actual implementation
+---
+## Sun May 24 21:46 CDT 2026 - US-018
+- Created /projects route (Blueprint ProjectsScreen) using getProjectsForUser
+- Implemented ProjectThumb SVG component matching blueprint-app.jsx pattern
+- Created Blueprint card grid layout with project tiles
+- Each card links to /project/[project_id] dashboard page
+- Projects sidebar nav item already correctly linked to /projects from US-002
+- Styled entirely with Blueprint .bp-* classes and styled-jsx
+- Handles loading, error, and empty states appropriately
+- **Files changed:** frontend/src/app/(app)/projects/page.tsx (created)
+- **Learnings for future iterations:**
+  - ProjectThumb SVG uses different color palettes rotated by project index
+  - Blueprint card grid uses auto-fill with minmax for responsive layout
+  - Projects page shows org name and description as metadata
+  - Projects nav already configured correctly in shell layout from US-002
+---
+## Sun May 24 21:49 CDT 2026 - US-019
+- Restyled /inbox page with Blueprint .bp-* classes replacing all Tailwind
+- Daily-bucket layout preserved with "Today's Items" header
+- InboxItem cards styled with AI lightning bolt badge (⚡) for AI drafts
+- AI-refusal variant styling with warning badge and border accent
+- Empty state message: "Nothing needs your attention. Upload a document to get started."
+- Realtime push behavior fully preserved (no page refresh required)
+- All Slice-07 acceptance behaviors maintained
+- **Files changed:** frontend/src/app/(app)/inbox/page.tsx (restyled)
+- **Learnings for future iterations:**
+  - AI badge uses lightning bolt symbol (⚡) consistently across the app
+  - Status badges follow bp-status-* pattern with info/warning/error variants
+  - Refusal cards use border-left accent with warning color
+  - styled-jsx is the pattern for component-scoped Blueprint styles
 ---
