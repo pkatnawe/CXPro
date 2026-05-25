@@ -64,4 +64,4 @@ Canonical vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-fo
 
 ### Domain docs
 
-Single-context. Domain language and architecture both live in [`docs/architecture.md`](docs/architecture.md). See [`docs/agents/domain.md`](docs/agents/domain.md).
+Single-context. The domain glossary (ubiquitous language) lives at [`CONTEXT.md`](CONTEXT.md) at the repo root, sourced from the per-context `**Language:**` lines inside [`docs/architecture.md`](docs/architecture.md). Architecture (aggregates, events, bounded-context map) stays in `docs/architecture.md`. Architectural decisions live in [`docs/adr/`](docs/adr/). See [`docs/agents/domain.md`](docs/agents/domain.md).

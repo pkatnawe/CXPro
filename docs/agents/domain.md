@@ -4,23 +4,22 @@ How the engineering skills should consume this repo's domain documentation when 
 
 ## Layout: single-context
 
-This repo is single-context. There is no `CONTEXT.md` or `CONTEXT-MAP.md` at the root. Instead, the project's domain language and architecture both live in **[`docs/architecture.md`](../architecture.md)** — treat it as the canonical CONTEXT source. The PRD-1 spec lives in **[`docs/prd-1-tracer-bullet.md`](../prd-1-tracer-bullet.md)** and is the next-most-authoritative source for current scope and terminology.
-
-There is no `docs/adr/` directory yet. ADRs may be created lazily by `/grill-with-docs` when decisions crystallize.
+This repo is single-context. The canonical glossary is **[`CONTEXT.md`](../../CONTEXT.md)** at the repo root, sourced from the per-context `**Language:**` lines in `docs/architecture.md`. Architecture (aggregates, events, bounded contexts, cross-context flows) stays in **[`docs/architecture.md`](../architecture.md)**. ADRs live in **[`docs/adr/`](../adr/)**. The PRD-1 spec lives in **[`docs/prd-1-tracer-bullet.md`](../prd-1-tracer-bullet.md)** and is the next-most-authoritative source for current scope.
 
 ## Before exploring, read these
 
-- **[`docs/architecture.md`](../architecture.md)** — the system's bounded contexts (identity/, commissioning/), domain entities (OCA, cx_engineer, Org, Project, DisciplineScope, Document, ExtractedSpec, TestProcedureInstance, InboxItem, AgentRun, AuditLogEntry, FeedbackRecord, Citation, EvalRun), and the architectural patterns in use (transactional outbox, DSPy-typed AI modules, party model + RLS, Inbox-as-home).
+- **[`CONTEXT.md`](../../CONTEXT.md)** — the ubiquitous language. Start here when you need to name something.
+- **[`docs/architecture.md`](../architecture.md)** — bounded contexts, aggregates, events, cross-context flows. The "how it fits together" doc.
 - **[`docs/prd-1-tracer-bullet.md`](../prd-1-tracer-bullet.md)** — the active spec. Read the slice you're working on (or all of them for cross-cutting work).
-- **`docs/adr/`** — if it exists, read ADRs that touch the area you're about to work in.
+- **[`docs/adr/`](../adr/)** — ADRs that touch the area you're about to work in.
 
 If any of these don't exist, proceed silently. Don't flag absence; don't suggest creating them upfront. `/grill-with-docs` will create ADRs lazily when decisions actually get resolved.
 
-## Use the architecture doc's vocabulary
+## Use the glossary's vocabulary
 
-When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `docs/architecture.md`. Don't drift to synonyms — say `OCA` not "owner", `InboxItem` not "task", `TestProcedureInstance` not "checklist instance", `DisciplineScope` not "discipline".
+When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms — say `OCA` not "owner", `InboxItem` not "task", `TestProcedureInstance` not "checklist instance", `DisciplineScope` not "discipline". Check `CONTEXT.md`'s **Flagged ambiguities** section before reaching for "task" or "account".
 
-If the concept you need isn't in the architecture doc yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/grill-with-docs`).
+If the concept you need isn't in `CONTEXT.md` yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/grill-with-docs` to resolve and add to `CONTEXT.md`).
 
 ## Flag ADR conflicts
 
