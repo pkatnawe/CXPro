@@ -126,3 +126,64 @@ Started: Sun May 24 17:47:23 CDT 2026
   - Count queries in Supabase use select('id', { count: 'exact', head: true }) pattern
   - Test data relationships carefully - agent_runs filter through joined test_procedure_instances
 ---
+## Sun May 24 19:20 CDT 2026 - US-010
+- Created UploadModal component with Blueprint styling  
+- Reused validateFile, generateStoragePath, and uploadPDF from lib/storage.ts
+- Modal validates PDF and 25MB size limit before upload
+- Uses existing document_uploaded outbox event flow via uploadPDF
+- Styled with Blueprint .bp-* classes and CSS-in-JS
+- Modal overlay, transitions, and responsive design implemented
+- **Files changed:** frontend/src/components/UploadModal.tsx (created)
+- **Learnings for future iterations:**
+  - uploadPDF from lib/storage.ts already handles the document_uploaded outbox event
+  - Blueprint modals use overlay pattern with stopPropagation on modal content
+  - CSS-in-JS with styled-jsx works well for component-scoped Blueprint styles
+  - File validation should happen on select, not just on upload
+---
+## Sun May 24 19:26 CDT 2026 - US-011
+- Rewrote project/[id]/page.tsx as Blueprint Dashboard using getProjectDashboard from lib/dashboard.ts
+- Integrated UploadModal component with "Upload submittal" button in top-right for OCA users
+- Dashboard displays project name, TPI status counts, recent AgentRuns list, and document count
+- Implemented three stat cards: Equipment Progress (with percentage), Equipment Status, and Documents
+- Added Recent Agent Activity section showing latest 5 agent runs with AI lightning bolt icons
+- Preserved Realtime subscriptions for TPIs, agent_runs, and documents to auto-update dashboard
+- All styled with Blueprint .bp-* classes matching blueprint-app.jsx::DashboardScreen pattern
+- **Files changed:** frontend/src/app/(app)/project/[id]/page.tsx (complete rewrite)
+- **Learnings for future iterations:**
+  - Dashboard uses getProjectDashboard function for all data fetching - no direct queries
+  - Real-time updates require three separate channel subscriptions for TPIs, agent_runs, and documents
+  - styled-jsx works well for component-scoped Blueprint styling
+  - bp-stat-card pattern with progress bars uses absolute positioning for the bar
+  - Status badges follow bp-status-* pattern with success/warning/error/neutral variants
+---
+## Sun May 24 19:28 CDT 2026 - US-012
+- Created lib/equipment.ts with getEquipmentForProject function
+- Implemented EquipmentRow type with all required fields (tpi_id, asset_tag, equipment_type, manufacturer, model, status)
+- Query left-joins test_procedure_instances to extracted_specs with fallback logic
+- Uses extracted_specs manufacturer/model when available, falls back to TPI fields if not
+- Created comprehensive unit tests in __tests__/equipment.test.ts
+- All tests pass (4 test cases covering all scenarios)
+- **Files changed:** frontend/src/lib/equipment.ts (created), frontend/src/lib/__tests__/equipment.test.ts (created)
+- **Learnings for future iterations:**
+  - Equipment is the join of test_procedure_instances + extracted_specs tables
+  - Left join pattern ensures rows without extracted_specs still appear (in-progress ingestion)
+  - Priority logic: use extracted_specs data if available, otherwise use TPI data, otherwise null
+  - Follows same typed-export pattern as storage.ts and dashboard.ts modules
+---
+## Sun May 24 19:31 CDT 2026 - US-013
+- Updated equipment.test.ts with comprehensive test coverage
+- Added typed in-memory fake for Supabase client (no live network calls)
+- Test coverage includes all required scenarios:
+  - Returns rows for a project the user can access
+  - Returns empty for a project in another org (RLS-scoping behavior)
+  - Returns row with null metadata fields when ExtractedSpec missing
+  - Returns empty when no TPIs exist
+  - Handles database errors appropriately
+- All 5 test cases pass
+- **Files changed:** frontend/src/lib/__tests__/equipment.test.ts (updated)
+- **Learnings for future iterations:**
+  - RLS policies return empty arrays for unauthorized access, not errors
+  - Test names should match acceptance criteria language exactly
+  - In-memory fakes prevent network calls during testing
+  - Mock chain pattern needed for Supabase's fluent API (.from().select().eq().order())
+---

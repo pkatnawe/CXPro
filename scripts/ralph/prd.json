@@ -160,7 +160,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17 Slice C."
     },
     {
@@ -177,7 +177,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17 Slice C. Replaces the old upload page."
     },
     {
@@ -192,7 +192,7 @@
         "Typecheck passes"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17 Slice D. Deep module per PRD."
     },
     {
@@ -208,7 +208,7 @@
         "Tests pass"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17."
     },
     {
@@ -224,7 +224,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "PRD #17 Slice D."
     },
     {
