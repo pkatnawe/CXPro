@@ -59,3 +59,31 @@ Started: Sun May 24 17:47:23 CDT 2026
   - Test command is `npm test` which runs `vitest run`, watch mode is `npm test:watch`
   - Tests should be placed in __tests__ directories following the existing pattern
 ---
+## Sun May 24 18:09 CDT 2026 - US-005
+- Restyled entity/[id]/page.tsx to use Blueprint three-panel layout
+- Removed duplicate sidebar (now handled by app layout)
+- Replaced all inline styles with Blueprint .bp-* utility classes
+- Implemented proper three-panel responsive layout (center content + right drawer)
+- Applied .bp-mono class to numbered step IDs for consistent typography
+- Added responsive reflow for mobile (drawer becomes bottom sheet <1024px)
+- Removed entity.css file as styles are now inline with styled-jsx
+- **Files changed:** frontend/src/app/(app)/entity/[id]/page.tsx (rewrote), deleted entity.css
+- **Learnings for future iterations:**
+  - The app layout already handles the main sidebar, entity pages only need content + drawer
+  - Three-panel layout uses grid: 1fr 400px for desktop, stacks for mobile
+  - .bp-mono class must be applied for JetBrains Mono font on step numbers
+  - All Slice-08 behaviors preserved: citations clickable, drawer functional, status badges visible
+---
+## Sun May 24 19:06 CDT 2026 - US-006
+- Verified AiChatDrawer and ActivityTab components already have Blueprint styling
+- Both components already use Blueprint .bp-* classes throughout
+- AI lightning bolt icon (⚡) already implemented in both components
+- AI Chat is default tab in entity page drawer as required
+- All acceptance criteria already met - components were pre-styled correctly
+- **Files changed:** No changes needed - components already properly styled
+- **Learnings for future iterations:**
+  - Always check if work might already be done before making changes
+  - AiChatDrawer and ActivityTab inject their own styles via style tags
+  - Components follow the Blueprint pattern from blueprint-app.jsx::AiPanel
+  - Entity page uses bp-drawer-tabs and bp-drawer-content for tab switching
+---
