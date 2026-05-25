@@ -38,3 +38,21 @@ Started: Mon May 25 14:18:52 CDT 2026
   - The frontend directory is the root (not ./frontend from project root)
   - Working directory is /Users/shlok/Desktop/SpareWork/CX/frontend
 ---
+
+## Mon May 25 14:37:30 CDT 2026 - US-003
+- Implemented UserMenu dropdown component with initials avatar
+- Avatar displays user initials from full_name or email using getInitials
+- Dropdown opens on click, closes on outside click
+- Theme toggle moved from sidebar to dropdown
+- Manage Team link appears when projectId is present
+- Sign Out button calls supabase.auth.signOut()
+- Files changed:
+  - src/components/UserMenu.tsx (new)
+  - src/app/(app)/layout.tsx (updated to use UserMenu, removed sidebar theme toggle)
+  - src/styles/blueprint.css (added dropdown styles)
+- **Learnings for future iterations:**
+  - UserMenu needs position: relative parent (.bp-user-menu) for dropdown positioning
+  - Use document mousedown listener for outside click detection
+  - Supabase user metadata stored in user.user_metadata.full_name
+  - Next.js build shows JSX errors when running tsc directly without config
+---

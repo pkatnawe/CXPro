@@ -152,6 +152,41 @@ export async function getPendingInvitesForProject(projectId: string): Promise<Pe
   }
 }
 
+export async function getCurrentUserRole(
+  userId: string,
+  projectId: string
+): Promise<'OCA' | 'cx_engineer' | null> {
+  try {
+    // First get the project's org_id
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .select('org_id')
+      .eq('id', projectId)
+      .single()
+
+    if (projectError) throw projectError
+    
+    const orgId = project.org_id
+
+    // Then get the user's role in that org
+    const { data: membership, error: membershipError } = await supabase
+      .from('memberships')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('org_id', orgId)
+      .maybeSingle()
+
+    if (membershipError) throw membershipError
+    
+    if (!membership) return null
+    
+    return membership.role as 'OCA' | 'cx_engineer'
+  } catch (error) {
+    console.error('Error fetching user role:', error)
+    throw error
+  }
+}
+
 export async function updateDiscipline(
   userId: string, 
   projectId: string, 

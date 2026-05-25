@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getMembersForProject, getPendingInvitesForProject, updateDiscipline } from '../members'
+import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole } from '../members'
 
 // Mock the supabase module
 vi.mock('../supabase', () => ({
@@ -707,5 +707,118 @@ describe('updateDiscipline', () => {
     expect(mockData.assignments).toContainEqual(
       { user_id: 'user-1', discipline_scope_id: 'ds-1' }
     )
+  })
+})
+
+describe('getCurrentUserRole', () => {
+  let mockData: {
+    projects: any[]
+    memberships: any[]
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    
+    mockData = {
+      projects: [],
+      memberships: []
+    }
+
+    const mockFrom = vi.mocked(supabase.from) as any
+    
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'projects') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                return {
+                  single: vi.fn().mockImplementation(() => {
+                    const project = mockData.projects.find(p => p.id === value)
+                    if (!project) {
+                      return { data: null, error: new Error('Project not found') }
+                    }
+                    return { data: { org_id: project.org_id }, error: null }
+                  })
+                }
+              })
+            }
+          })
+        }
+      }
+      
+      if (table === 'memberships') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            let filters: any = {}
+            const queryBuilder = {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                filters[column] = value
+                return queryBuilder
+              }),
+              maybeSingle: vi.fn().mockImplementation(() => {
+                const membership = mockData.memberships.find(
+                  m => m.user_id === filters.user_id && m.org_id === filters.org_id
+                )
+                if (!membership) {
+                  return { data: null, error: null }
+                }
+                return { data: { role: membership.role }, error: null }
+              })
+            }
+            return queryBuilder
+          })
+        }
+      }
+      
+      return {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockReturnThis()
+      }
+    })
+  })
+
+  it('returns OCA for a user with OCA role', async () => {
+    mockData.projects = [
+      { id: 'project-1', org_id: 'org-1' }
+    ]
+    
+    mockData.memberships = [
+      { user_id: 'user-1', org_id: 'org-1', role: 'OCA' }
+    ]
+    
+    const result = await getCurrentUserRole('user-1', 'project-1')
+    
+    expect(result).toBe('OCA')
+  })
+
+  it('returns cx_engineer for a user with cx_engineer role', async () => {
+    mockData.projects = [
+      { id: 'project-1', org_id: 'org-1' }
+    ]
+    
+    mockData.memberships = [
+      { user_id: 'user-2', org_id: 'org-1', role: 'cx_engineer' }
+    ]
+    
+    const result = await getCurrentUserRole('user-2', 'project-1')
+    
+    expect(result).toBe('cx_engineer')
+  })
+
+  it('returns null when user has no membership in the project org', async () => {
+    mockData.projects = [
+      { id: 'project-1', org_id: 'org-1' }
+    ]
+    
+    mockData.memberships = [
+      { user_id: 'user-3', org_id: 'org-2', role: 'OCA' } // Different org
+    ]
+    
+    const result = await getCurrentUserRole('user-3', 'project-1')
+    
+    expect(result).toBe(null)
   })
 })
