@@ -87,3 +87,16 @@ Started: Sun May 24 17:47:23 CDT 2026
   - Components follow the Blueprint pattern from blueprint-app.jsx::AiPanel
   - Entity page uses bp-drawer-tabs and bp-drawer-content for tab switching
 ---
+## Sun May 24 19:08 CDT 2026 - US-007
+- Verified CitationChip and CommandPalette components already properly restyled
+- Both components already use Blueprint .bp-* classes throughout
+- CitationChip uses .bp-citation-* classes with Blueprint styling
+- CommandPalette uses .bp-cmd-* classes for all elements
+- All acceptance criteria already met: Cmd-K opens palette, citations clickable with PDF opening
+- **Files changed:** No changes needed - components were already properly styled
+- **Learnings for future iterations:**
+  - Always verify if work might already be complete before making changes
+  - CitationChip properly opens PDFs at page coordinates with bbox highlighting
+  - CommandPalette searches Projects, Documents, and TestProcedureInstances
+  - Keyboard shortcuts (Cmd-K) properly preserved in entity page
+---
