@@ -100,3 +100,16 @@ Started: Sun May 24 17:47:23 CDT 2026
   - CommandPalette searches Projects, Documents, and TestProcedureInstances
   - Keyboard shortcuts (Cmd-K) properly preserved in entity page
 ---
+## Sun May 24 19:15 CDT 2026 - US-008
+- Created lib/dashboard.ts with getProjectDashboard function
+- Implemented DashboardSummary type with status_counts, recent_agent_runs, and document_count
+- Query joins agent_runs to test_procedure_instances to get project-scoped agent runs
+- Gets latest 5 agent runs ordered by created_at descending
+- Follows typed-export pattern from storage.ts module
+- **Files changed:** frontend/src/lib/dashboard.ts (created)
+- **Learnings for future iterations:**
+  - Supabase joins use !inner syntax for foreign key relationships
+  - Count queries use { count: 'exact', head: true } options
+  - Agent runs are linked to projects through test_procedure_instances table
+  - Use `any` type for complex Supabase join results to avoid TypeScript issues
+---
