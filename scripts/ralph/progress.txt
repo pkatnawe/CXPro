@@ -2,11 +2,31 @@
 Started: Mon May 25 00:43:16 CDT 2026
 ---
 
+## 2026-05-25 06:00:00 - US-003
+- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
+- Files changed:
+  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
+  - backend/apply_redeem_invitations_migration.py (created migration application script)
+  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
+- **Learnings for future iterations:**
+  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
+  - Integration tests should use asyncpg for async database operations
+  - When testing database triggers, be aware of automatic execution flow
+  - Pending invitations need unique tokens to avoid conflicts
+  - Test cleanup must be thorough to avoid data persistence between runs
+---
+
 ## Codebase Patterns
 - Database migrations are applied using Python scripts in backend/ directory (e.g., apply_migration.py)
 - The function signature of Postgres functions should remain unchanged when updating their body
 - Test database functions by calling them directly with SQL via psycopg2
 - TypeScript type checking is done with `npm run type-check` in frontend directory
+- Integration tests use asyncpg for async database operations
+- The handle_new_user trigger fires AFTER INSERT on auth.users and automatically redeems pending invitations
+- FastAPI endpoints: Use `Depends(security)` with HTTPBearer for JWT auth, pydantic BaseModel for request bodies
+- Supabase client setup: Create with `create_client(url, service_key)`, methods are synchronous (not async)
+- Backend services: Create service classes that accept supabase client and db connection in __init__
+- Test with unique identifiers (e.g., 'test-org-inv' instead of 'test-org') to avoid conflicts
 
 ## 2026-05-25 00:45:00 - US-001
 - What was implemented: Updated create_project_with_discipline function to auto-seed all four canonical disciplines (Mechanical, Electrical, Controls, General Construction) when a new project is created
@@ -17,6 +37,37 @@ Started: Mon May 25 00:43:16 CDT 2026
   - Database migrations live in the migrations/ directory and are applied using Python scripts
   - Testing database functions requires connecting with psycopg2 and executing SQL directly
   - The four canonical disciplines are: Mechanical, Electrical, Controls, General Construction
+---
+
+## 2026-05-25 06:00:00 - US-003
+- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
+- Files changed:
+  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
+  - backend/apply_redeem_invitations_migration.py (created migration application script)
+  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
+- **Learnings for future iterations:**
+  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
+  - Integration tests should use asyncpg for async database operations
+  - When testing database triggers, be aware of automatic execution flow
+  - Pending invitations need unique tokens to avoid conflicts
+  - Test cleanup must be thorough to avoid data persistence between runs
+---
+
+## 2026-05-25 06:10:00 - US-004
+- What was implemented: Created InvitationService module with create_invitation method and POST /invites FastAPI endpoint for issuing invitations and triggering Supabase Auth magic-link emails
+- Files changed:
+  - backend/invitation_service.py (created - InvitationService class with create_invitation method)
+  - backend/main.py (updated - added POST /invites endpoint with JWT auth)
+  - backend/test_invitation_service.py (created - comprehensive integration test)
+  - backend/test_invitation_service_simple.py (created - simplified unit tests)
+- **Learnings for future iterations:**
+  - Patterns discovered: FastAPI endpoints use Depends(security) for JWT auth, HTTPBearer for token extraction
+  - Supabase Python client methods are synchronous, not async - no await needed
+  - For testing with mocks, use MagicMock for sync methods, AsyncMock for async database operations
+  - Environment variables for backend: DATABASE_URL for postgres connection, DATABASE_SECRET for Supabase service key
+  - Backend test files should handle unique constraint violations by using unique test data identifiers
+  - The supabase.auth.admin.invite_user_by_email() sends invitations for new users
+  - The supabase.auth.sign_in_with_otp() sends magic links for existing users
 ---
 
 ## 2026-05-25 00:50:00 - US-002
@@ -30,4 +81,18 @@ Started: Mon May 25 00:43:16 CDT 2026
   - RLS policies should be defined for both SELECT and INSERT operations for OCA roles
   - Unique constraints are automatically named by Postgres (e.g., pending_invitations_token_key)
   - Project structure has backend files in root directory, not in a backend/ subdirectory
+---
+
+## 2026-05-25 06:00:00 - US-003
+- What was implemented: Created redeem_pending_invitations function that automatically redeems all unexpired pending invitations when a user signs up, wired it into the handle_new_user trigger
+- Files changed:
+  - migrations/011_redeem_pending_invitations.sql (created migration with function and trigger update)
+  - backend/apply_redeem_invitations_migration.py (created migration application script)
+  - backend/test_redeem_pending_invitations.py (created comprehensive integration test)
+- **Learnings for future iterations:**
+  - The handle_new_user trigger fires on auth.users INSERT, not just when called manually
+  - Integration tests should use asyncpg for async database operations
+  - When testing database triggers, be aware of automatic execution flow
+  - Pending invitations need unique tokens to avoid conflicts
+  - Test cleanup must be thorough to avoid data persistence between runs
 ---
