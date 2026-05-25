@@ -113,3 +113,16 @@ Started: Sun May 24 17:47:23 CDT 2026
   - Agent runs are linked to projects through test_procedure_instances table
   - Use `any` type for complex Supabase join results to avoid TypeScript issues
 ---
+## Sun May 24 19:15 CDT 2026 - US-009
+- Created comprehensive unit tests for lib/dashboard.ts using Vitest
+- Implemented typed in-memory fake for Supabase client with no live network calls
+- Test coverage includes: status_counts grouping, recent_agent_runs ordering and limiting, document_count aggregation
+- Mock handles complex join queries between agent_runs and test_procedure_instances tables
+- All 7 test cases pass covering edge cases including null statuses and empty data
+- **Files changed:** frontend/src/lib/__tests__/dashboard.test.ts (created)
+- **Learnings for future iterations:**
+  - Mock Supabase from() method returns a chain of methods - must mock entire chain
+  - Use 'as any' type casting for vi.mocked() to avoid TypeScript issues with complex mock chains
+  - Count queries in Supabase use select('id', { count: 'exact', head: true }) pattern
+  - Test data relationships carefully - agent_runs filter through joined test_procedure_instances
+---
