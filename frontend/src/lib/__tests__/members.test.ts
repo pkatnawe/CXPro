@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getMembersForProject, getPendingInvitesForProject } from '../members'
+import { getMembersForProject, getPendingInvitesForProject, updateDiscipline } from '../members'
 
 // Mock the supabase module
 vi.mock('../supabase', () => ({
@@ -396,5 +396,190 @@ describe('getPendingInvitesForProject', () => {
       expires_at: futureDate.toISOString(),
       created_at: expect.any(String)
     }])
+  })
+})
+
+describe('updateDiscipline', () => {
+  let mockData: {
+    assignments: any[]
+    discipline_scopes: any[]
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    
+    mockData = {
+      assignments: [],
+      discipline_scopes: []
+    }
+
+    const mockFrom = vi.mocked(supabase.from) as any
+    
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'assignments') {
+        const queryBuilder = {
+          delete: vi.fn().mockImplementation(() => {
+            return {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                if (column === 'user_id') {
+                  const userId = value
+                  return {
+                    eq: vi.fn().mockImplementation((column2: string, value2: any) => {
+                      if (column2 === 'discipline_scope_id') {
+                        // Find assignments to delete based on user_id and discipline_scope_id
+                        const disciplineScopeId = value2
+                        const projectDiscipline = mockData.discipline_scopes.find(
+                          ds => ds.id === disciplineScopeId
+                        )
+                        
+                        if (projectDiscipline) {
+                          // Remove assignments for this user and project
+                          mockData.assignments = mockData.assignments.filter(
+                            a => !(a.user_id === userId && 
+                                   mockData.discipline_scopes.some(
+                                     ds => ds.id === a.discipline_scope_id && 
+                                           ds.project_id === projectDiscipline.project_id
+                                   ))
+                          )
+                        }
+                        
+                        return {
+                          data: null,
+                          error: null
+                        }
+                      }
+                      return { data: null, error: null }
+                    })
+                  }
+                }
+                return { data: null, error: null }
+              })
+            }
+          }),
+          insert: vi.fn().mockImplementation((data: any) => {
+            // Add new assignment
+            mockData.assignments.push(data)
+            return {
+              data: data,
+              error: null
+            }
+          }),
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                if (column === 'user_id') {
+                  const userId = value
+                  return {
+                    eq: vi.fn().mockImplementation((column2: string, value2: any) => {
+                      // Return assignments for the user
+                      const userAssignments = mockData.assignments.filter(
+                        a => a.user_id === userId
+                      )
+                      return {
+                        data: userAssignments,
+                        error: null
+                      }
+                    })
+                  }
+                }
+                return { data: [], error: null }
+              })
+            }
+          })
+        }
+        return queryBuilder
+      }
+      
+      if (table === 'discipline_scopes') {
+        return {
+          select: vi.fn().mockImplementation((columns?: string) => {
+            return {
+              eq: vi.fn().mockImplementation((column: string, value: any) => {
+                if (column === 'project_id') {
+                  const projectScopes = mockData.discipline_scopes.filter(
+                    ds => ds.project_id === value
+                  )
+                  return {
+                    data: projectScopes,
+                    error: null
+                  }
+                }
+                return { data: [], error: null }
+              })
+            }
+          })
+        }
+      }
+      
+      return {
+        delete: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis()
+      }
+    })
+  })
+
+  it('replaces user assignment with new discipline_scope_id', async () => {
+    // Setup test data
+    mockData.discipline_scopes = [
+      { id: 'ds-1', project_id: 'project-1', name: 'Mechanical' },
+      { id: 'ds-2', project_id: 'project-1', name: 'Electrical' },
+      { id: 'ds-3', project_id: 'project-2', name: 'Controls' }
+    ]
+    
+    mockData.assignments = [
+      { user_id: 'user-1', discipline_scope_id: 'ds-1' }, // User is in Mechanical
+      { user_id: 'user-2', discipline_scope_id: 'ds-3' }  // Different project
+    ]
+    
+    // Update user-1 from Mechanical to Electrical
+    await updateDiscipline('user-1', 'project-1', 'ds-2')
+    
+    // Verify old assignment is removed and new one is added
+    expect(mockData.assignments).not.toContainEqual(
+      { user_id: 'user-1', discipline_scope_id: 'ds-1' }
+    )
+    expect(mockData.assignments).toContainEqual(
+      { user_id: 'user-1', discipline_scope_id: 'ds-2' }
+    )
+    // Other user's assignment should remain
+    expect(mockData.assignments).toContainEqual(
+      { user_id: 'user-2', discipline_scope_id: 'ds-3' }
+    )
+  })
+
+  it('is idempotent - calling with same value twice produces exactly one row', async () => {
+    mockData.discipline_scopes = [
+      { id: 'ds-1', project_id: 'project-1', name: 'Mechanical' },
+      { id: 'ds-2', project_id: 'project-1', name: 'Electrical' }
+    ]
+    
+    mockData.assignments = []
+    
+    // Call twice with same parameters
+    await updateDiscipline('user-1', 'project-1', 'ds-2')
+    await updateDiscipline('user-1', 'project-1', 'ds-2')
+    
+    // Should only have one assignment
+    const userAssignments = mockData.assignments.filter(
+      a => a.user_id === 'user-1' && a.discipline_scope_id === 'ds-2'
+    )
+    expect(userAssignments).toHaveLength(1)
+  })
+
+  it('handles user with no prior assignment', async () => {
+    mockData.discipline_scopes = [
+      { id: 'ds-1', project_id: 'project-1', name: 'Mechanical' }
+    ]
+    
+    mockData.assignments = []
+    
+    // Add assignment for user with no prior assignment
+    await updateDiscipline('user-1', 'project-1', 'ds-1')
+    
+    expect(mockData.assignments).toContainEqual(
+      { user_id: 'user-1', discipline_scope_id: 'ds-1' }
+    )
   })
 })

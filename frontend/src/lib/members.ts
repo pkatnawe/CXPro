@@ -96,3 +96,52 @@ export async function getPendingInvitesForProject(projectId: string): Promise<Pe
     throw error
   }
 }
+
+export async function updateDiscipline(
+  userId: string, 
+  projectId: string, 
+  newDisciplineScopeId: string
+): Promise<void> {
+  try {
+    // First, get all discipline scopes for this project to find existing assignments
+    const { data: projectDisciplines, error: disciplinesError } = await supabase
+      .from('discipline_scopes')
+      .select('id')
+      .eq('project_id', projectId)
+    
+    if (disciplinesError) throw disciplinesError
+    
+    // Delete all existing assignments for this user in this project
+    // (an assignment links a user to a discipline_scope, and discipline_scopes belong to projects)
+    if (projectDisciplines && projectDisciplines.length > 0) {
+      const disciplineScopeIds = projectDisciplines.map(ds => ds.id)
+      
+      // Delete existing assignments for this user and project
+      for (const dsId of disciplineScopeIds) {
+        await supabase
+          .from('assignments')
+          .delete()
+          .eq('user_id', userId)
+          .eq('discipline_scope_id', dsId)
+      }
+    }
+    
+    // Insert the new assignment
+    const { error: insertError } = await supabase
+      .from('assignments')
+      .insert({
+        user_id: userId,
+        discipline_scope_id: newDisciplineScopeId
+      })
+    
+    if (insertError) {
+      // If it's a duplicate key error, that's ok (idempotent)
+      if (!insertError.message?.includes('duplicate')) {
+        throw insertError
+      }
+    }
+  } catch (error) {
+    console.error('Error updating discipline:', error)
+    throw error
+  }
+}
