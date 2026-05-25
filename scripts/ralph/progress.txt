@@ -56,3 +56,18 @@ Started: Mon May 25 14:18:52 CDT 2026
   - Supabase user metadata stored in user.user_metadata.full_name
   - Next.js build shows JSX errors when running tsc directly without config
 ---
+
+## Mon May 25 14:43:00 CDT 2026 - US-004
+- Implemented getCurrentUserRole function to check user's role in a project's org
+- Added OCA gate to the invite form on members page
+- Non-OCA users see "Only OCAs can invite members" notice
+- Files changed:
+  - src/lib/members.ts (added getCurrentUserRole function)
+  - src/lib/__tests__/members.test.ts (added tests for getCurrentUserRole)
+  - src/app/(app)/project/[id]/members/page.tsx (added OCA check and conditional rendering)
+- **Learnings for future iterations:**
+  - Use maybeSingle() instead of single() when membership might not exist
+  - Gate features by checking role before render, not just disabling
+  - Always test role checks with null case (user not in org)
+  - Tests all passing: 13 tests in members.test.ts
+---
