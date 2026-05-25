@@ -1,0 +1,141 @@
+{
+  "project": "CXPro",
+  "branchName": "ralph/prd-5-v0-stabilization",
+  "description": "PRD-5 v0 Stabilization. Bug-fix sweep across the shipped v0 features. Three Postgres migrations (seat the project creator on their own project, resolve the agent_runs.test_procedure_instance_id mismatch, rewrite the broken accept_draft_test_procedure function) plus four frontend fixes (use the existing getErrorMessage helper everywhere, bound every .single() call, distinguish dashboard empty states inline, replace the hardcoded localhost:8000 URL with a configurable env var) and one repo-hygiene commit (gitignore __pycache__). No new modules — modifies behavior inside existing deep modules. See docs/prd-5-v0-stabilization.md and GitHub issue #26. Every redefined Postgres function must restore OWNER TO postgres + SET search_path = public per the canonical safeguard in migration 012.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Migration 014 — seat project creator + four DisciplineScopes + four Assignments",
+      "description": "As an OCA, I want creating a Project to seat me on it across participations and assignments so that the Project appears on my dashboard immediately.",
+      "acceptanceCriteria": [
+        "Failing pytest integration test exists in backend/ marked @pytest.mark.integration covering: after calling create_project_with_discipline as an OCA, the caller has exactly 1 row in participations for the new project, exactly 4 rows in assignments (one per DisciplineScope), and the project has 4 discipline_scopes rows (Mechanical, Electrical, Controls, General Construction); calling the function twice is idempotent (no duplicate participations or assignments); RLS bypass works (function succeeds even when caller is not postgres superuser)",
+        "Invoke /tdd skill: write the failing test first, confirm red, implement, confirm green",
+        "New migrations/014_seat_project_creator.sql file CREATE OR REPLACE FUNCTION create_project_with_discipline(project_name TEXT, project_description TEXT, org_id UUID) RETURNS UUID does all of: INSERT into projects, INSERT four rows into discipline_scopes (Mechanical, Electrical, Controls, General Construction), INSERT one row into participations for auth.uid() x new project, INSERT four rows into assignments for auth.uid() x each new discipline_scope_id",
+        "Migration declares LANGUAGE plpgsql SECURITY DEFINER SET search_path = public",
+        "Migration ends with ALTER FUNCTION create_project_with_discipline(TEXT, TEXT, UUID) OWNER TO postgres",
+        "Migration includes ON CONFLICT DO NOTHING on the participations and assignments inserts for idempotency",
+        "Migration applied to the dev Supabase via the backend apply_*.py pattern or a direct psycopg2 invocation; verification by direct DB inspection",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Completed: Migration 014 created with create_project_with_discipline function, integration test passing"
+    },
+    {
+      "id": "US-002",
+      "title": "Migration 015 — resolve agent_runs.test_procedure_instance_id mismatch",
+      "description": "As a developer running the dashboard query, I want getProjectDashboard to reference columns that actually exist on agent_runs so the page does not error in the browser console.",
+      "acceptanceCriteria": [
+        "Before writing code, read docs/architecture.md section 2.3 Context 9 (AI and Conversation) to determine the correct direction of the relationship: does AgentRun reference its target entity directly or is the relationship stored on the target (test_procedure_instances.agent_run_id)?",
+        "Migration header comment quotes the architecture decision verbatim and states which direction was chosen and why",
+        "If the architecture supports the column on agent_runs: new migrations/015_fix_agent_runs_column.sql adds test_procedure_instance_id UUID NULL REFERENCES test_procedure_instances(id) ON DELETE SET NULL to agent_runs, with an index",
+        "If the architecture says agent_runs is target-agnostic: instead update frontend/src/lib/dashboard.ts to query through test_procedure_instances.agent_run_id; no schema change",
+        "After applying, loading the project dashboard in a real browser produces zero console errors mentioning agent_runs",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Completed: Frontend updated to query through test_procedure_instances.agent_run_id per architecture"
+    },
+    {
+      "id": "US-003",
+      "title": "Migration 016 — rewrite accept_draft_test_procedure to read role from memberships",
+      "description": "As an OCA using the checklist accept flow, I want accept_draft_test_procedure to read my role from memberships (where it lives) so accepting a draft does not crash on missing columns.",
+      "acceptanceCriteria": [
+        "Failing pytest integration test marked @pytest.mark.integration covering: an OCA of the project's org calling accept_draft_test_procedure for a draft instance succeeds and the instance status transitions from draft to active; a cx_engineer calling it gets a clear permission-denied error; a user with no membership in the project's org gets the same permission-denied error",
+        "Invoke /tdd skill: write the failing test first, confirm red, implement, confirm green",
+        "New migrations/016_fix_accept_draft_test_procedure.sql CREATE OR REPLACE FUNCTION removes the broken assignments a ON a.participation_id = p.id join and removes any reference to assignments.role",
+        "Role lookup uses memberships table joined to projects via org_id; checks memberships.role = 'OCA'",
+        "Function declares LANGUAGE plpgsql SECURITY DEFINER SET search_path = public",
+        "Migration ends with ALTER FUNCTION accept_draft_test_procedure(...) OWNER TO postgres",
+        "Migration applied to the dev Supabase",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Completed: Migration 016 created to fix accept_draft_test_procedure function, reading role from memberships table instead of non-existent assignments.role"
+    },
+    {
+      "id": "US-004",
+      "title": "Use getErrorMessage helper everywhere — drop the instanceof Error anti-pattern",
+      "description": "As any user, when a Supabase RPC or query fails I want to see the real error message — not the literal Unknown error string.",
+      "acceptanceCriteria": [
+        "Failing vitest test in frontend/src/lib/__tests__/error.test.ts covers getErrorMessage on five input shapes: Error instance returns .message; Supabase object {message: 'duplicate key', code: '23505'} returns the message; plain string returns the string; null returns the literal 'Unknown error'; arbitrary object returns JSON.stringify",
+        "Invoke /tdd skill: write the failing test first, confirm red, implement, confirm green",
+        "Audit and replace every remaining occurrence of `error instanceof Error ? error.message : 'Unknown error'` and the err variant `err instanceof Error ? err.message : 'Failed to ...'` with a call to getErrorMessage from frontend/src/lib/error.ts",
+        "Known sites to audit and fix: frontend/src/app/(app)/dashboard/page.tsx, frontend/src/app/(app)/profile/page.tsx (3 sites), frontend/src/app/(app)/project/[id]/page.tsx, frontend/src/app/entity/[id]/page.tsx, frontend/src/components/auth/SignInForm.tsx, frontend/src/components/auth/SignUpForm.tsx",
+        "grep -r 'instanceof Error' frontend/src/app frontend/src/components returns zero matches after the change",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Completed: Added tests for getErrorMessage, replaced all instanceof Error patterns with getErrorMessage calls"
+    },
+    {
+      "id": "US-005",
+      "title": "Bound every .single() that may legitimately return zero rows — use maybeSingle and handle null",
+      "description": "As a user navigating to a Project or Entity I don't have access to, I want a meaningful in-page error instead of a silent redirect.",
+      "acceptanceCriteria": [
+        "Audit every .single() call in frontend/src/app/ — for each, decide whether zero rows is legitimate (use .maybeSingle() and handle the null case explicitly) or the row must exist (keep .single() but surface the error to the user via getErrorMessage)",
+        "frontend/src/app/(app)/profile/page.tsx memberships lookup: switch to .maybeSingle(); when null, render 'You have not joined any organizations yet' instead of leaving role blank",
+        "frontend/src/app/entity/[id]/page.tsx participation lookup: switch to .maybeSingle(); when null, do NOT default role to cx_engineer — instead surface 'You do not have access to this entity' and stop rendering",
+        "frontend/src/app/(app)/project/[id]/page.tsx project + membership lookups: when either is null, render 'You do not have access to this project' with a link back to /dashboard — do not silent-redirect",
+        "frontend/src/app/entity/[id]/page.tsx document and agent_run side queries: destructure both data and error; surface getErrorMessage on error instead of silently setting state to null",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Completed: Updated entity and project pages to use maybeSingle(), properly handle null cases with meaningful error messages"
+    },
+    {
+      "id": "US-006",
+      "title": "Distinguish dashboard empty states inline — no new helper module",
+      "description": "As a user with Memberships but zero Projects visible, I want the empty state to distinguish 'no project yet' from 'couldn't load'.",
+      "acceptanceCriteria": [
+        "frontend/src/app/(app)/dashboard/page.tsx computes three states inline based on (memberships.length, projects.length, loadError): zero memberships -> show onboarding 'Create your organization to get started'; memberships > 0 and projects empty and no error -> show 'No projects yet. Create one to get started'; memberships > 0 and error -> show 'Could not load your projects' with a Retry button that re-runs the load function",
+        "No new module created — the branching lives in the dashboard page component itself (per direction)",
+        "Loading state distinct from empty state (skeleton/spinner while fetching, then one of the three messages)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Completed: Implemented three distinct empty states inline in dashboard page based on memberships, projects, and loadError conditions"
+    },
+    {
+      "id": "US-007",
+      "title": "Members page POST /invites URL via NEXT_PUBLIC_API_URL env var",
+      "description": "As an OCA using the invite form in a deployed environment, I want the form to call the backend at a configured URL so invites work outside localhost.",
+      "acceptanceCriteria": [
+        "frontend/src/app/(app)/project/[id]/members/page.tsx no longer hardcodes http://localhost:8000; instead reads process.env.NEXT_PUBLIC_API_URL with a fallback to http://localhost:8000 for dev",
+        "frontend/.env.example (create if absent) documents NEXT_PUBLIC_API_URL=http://localhost:8000",
+        "grep for 'localhost:8000' in frontend/src returns at most the fallback default in the members page",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Completed: Replaced hardcoded localhost:8000 with NEXT_PUBLIC_API_URL env var, created .env.example"
+    },
+    {
+      "id": "US-008",
+      "title": "Repo hygiene — gitignore __pycache__ and *.pyc, untrack existing files",
+      "description": "As a developer cloning the repo, I want Python bytecode files excluded from version control so backend runs don't generate noisy diffs.",
+      "acceptanceCriteria": [
+        ".gitignore at the repo root includes the lines: **/__pycache__/ and *.pyc",
+        "git rm --cached run on every currently-tracked .pyc file under backend/__pycache__/",
+        "git status after the change shows no .pyc files in either staged, unstaged, or untracked sections",
+        "One focused commit with a message like 'chore: gitignore Python bytecode'",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Completed: Added **/__pycache__/ and *.pyc to .gitignore, removed all tracked .pyc files"
+    }
+  ]
+}

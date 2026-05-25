@@ -1,139 +1,82 @@
 {
   "project": "CXPro",
-  "branchName": "ralph/prd-5-v0-stabilization",
-  "description": "PRD-5 v0 Stabilization. Bug-fix sweep across the shipped v0 features. Three Postgres migrations (seat the project creator on their own project, resolve the agent_runs.test_procedure_instance_id mismatch, rewrite the broken accept_draft_test_procedure function) plus four frontend fixes (use the existing getErrorMessage helper everywhere, bound every .single() call, distinguish dashboard empty states inline, replace the hardcoded localhost:8000 URL with a configurable env var) and one repo-hygiene commit (gitignore __pycache__). No new modules — modifies behavior inside existing deep modules. See docs/prd-5-v0-stabilization.md and GitHub issue #26. Every redefined Postgres function must restore OWNER TO postgres + SET search_path = public per the canonical safeguard in migration 012.",
+  "branchName": "ralph/prd-6-team-management",
+  "description": "PRD-6 Team Management & User Identity. Four stories: (1) extract and test a getInitials pure function, (2) fix the broken getMembersForProject two-table join bug with a multi-step query, (3) replace the hardcoded user avatar with a real UserMenu dropdown (initials, theme toggle, Manage Team link, sign out), (4) gate the invite form behind an OCA role check. No new migrations. All changes are frontend-only.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Migration 014 — seat project creator + four DisciplineScopes + four Assignments",
-      "description": "As an OCA, I want creating a Project to seat me on it across participations and assignments so that the Project appears on my dashboard immediately.",
+      "title": "getInitials pure function + identity lib",
+      "description": "As a developer, I want a tested pure function that derives display initials from a user's full name or email so that every component that renders a user avatar uses consistent, correct logic.",
       "acceptanceCriteria": [
-        "Failing pytest integration test exists in backend/ marked @pytest.mark.integration covering: after calling create_project_with_discipline as an OCA, the caller has exactly 1 row in participations for the new project, exactly 4 rows in assignments (one per DisciplineScope), and the project has 4 discipline_scopes rows (Mechanical, Electrical, Controls, General Construction); calling the function twice is idempotent (no duplicate participations or assignments); RLS bypass works (function succeeds even when caller is not postgres superuser)",
-        "Invoke /tdd skill: write the failing test first, confirm red, implement, confirm green",
-        "New migrations/014_seat_project_creator.sql file CREATE OR REPLACE FUNCTION create_project_with_discipline(project_name TEXT, project_description TEXT, org_id UUID) RETURNS UUID does all of: INSERT into projects, INSERT four rows into discipline_scopes (Mechanical, Electrical, Controls, General Construction), INSERT one row into participations for auth.uid() x new project, INSERT four rows into assignments for auth.uid() x each new discipline_scope_id",
-        "Migration declares LANGUAGE plpgsql SECURITY DEFINER SET search_path = public",
-        "Migration ends with ALTER FUNCTION create_project_with_discipline(TEXT, TEXT, UUID) OWNER TO postgres",
-        "Migration includes ON CONFLICT DO NOTHING on the participations and assignments inserts for idempotency",
-        "Migration applied to the dev Supabase via the backend apply_*.py pattern or a direct psycopg2 invocation; verification by direct DB inspection",
+        "New file frontend/src/lib/identity.ts exports getInitials(fullName: string | undefined, email: string): string",
+        "Two-word name returns first letter of each word uppercased (e.g. 'John Smith' → 'JS')",
+        "Single-word name returns its first letter uppercased (e.g. 'Alice' → 'A')",
+        "Three-or-more-word name returns first letter of first word + first letter of last word uppercased (e.g. 'Mary Jane Watson' → 'MW')",
+        "undefined fullName falls back to first letter of email uppercased",
+        "Empty string fullName falls back to first letter of email uppercased",
+        "New test file frontend/src/lib/__tests__/identity.test.ts covers all five cases above",
         "Tests pass",
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Completed: Migration 014 created with create_project_with_discipline function, integration test passing"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Migration 015 — resolve agent_runs.test_procedure_instance_id mismatch",
-      "description": "As a developer running the dashboard query, I want getProjectDashboard to reference columns that actually exist on agent_runs so the page does not error in the browser console.",
+      "title": "Fix getMembersForProject — two-step query with org isolation",
+      "description": "As a project OCA viewing the members page, I want the member list to show correct roles so that I can trust who is an OCA versus a CX engineer on this project.",
       "acceptanceCriteria": [
-        "Before writing code, read docs/architecture.md section 2.3 Context 9 (AI and Conversation) to determine the correct direction of the relationship: does AgentRun reference its target entity directly or is the relationship stored on the target (test_procedure_instances.agent_run_id)?",
-        "Migration header comment quotes the architecture decision verbatim and states which direction was chosen and why",
-        "If the architecture supports the column on agent_runs: new migrations/015_fix_agent_runs_column.sql adds test_procedure_instance_id UUID NULL REFERENCES test_procedure_instances(id) ON DELETE SET NULL to agent_runs, with an index",
-        "If the architecture says agent_runs is target-agnostic: instead update frontend/src/lib/dashboard.ts to query through test_procedure_instances.agent_run_id; no schema change",
-        "After applying, loading the project dashboard in a real browser produces zero console errors mentioning agent_runs",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "getMembersForProject in frontend/src/lib/members.ts is rewritten to use six sequential Supabase queries joined in JS: (1) participations where project_id=X → user_ids, (2) projects where id=X → org_id, (3) users where id IN(user_ids) → email+full_name, (4) memberships where user_id IN(user_ids) AND org_id=org_id → roles, (5) discipline_scopes where project_id=X → scope ids, (6) assignments where user_id IN(user_ids) AND discipline_scope_id IN(scope_ids) → discipline names",
+        "The function returns early with [] if participations is empty (skip the remaining five queries)",
+        "ProjectMember type gains optional full_name?: string field",
+        "Existing tests in frontend/src/lib/__tests__/members.test.ts are updated to mock the new multi-table call pattern",
+        "New test verifies org isolation: a user who is a member of org-A AND org-B gets their org-A role (not org-B role) when querying an org-A project",
+        "Tests pass",
+        "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Completed: Frontend updated to query through test_procedure_instances.agent_run_id per architecture"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Migration 016 — rewrite accept_draft_test_procedure to read role from memberships",
-      "description": "As an OCA using the checklist accept flow, I want accept_draft_test_procedure to read my role from memberships (where it lives) so accepting a draft does not crash on missing columns.",
+      "title": "UserMenu dropdown — initials avatar, theme toggle, Manage Team, Sign Out",
+      "description": "As a logged-in user, I want a dropdown from my avatar that lets me toggle the theme, navigate to team management, and sign out so that I don't have to hunt through the sidebar for these actions.",
       "acceptanceCriteria": [
-        "Failing pytest integration test marked @pytest.mark.integration covering: an OCA of the project's org calling accept_draft_test_procedure for a draft instance succeeds and the instance status transitions from draft to active; a cx_engineer calling it gets a clear permission-denied error; a user with no membership in the project's org gets the same permission-denied error",
-        "Invoke /tdd skill: write the failing test first, confirm red, implement, confirm green",
-        "New migrations/016_fix_accept_draft_test_procedure.sql CREATE OR REPLACE FUNCTION removes the broken assignments a ON a.participation_id = p.id join and removes any reference to assignments.role",
-        "Role lookup uses memberships table joined to projects via org_id; checks memberships.role = 'OCA'",
-        "Function declares LANGUAGE plpgsql SECURITY DEFINER SET search_path = public",
-        "Migration ends with ALTER FUNCTION accept_draft_test_procedure(...) OWNER TO postgres",
-        "Migration applied to the dev Supabase",
-        "Tests pass",
-        "Typecheck passes"
+        "New component frontend/src/components/UserMenu.tsx created",
+        "UserMenu fetches the current user via supabase.auth.getUser() on mount and reads full_name from user_metadata (field name: full_name) and falls back to email",
+        "Avatar circle displays initials via getInitials() imported from @/lib/identity",
+        "Clicking the avatar toggles a dropdown; clicking outside the dropdown closes it (use a useEffect + mousedown listener on document)",
+        "Dropdown item 1: theme toggle button — clicking it toggles between light and dark, updates data-theme on documentElement and localStorage (same logic that was in the sidebar bp-nav-bottom button)",
+        "Dropdown item 2: 'Manage Team' link rendered as a Next.js Link to /project/{projectId}/members — only rendered when projectId prop is non-null; hidden otherwise",
+        "Dropdown item 3: 'Sign Out' button — calls supabase.auth.signOut() then router.push('/auth')",
+        "frontend/src/app/(app)/layout.tsx replaces the bp-user div with <UserMenu projectId={projectId} theme={theme} onThemeChange={setTheme} /> passing down theme state",
+        "The bp-nav-bottom div and its theme toggle button are removed from layout.tsx sidebar",
+        "All new elements use bp-* CSS class names consistent with the existing design system (no hardcoded Tailwind color classes like bg-blue-600)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill: avatar shows correct initials, dropdown opens and closes, theme toggle switches theme, sign out redirects to /auth"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Completed: Migration 016 created to fix accept_draft_test_procedure function, reading role from memberships table instead of non-existent assignments.role"
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Use getErrorMessage helper everywhere — drop the instanceof Error anti-pattern",
-      "description": "As any user, when a Supabase RPC or query fails I want to see the real error message — not the literal Unknown error string.",
+      "title": "OCA gate on invite form + getCurrentUserRole function",
+      "description": "As a CX engineer viewing the members page, I want the invite form hidden so that I cannot accidentally attempt an action I don't have permission to perform.",
       "acceptanceCriteria": [
-        "Failing vitest test in frontend/src/lib/__tests__/error.test.ts covers getErrorMessage on five input shapes: Error instance returns .message; Supabase object {message: 'duplicate key', code: '23505'} returns the message; plain string returns the string; null returns the literal 'Unknown error'; arbitrary object returns JSON.stringify",
-        "Invoke /tdd skill: write the failing test first, confirm red, implement, confirm green",
-        "Audit and replace every remaining occurrence of `error instanceof Error ? error.message : 'Unknown error'` and the err variant `err instanceof Error ? err.message : 'Failed to ...'` with a call to getErrorMessage from frontend/src/lib/error.ts",
-        "Known sites to audit and fix: frontend/src/app/(app)/dashboard/page.tsx, frontend/src/app/(app)/profile/page.tsx (3 sites), frontend/src/app/(app)/project/[id]/page.tsx, frontend/src/app/entity/[id]/page.tsx, frontend/src/components/auth/SignInForm.tsx, frontend/src/components/auth/SignUpForm.tsx",
-        "grep -r 'instanceof Error' frontend/src/app frontend/src/components returns zero matches after the change",
+        "frontend/src/lib/members.ts exports a new function getCurrentUserRole(userId: string, projectId: string): Promise<'OCA' | 'cx_engineer' | null>",
+        "getCurrentUserRole fetches org_id from projects where id=projectId, then fetches role from memberships where user_id=userId AND org_id=org_id, returns the role string or null if no row found",
+        "New tests in frontend/src/lib/__tests__/members.test.ts cover getCurrentUserRole: returns 'OCA' for an OCA member, returns 'cx_engineer' for a regular member, returns null when the user has no membership in the project's org",
+        "frontend/src/app/(app)/project/[id]/members/page.tsx calls getCurrentUserRole(session.user.id, projectId) after the session check and stores the result in an isOCA boolean state",
+        "The 'Invite Team Member' form section is only rendered when isOCA is true",
+        "When isOCA is false, a read-only notice is rendered in place of the form: 'Only OCAs can invite members'",
         "Tests pass",
-        "Typecheck passes"
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill: sign in as a cx_engineer user, navigate to a project members page, confirm the invite form is absent and the notice is shown"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Completed: Added tests for getErrorMessage, replaced all instanceof Error patterns with getErrorMessage calls"
-    },
-    {
-      "id": "US-005",
-      "title": "Bound every .single() that may legitimately return zero rows — use maybeSingle and handle null",
-      "description": "As a user navigating to a Project or Entity I don't have access to, I want a meaningful in-page error instead of a silent redirect.",
-      "acceptanceCriteria": [
-        "Audit every .single() call in frontend/src/app/ — for each, decide whether zero rows is legitimate (use .maybeSingle() and handle the null case explicitly) or the row must exist (keep .single() but surface the error to the user via getErrorMessage)",
-        "frontend/src/app/(app)/profile/page.tsx memberships lookup: switch to .maybeSingle(); when null, render 'You have not joined any organizations yet' instead of leaving role blank",
-        "frontend/src/app/entity/[id]/page.tsx participation lookup: switch to .maybeSingle(); when null, do NOT default role to cx_engineer — instead surface 'You do not have access to this entity' and stop rendering",
-        "frontend/src/app/(app)/project/[id]/page.tsx project + membership lookups: when either is null, render 'You do not have access to this project' with a link back to /dashboard — do not silent-redirect",
-        "frontend/src/app/entity/[id]/page.tsx document and agent_run side queries: destructure both data and error; surface getErrorMessage on error instead of silently setting state to null",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 5,
-      "passes": true,
-      "notes": "Completed: Updated entity and project pages to use maybeSingle(), properly handle null cases with meaningful error messages"
-    },
-    {
-      "id": "US-006",
-      "title": "Distinguish dashboard empty states inline — no new helper module",
-      "description": "As a user with Memberships but zero Projects visible, I want the empty state to distinguish 'no project yet' from 'couldn't load'.",
-      "acceptanceCriteria": [
-        "frontend/src/app/(app)/dashboard/page.tsx computes three states inline based on (memberships.length, projects.length, loadError): zero memberships -> show onboarding 'Create your organization to get started'; memberships > 0 and projects empty and no error -> show 'No projects yet. Create one to get started'; memberships > 0 and error -> show 'Could not load your projects' with a Retry button that re-runs the load function",
-        "No new module created — the branching lives in the dashboard page component itself (per direction)",
-        "Loading state distinct from empty state (skeleton/spinner while fetching, then one of the three messages)",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 6,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-007",
-      "title": "Members page POST /invites URL via NEXT_PUBLIC_API_URL env var",
-      "description": "As an OCA using the invite form in a deployed environment, I want the form to call the backend at a configured URL so invites work outside localhost.",
-      "acceptanceCriteria": [
-        "frontend/src/app/(app)/project/[id]/members/page.tsx no longer hardcodes http://localhost:8000; instead reads process.env.NEXT_PUBLIC_API_URL with a fallback to http://localhost:8000 for dev",
-        "frontend/.env.example (create if absent) documents NEXT_PUBLIC_API_URL=http://localhost:8000",
-        "grep for 'localhost:8000' in frontend/src returns at most the fallback default in the members page",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 7,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-008",
-      "title": "Repo hygiene — gitignore __pycache__ and *.pyc, untrack existing files",
-      "description": "As a developer cloning the repo, I want Python bytecode files excluded from version control so backend runs don't generate noisy diffs.",
-      "acceptanceCriteria": [
-        ".gitignore at the repo root includes the lines: **/__pycache__/ and *.pyc",
-        "git rm --cached run on every currently-tracked .pyc file under backend/__pycache__/",
-        "git status after the change shows no .pyc files in either staged, unstaged, or untracked sections",
-        "One focused commit with a message like 'chore: gitignore Python bytecode'",
-        "Typecheck passes"
-      ],
-      "priority": 8,
       "passes": false,
       "notes": ""
     }

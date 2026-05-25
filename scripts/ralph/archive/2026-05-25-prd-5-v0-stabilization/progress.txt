@@ -1,0 +1,116 @@
+# Ralph Progress Log
+Started: Mon May 25 13:05:22 CDT 2026
+---
+
+## Codebase Patterns
+- Assignments table uses user_id directly (not participation_id) 
+- discipline_scopes table has no updated_at column (only created_at)
+- Use ON CONFLICT DO NOTHING for idempotency in migrations
+- Test functions must use transactions with SET LOCAL for auth.uid() to work
+- Migration functions should use SECURITY DEFINER and end with ALTER FUNCTION ... OWNER TO postgres
+- Assignments table has NO role column - role lives in memberships table (User × Org relationship)
+- Use memberships.role for permission checks, not assignments (assignments only connects users to discipline_scopes)
+
+## 2026-05-25 13:13 - US-001
+- Implemented Migration 014 to create create_project_with_discipline function
+- Files changed:
+  - migrations/014_seat_project_creator.sql (new)
+  - backend/test_seat_project_creator.py (new)
+  - backend/apply_seat_creator_migration.py (new)
+- **Learnings for future iterations:**
+  - assignments table uses user_id not participation_id (discovered via schema inspection)
+  - discipline_scopes table lacks updated_at column (has only created_at)
+  - auth.uid() reads from request.jwt.claim.sub which requires SET LOCAL in a transaction
+  - asyncpg requires transactions for SET LOCAL commands to persist
+  - UUID comparisons in Python need str() conversion when comparing with database results
+---
+
+## 2026-05-25 13:18 - US-002
+- Resolved agent_runs.test_procedure_instance_id mismatch in dashboard query
+- Files changed:
+  - frontend/src/lib/dashboard.ts (modified query to use correct relationship)
+- **Learnings for future iterations:**
+  - agent_runs table is target-agnostic per architecture Context 9 (AI & Conversation)
+  - The relationship is test_procedure_instances → agent_runs (via agent_run_id FK)
+  - Frontend should query through test_procedure_instances.agent_run_id, not the other way
+  - No migration needed since the schema already follows the correct architecture
+---
+
+## 2026-05-25 13:30 - US-003
+- Fixed accept_draft_test_procedure function to read role from memberships table
+- Files changed:
+  - migrations/016_fix_accept_draft_test_procedure.sql (new)
+  - backend/test_accept_draft_test_procedure.py (new integration test)
+  - backend/apply_fix_accept_migration.py (new migration runner)
+- **Learnings for future iterations:**
+  - The assignments table does NOT have a role column - it only links users to discipline_scopes
+  - Roles are stored in the memberships table (User × Org relationship)
+  - Permission checks should join through memberships table to check for OCA role
+  - The outbox table referenced in migration 008 doesn't exist yet - skip event emission for now
+  - Use asyncpg.exceptions.RaiseError (not RaiseException) for catching Postgres RAISE exceptions
+---
+
+## 2026-05-25 13:34 - US-004
+- Implemented getErrorMessage helper replacement across all frontend auth and member components
+- Files changed:
+  - frontend/src/lib/__tests__/error.test.ts (new test file with 5 test cases)
+  - frontend/src/components/auth/SignInForm.tsx (replaced instanceof Error pattern)
+  - frontend/src/components/auth/SignUpForm.tsx (replaced instanceof Error pattern)
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (replaced instanceof Error pattern)
+- **Learnings for future iterations:**
+  - The getErrorMessage helper already handles multiple error formats including Supabase errors
+  - Test suite has some unrelated failing tests in dashboard.test.ts (pre-existing)
+  - Frontend uses npm run type-check instead of npm run typecheck for type validation
+---
+
+## 2026-05-25 13:39 - US-005
+- Bounded every .single() query that may return zero rows with maybeSingle()
+- Files changed:
+  - frontend/src/app/(app)/entity/[id]/page.tsx (updated participation, document, agent_run queries)
+  - frontend/src/app/(app)/project/[id]/page.tsx (updated project and membership queries)
+- **Learnings for future iterations:**
+  - Profile page mentioned in PRD doesn't exist - some listed files may be outdated references
+  - Use maybeSingle() when zero rows is a legitimate possibility (e.g., user has no access)
+  - Don't default to fallback roles when user has no participation - show access error instead
+  - Import getErrorMessage helper to surface Supabase errors properly
+  - TypeScript build has pre-existing errors for missing page files (unrelated to our changes)
+---
+
+## 2026-05-25 13:42 - US-006
+- Implemented dashboard empty state logic inline based on memberships, projects, and loadError
+- Files changed:
+  - frontend/src/app/(app)/dashboard/page.tsx (modified empty state logic and added retry button)
+- **Learnings for future iterations:**
+  - Dashboard needs to track loadError state separately to distinguish between "couldn't load" and "no projects yet"
+  - Empty state should check memberships.length === 0 first to show onboarding message
+  - When there's a load error, provide a Retry button that calls loadUserData again
+  - Keep all branching logic inline in the component (no helper modules)
+  - TypeScript type-check has pre-existing errors unrelated to our changes
+---
+
+## 2026-05-25 13:45 - US-007
+- Replaced hardcoded localhost:8000 URL with NEXT_PUBLIC_API_URL environment variable
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx (modified to use env var)
+  - frontend/.env.example (created with documentation)
+  - .gitignore (updated to allow .env.example files)
+  - frontend/.gitignore (updated to allow .env.example files)
+- **Learnings for future iterations:**
+  - Frontend has its own .gitignore that also needs updating when changing ignore patterns
+  - Use !.env.example pattern to exclude .env.example from .env* ignore rule
+  - The apiUrl now uses process.env.NEXT_PUBLIC_API_URL with fallback to localhost:8000
+  - No other localhost:8000 references found in the frontend codebase
+  - TypeScript build has pre-existing errors unrelated to our changes
+---
+
+## 2026-05-25 13:46 - US-008
+- Added Python bytecode gitignore patterns and removed tracked .pyc files
+- Files changed:
+  - .gitignore (added **/__pycache__/ and *.pyc patterns)
+  - backend/__pycache__/*.pyc (13 files removed from git tracking)
+- **Learnings for future iterations:**
+  - Found 13 .pyc files that were tracked in git under backend/__pycache__/
+  - Use git rm -r --cached to remove files from tracking without deleting them from disk
+  - The patterns **/__pycache__/ and *.pyc effectively ignore all Python bytecode
+  - git status --ignored can be used to verify ignore patterns are working
+---
