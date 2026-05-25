@@ -13,3 +13,5 @@ scikit-learn>=1.3.0
 # Agent orchestration dependencies for Slice-06
 langgraph>=0.0.25
 pydantic>=2.0.0
+# Identity / invitations (PRD-3)
+supabase>=2.0.0

@@ -76,36 +76,26 @@ class InvitationService:
         """, invitation_id, email, org_id, project_id, role, discipline_scope_id,
             token, invited_by, expires_at, datetime.now())
         
-        # Check if user exists in Supabase Auth
-        try:
-            # Try to get user by email
-            user_response = self.supabase.auth.get_user(email)
-            if hasattr(user_response, '__await__'):
-                user_response = await user_response
-            user_exists = True
-        except Exception:
-            # User doesn't exist
-            user_exists = False
-        
-        # Send invitation email via Supabase Auth
+        # Determine whether the invitee already has an account.
+        # auth.get_user() takes a JWT — not an email — so it's unsuitable here.
+        # Query the public.users table directly (populated by the handle_new_user trigger).
+        existing = await self.conn.fetchrow(
+            "SELECT id FROM users WHERE email = $1", email
+        )
+        user_exists = existing is not None
+
+        # Send the magic-link email through Supabase Auth.
+        # Both SDK methods take snake_case option keys (redirect_to / email_redirect_to).
         if not user_exists:
-            # New user - send invitation email
-            result = self.supabase.auth.admin.invite_user_by_email({
-                'email': email,
-                'redirectTo': redirect_to
-            })
-            if hasattr(result, '__await__'):
-                await result
+            self.supabase.auth.admin.invite_user_by_email(
+                email,
+                {"redirect_to": redirect_to},
+            )
         else:
-            # Existing user - send magic link
-            result = self.supabase.auth.sign_in_with_otp({
-                'email': email,
-                'options': {
-                    'emailRedirectTo': redirect_to
-                }
+            self.supabase.auth.sign_in_with_otp({
+                "email": email,
+                "options": {"email_redirect_to": redirect_to},
             })
-            if hasattr(result, '__await__'):
-                await result
         
         return {
             'id': invitation_id,

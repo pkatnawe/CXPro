@@ -78,56 +78,30 @@ export default function AcceptInvitePage() {
 
     const handleInvitationWithSession = async (inviteToken: string) => {
       try {
-        // Query pending_invitations to get the project_id
-        // First, check if the invitation exists and get its details
-        const { data: invitation, error: invitationError } = await supabase
-          .from('pending_invitations')
-          .select('*, projects!pending_invitations_project_id_fkey(id, name)')
-          .eq('token', inviteToken)
-          .single()
+        // Look up the invitation via the token-scoped SECURITY DEFINER RPC.
+        // The pending_invitations table has OCA-only RLS, so a direct select
+        // by the invitee returns nothing; the RPC exposes only the single
+        // row matching the (opaque, unguessable) token.
+        const { data: rows, error: rpcError } = await supabase
+          .rpc('get_invitation_by_token', { p_token: inviteToken })
 
-        if (invitationError || !invitation) {
-          // Check if it's an expired or already accepted invitation
-          const { data: expiredInvite } = await supabase
-            .from('pending_invitations')
-            .select('expires_at, accepted_at')
-            .eq('token', inviteToken)
-            .single()
-
-          if (expiredInvite?.accepted_at) {
-            setMessage('This invitation has already been accepted. Redirecting...')
-            // Try to find the project through participations
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-              const { data: participation } = await supabase
-                .from('participations')
-                .select('project_id')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single()
-              
-              if (participation?.project_id) {
-                setTimeout(() => router.push(`/project/${participation.project_id}`), 2000)
-                return
-              }
-            }
-            setTimeout(() => router.push('/dashboard'), 2000)
-            return
-          } else if (expiredInvite && new Date(expiredInvite.expires_at) < new Date()) {
-            setError('This invitation has expired')
-            setLoading(false)
-            setTimeout(() => router.push('/'), 3000)
-            return
-          } else {
-            setError('This invitation is invalid or has expired')
-            setLoading(false)
-            setTimeout(() => router.push('/'), 3000)
-            return
-          }
+        if (rpcError) {
+          console.error('get_invitation_by_token error:', rpcError)
+          setError('Could not look up this invitation')
+          setLoading(false)
+          setTimeout(() => router.push('/'), 3000)
+          return
         }
 
-        // Check if invitation is expired
+        const invitation = Array.isArray(rows) ? rows[0] : rows
+
+        if (!invitation) {
+          setError('This invitation is invalid')
+          setLoading(false)
+          setTimeout(() => router.push('/'), 3000)
+          return
+        }
+
         if (new Date(invitation.expires_at) < new Date()) {
           setError('This invitation has expired')
           setLoading(false)
@@ -135,49 +109,43 @@ export default function AcceptInvitePage() {
           return
         }
 
-        // The invitation should have been automatically redeemed by the handle_new_user trigger
-        // Check if user now has participation in the project
+        // The invitation should have been redeemed by the handle_new_user trigger.
+        // Confirm by checking participations for the invited project.
         const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
+        if (!user) {
+          setError('Unable to verify your authentication')
+          setLoading(false)
+          setTimeout(() => router.push('/auth'), 3000)
+          return
+        }
+
+        const confirmAccess = async () => {
           const { data: participation } = await supabase
             .from('participations')
             .select('project_id')
             .eq('user_id', user.id)
             .eq('project_id', invitation.project_id)
             .single()
-
-          if (participation) {
-            setMessage(`Welcome to ${invitation.projects?.name || 'the project'}! Redirecting...`)
-            setLoading(false)
-            setTimeout(() => router.push(`/project/${invitation.project_id}`), 2000)
-          } else {
-            // Redemption might still be processing
-            setMessage('Setting up your access...')
-            // Wait a bit and check again
-            setTimeout(async () => {
-              const { data: retryParticipation } = await supabase
-                .from('participations')
-                .select('project_id')
-                .eq('user_id', user.id)
-                .eq('project_id', invitation.project_id)
-                .single()
-              
-              if (retryParticipation) {
-                setMessage(`Welcome to ${invitation.projects?.name || 'the project'}! Redirecting...`)
-                setTimeout(() => router.push(`/project/${invitation.project_id}`), 2000)
-              } else {
-                setError('Unable to verify your project access. Please contact support.')
-                setTimeout(() => router.push('/dashboard'), 3000)
-              }
-              setLoading(false)
-            }, 2000)
-          }
-        } else {
-          setError('Unable to verify your authentication')
-          setLoading(false)
-          setTimeout(() => router.push('/auth'), 3000)
+          return participation
         }
-        
+
+        let participation = await confirmAccess()
+        if (!participation) {
+          // Redemption might still be processing — retry once after a beat.
+          setMessage('Setting up your access...')
+          await new Promise((r) => setTimeout(r, 2000))
+          participation = await confirmAccess()
+        }
+
+        if (participation) {
+          setMessage(`Welcome to ${invitation.project_name || 'the project'}! Redirecting...`)
+          setLoading(false)
+          setTimeout(() => router.push(`/project/${invitation.project_id}`), 1500)
+        } else {
+          setError('Unable to verify your project access. Please contact support.')
+          setLoading(false)
+          setTimeout(() => router.push('/dashboard'), 3000)
+        }
       } catch (err) {
         console.error('Error handling invitation:', err)
         setError('An error occurred while processing your invitation')
