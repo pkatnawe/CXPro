@@ -1,4 +1,10 @@
+# Ralph Progress Log
+Started: Mon May 25 14:18:52 CDT 2026
+
 ## Codebase Patterns
+- Use vitest imports (describe, test, expect) in test files
+- Frontend test files go in src/lib/__tests__/
+- Type-check command is: npm run type-check (not typecheck)
 - Use bp-* CSS class names for all UI elements — no raw Tailwind color classes
 - Supabase relational joins only work through actual FKs — use multi-step queries + JS join when tables share user_id but have no direct FK
 - Theme state lives in layout.tsx (localStorage + data-theme on documentElement)
@@ -6,3 +12,16 @@
 - Auth check pattern: supabase.auth.getSession() → if no session redirect to /auth
 - getErrorMessage from @/lib/error for all error display — no instanceof Error pattern
 - maybeSingle() for queries that may legitimately return zero rows; single() only when row must exist
+---
+
+## Mon May 25 14:22:00 CDT 2026 - US-001
+- Implemented getInitials pure function in frontend/src/lib/identity.ts
+- Created comprehensive test file in frontend/src/lib/__tests__/identity.test.ts
+- Files changed:
+  - frontend/src/lib/identity.ts (new)
+  - frontend/src/lib/__tests__/identity.test.ts (new)
+- **Learnings for future iterations:**
+  - Vitest test files need to import describe, test, expect from 'vitest'
+  - Type check command is npm run type-check, not npm run typecheck
+  - Test files successfully run with: npm test -- <path>
+---
