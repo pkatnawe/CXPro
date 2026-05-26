@@ -110,3 +110,16 @@ Started: Mon May 26 23:28:43 CDT 2026
   - The 6-role model is now properly typed throughout the frontend type system
   - Some files referenced in PRDs may not exist yet, which is okay - skip them and focus on what does exist
 ---
+
+## Mon May 26 23:57:00 CDT 2026 - US-008
+- Implemented dynamic Role dropdown generation using ROLES array from lib/roles module
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx: Imported ROLES and ROLE_LABELS, replaced hardcoded <option> elements with ROLES.map()
+- Role dropdown now shows all 6 canonical roles with proper display labels
+- Default formData.role remains 'cx_engineer' as required
+- TypeScript type checking passes successfully
+- **Learnings for future iterations:**
+  - Use ROLES and ROLE_LABELS from lib/roles for any role-related UI components
+  - The map pattern for generating options keeps UI consistent with the source of truth
+  - TypeScript check command in frontend directory is `npm run type-check`
+---

@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { supabase, type DisciplineScope } from '@/lib/supabase'
 import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole, type ProjectMember, type PendingInvite } from '@/lib/members'
 import { getErrorMessage } from '@/lib/error'
-import { ROLES, ROLE_LABELS } from '@/lib/roles'
+import { ROLES, ROLE_LABELS, type Role } from '@/lib/roles'
+import { canManageTeam } from '@/lib/permissions'
 
 export default function MembersPage() {
   const params = useParams()
@@ -25,7 +26,7 @@ export default function MembersPage() {
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([])
   const [membersLoading, setMembersLoading] = useState(true)
   const [updatingDiscipline, setUpdatingDiscipline] = useState<string | null>(null)
-  const [isOCA, setIsOCA] = useState(false)
+  const [canManage, setCanManage] = useState(false)
   const [roleLoading, setRoleLoading] = useState(true)
 
   // Check authentication and load disciplines
@@ -39,13 +40,13 @@ export default function MembersPage() {
         return
       }
 
-      // Check if user is OCA
+      // Check if user can manage team
       try {
         const role = await getCurrentUserRole(session.user.id, projectId)
-        setIsOCA(role === 'OCA')
+        setCanManage(canManageTeam(role))
       } catch (error) {
         console.error('Error checking user role:', error)
-        setIsOCA(false)
+        setCanManage(false)
       } finally {
         setRoleLoading(false)
       }
@@ -190,7 +191,7 @@ export default function MembersPage() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="text-gray-500">Loading permissions...</div>
         </div>
-      ) : isOCA ? (
+      ) : canManage ? (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Invite Team Member</h2>
           
@@ -273,7 +274,7 @@ export default function MembersPage() {
       ) : (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="text-gray-500 text-center py-4">
-            Only OCAs can invite members
+            Only OCAs and CMs can invite members
           </div>
         </div>
       )}
