@@ -2,53 +2,43 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase, type Org, type Project, type Membership } from '@/lib/supabase'
+import { supabase, type Project } from '@/lib/supabase'
 import { getErrorMessage } from '@/lib/error'
+import { getPrimaryOrg } from '@/lib/getPrimaryOrg'
 
-export default function DashboardPage() {
+export default function OrganizationPage() {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
-  const [orgs, setOrgs] = useState<Org[]>([])
+  const [org, setOrg] = useState<{ id: string; name: string; role: 'OCA' | 'cx_engineer' } | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
-  const [memberships, setMemberships] = useState<Membership[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [showOrgForm, setShowOrgForm] = useState(false)
   const [showProjectForm, setShowProjectForm] = useState(false)
   const router = useRouter()
 
   // Form states
-  const [orgName, setOrgName] = useState('')
-  const [orgSlug, setOrgSlug] = useState('')
   const [projectName, setProjectName] = useState('')
   const [projectDescription, setProjectDescription] = useState('')
-  const [selectedOrgForProject, setSelectedOrgForProject] = useState('')
 
-  const loadUserData = async () => {
+  const loadUserData = async (userId: string) => {
     try {
       setLoadError(null)
       
-      // Load orgs
-      const { data: orgsData, error: orgsError } = await supabase
-        .from('orgs')
-        .select('*')
+      // Load primary org
+      const primaryOrg = await getPrimaryOrg(userId)
+      setOrg(primaryOrg)
 
-      // Load memberships
-      const { data: membershipsData, error: membershipsError } = await supabase
-        .from('memberships')
-        .select('*')
+      // Load projects filtered by org_id if org exists
+      if (primaryOrg) {
+        const { data: projectsData, error: projectsError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('org_id', primaryOrg.id)
 
-      // Load projects
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('projects')
-        .select('*')
-
-      if (orgsError || membershipsError || projectsError) {
-        const error = orgsError || membershipsError || projectsError
-        setLoadError(getErrorMessage(error))
-      } else {
-        setOrgs(orgsData || [])
-        setMemberships(membershipsData || [])
-        setProjects(projectsData || [])
+        if (projectsError) {
+          setLoadError(getErrorMessage(projectsError))
+        } else {
+          setProjects(projectsData || [])
+        }
       }
     } catch (error) {
       console.error('Error loading user data:', error)
@@ -68,50 +58,30 @@ export default function DashboardPage() {
       }
 
       setUser(session.user)
-      await loadUserData()
+      await loadUserData(session.user.id)
     }
 
     getUser()
   }, [router])
 
-
-  const handleCreateOrg = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
-      const { error } = await supabase.rpc('create_org_with_membership', {
-        org_name: orgName,
-        org_slug: orgSlug
-      })
-
-      if (error) throw error
-
-      setOrgName('')
-      setOrgSlug('')
-      setShowOrgForm(false)
-      await loadUserData()
-    } catch (error) {
-      alert('Error creating organization: ' + getErrorMessage(error))
-    }
-  }
-
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (!org) return
+
     try {
       const { error } = await supabase.rpc('create_project_with_discipline', {
         project_name: projectName,
         project_description: projectDescription,
-        org_id: selectedOrgForProject
+        org_id: org.id
       })
 
       if (error) throw error
 
       setProjectName('')
       setProjectDescription('')
-      setSelectedOrgForProject('')
       setShowProjectForm(false)
-      await loadUserData()
+      await loadUserData(user!.id)
     } catch (error) {
       alert('Error creating project: ' + getErrorMessage(error))
     }
@@ -122,28 +92,25 @@ export default function DashboardPage() {
     router.push('/auth')
   }
 
-  const getUserRole = (orgId: string) => {
-    const membership = memberships.find(m => m.org_id === orgId)
-    return membership?.role || 'cx_engineer'
-  }
-
   if (loading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>
+    return (
+      <div className="bp-screen">
+        <div className="bp-loading">Loading organization...</div>
+      </div>
+    )
   }
-
-  const ocaMemberships = memberships.filter(m => m.role === 'OCA')
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <h1 className="text-3xl font-bold text-gray-900">CXPro Dashboard</h1>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">{user?.email}</span>
+    <div className="bp-screen">
+      <header className="bp-header">
+        <div className="bp-header-inner">
+          <div className="bp-header-content">
+            <div className="bp-header-title">{org ? org.name : 'No organization yet'}</div>
+            <div className="bp-header-tools">
+              <span className="bp-subtle">{user?.email}</span>
               <button
                 onClick={handleSignOut}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="bp-btn-ghost"
               >
                 Sign Out
               </button>
@@ -152,199 +119,110 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Organizations */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Organizations</h3>
+      <main className="bp-content">
+        <div className="bp-container">
+          {/* Projects Section */}
+          <div className="bp-card">
+            <div className="bp-card-header">
+              <h2 className="bp-h2">Projects</h2>
+              {org && org.role === 'OCA' && (
+                <button
+                  onClick={() => setShowProjectForm(!showProjectForm)}
+                  className="bp-btn-primary"
+                >
+                  Create Project
+                </button>
+              )}
+            </div>
+
+            {showProjectForm && (
+              <form onSubmit={handleCreateProject} className="bp-form">
+                <div className="bp-form-group">
+                  <input
+                    type="text"
+                    placeholder="Project Name"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    required
+                    className="bp-input"
+                  />
+                </div>
+                <div className="bp-form-group">
+                  <textarea
+                    placeholder="Project Description"
+                    value={projectDescription}
+                    onChange={(e) => setProjectDescription(e.target.value)}
+                    className="bp-textarea"
+                    rows={3}
+                  />
+                </div>
+                <div className="bp-form-actions">
+                  <button type="submit" className="bp-btn-primary">
+                    Create
+                  </button>
                   <button
-                    onClick={() => setShowOrgForm(!showOrgForm)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                    type="button"
+                    onClick={() => setShowProjectForm(false)}
+                    className="bp-btn-ghost"
                   >
-                    Create Org
+                    Cancel
                   </button>
                 </div>
+              </form>
+            )}
 
-                {showOrgForm && (
-                  <form onSubmit={handleCreateOrg} className="mb-4 p-4 bg-gray-50 rounded">
-                    <div className="grid grid-cols-1 gap-3">
-                      <input
-                        type="text"
-                        placeholder="Organization Name"
-                        value={orgName}
-                        onChange={(e) => setOrgName(e.target.value)}
-                        required
-                        className="px-3 py-2 border rounded"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Organization Slug (unique)"
-                        value={orgSlug}
-                        onChange={(e) => setOrgSlug(e.target.value)}
-                        required
-                        className="px-3 py-2 border rounded"
-                      />
-                      <div className="flex space-x-2">
-                        <button type="submit" className="bg-green-600 text-white px-3 py-1 rounded text-sm">
-                          Create
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowOrgForm(false)}
-                          className="bg-gray-600 text-white px-3 py-1 rounded text-sm"
-                        >
-                          Cancel
-                        </button>
+            <div className="bp-card-content">
+              {projects.length > 0 ? (
+                <div className="bp-list">
+                  {projects.map(project => (
+                    <div key={project.id} className="bp-list-item">
+                      <div className="bp-list-item-content">
+                        <h3 className="bp-list-item-title">{project.name}</h3>
+                        {project.description && (
+                          <p className="bp-list-item-desc">{project.description}</p>
+                        )}
                       </div>
-                    </div>
-                  </form>
-                )}
-
-                <div className="space-y-2">
-                  {orgs.map(org => (
-                    <div key={org.id} className="p-3 border rounded">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h4 className="font-medium">{org.name}</h4>
-                          <p className="text-sm text-gray-600">@{org.slug}</p>
-                        </div>
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                          {getUserRole(org.id)}
-                        </span>
+                      <div className="bp-list-item-actions">
+                        <button
+                          onClick={() => router.push(`/project/${project.id}`)}
+                          className="bp-btn-secondary"
+                        >
+                          View
+                        </button>
+                        {org && org.role === 'OCA' && (
+                          <button
+                            onClick={() => router.push(`/project/${project.id}/members`)}
+                            className="bp-btn-ghost"
+                          >
+                            Manage Team
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
-                  {orgs.length === 0 && (
-                    <p className="text-gray-500 text-sm">No organizations yet. Create one to get started!</p>
-                  )}
                 </div>
-              </div>
-            </div>
-
-            {/* Projects */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Projects</h3>
-                  {ocaMemberships.length > 0 && (
-                    <button
-                      onClick={() => setShowProjectForm(!showProjectForm)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                    >
-                      Create Project
-                    </button>
-                  )}
-                </div>
-
-                {showProjectForm && (
-                  <form onSubmit={handleCreateProject} className="mb-4 p-4 bg-gray-50 rounded">
-                    <div className="grid grid-cols-1 gap-3">
-                      <select
-                        value={selectedOrgForProject}
-                        onChange={(e) => setSelectedOrgForProject(e.target.value)}
-                        required
-                        className="px-3 py-2 border rounded"
+              ) : (
+                <div className="bp-empty">
+                  {!org ? (
+                    <p>No organization yet</p>
+                  ) : loadError ? (
+                    <>
+                      <p>Could not load your projects</p>
+                      <button
+                        onClick={async () => {
+                          setLoading(true)
+                          await loadUserData(user!.id)
+                        }}
+                        className="bp-btn-secondary"
                       >
-                        <option value="">Select Organization</option>
-                        {orgs.filter(org => getUserRole(org.id) === 'OCA').map(org => (
-                          <option key={org.id} value={org.id}>{org.name}</option>
-                        ))}
-                      </select>
-                      <input
-                        type="text"
-                        placeholder="Project Name"
-                        value={projectName}
-                        onChange={(e) => setProjectName(e.target.value)}
-                        required
-                        className="px-3 py-2 border rounded"
-                      />
-                      <textarea
-                        placeholder="Project Description"
-                        value={projectDescription}
-                        onChange={(e) => setProjectDescription(e.target.value)}
-                        className="px-3 py-2 border rounded"
-                        rows={3}
-                      />
-                      <div className="flex space-x-2">
-                        <button type="submit" className="bg-green-600 text-white px-3 py-1 rounded text-sm">
-                          Create
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowProjectForm(false)}
-                          className="bg-gray-600 text-white px-3 py-1 rounded text-sm"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                )}
-
-                <div className="space-y-2">
-                  {/* Show projects if available */}
-                  {projects.map(project => {
-                    const org = orgs.find(o => o.id === project.org_id)
-                    const isOca = getUserRole(project.org_id) === 'OCA'
-                    return (
-                      <div key={project.id} className="p-3 border rounded hover:bg-gray-50">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{project.name}</h4>
-                            <p className="text-sm text-gray-600">{org?.name}</p>
-                            {project.description && (
-                              <p className="text-sm text-gray-500 mt-1">{project.description}</p>
-                            )}
-                          </div>
-                          <div className="ml-4 flex space-x-2">
-                            <button
-                              onClick={() => router.push(`/project/${project.id}`)}
-                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                            >
-                              View
-                            </button>
-                            {isOca && (
-                              <button
-                                onClick={() => router.push(`/project/${project.id}/members`)}
-                                className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
-                              >
-                                Manage Team
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                  
-                  {/* Empty state logic based on memberships, projects, and loadError */}
-                  {projects.length === 0 && (
-                    <div className="text-gray-500 text-sm">
-                      {memberships.length === 0 ? (
-                        <p>Create your organization to get started</p>
-                      ) : loadError ? (
-                        <div>
-                          <p>Could not load your projects</p>
-                          <button
-                            onClick={async () => {
-                              setLoading(true)
-                              await loadUserData()
-                            }}
-                            className="mt-2 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                          >
-                            Retry
-                          </button>
-                        </div>
-                      ) : (
-                        <p>No projects yet. Create one to get started</p>
-                      )}
-                    </div>
+                        Retry
+                      </button>
+                    </>
+                  ) : (
+                    <p>No projects yet. Create one to get started</p>
                   )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

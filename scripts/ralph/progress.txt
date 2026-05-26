@@ -27,3 +27,15 @@ Started: Mon May 25 21:22:03 CDT 2026
   - Type-check command confirmed as: npm run type-check
   - Browser testing tools not available via MCP, manual testing needed for UI verification
 ---
+
+## Mon May 25 21:33:42 CDT 2026 - US-002
+- Implemented getPrimaryOrg deep module with unit tests
+- Files changed:
+  - Created frontend/src/lib/getPrimaryOrg.ts with function that queries memberships joined with orgs
+  - Created frontend/src/lib/__tests__/getPrimaryOrg.test.ts with comprehensive test coverage
+- **Learnings for future iterations:**
+  - Supabase join syntax uses nested column names like `orgs(id, name)` in select clause
+  - When accessing joined data in TypeScript, may need to cast to `any` to satisfy type checker
+  - Test pattern follows members.test.ts approach with mock chain for from().select().eq().order()
+  - All tests pass and type-check succeeds
+---
