@@ -82,3 +82,31 @@ Started: Mon May 26 23:28:43 CDT 2026
   - Type guard pattern: check typeof === 'string' first, then inclusion in array
   - Frontend role values match backend exactly: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm
 ---
+## Mon May 26 23:50:35 CDT 2026 - US-006
+- Implemented frontend lib/permissions module with canManageTeam and canCreateProject predicates
+- Files changed:
+  - Created frontend/src/lib/permissions.ts with two permission predicate functions
+  - Created frontend/src/lib/__tests__/permissions.test.ts with 16 comprehensive test cases
+- All 16 tests pass successfully under vitest (8 for each predicate)
+- TypeScript type checking passes with npm run type-check
+- Both predicates return true for 'OCA' and 'CM', false for all other roles and invalid inputs
+- **Learnings for future iterations:**
+  - Frontend permissions module follows same pattern as backend
+  - Functions handle null and undefined defensively using type union Role | null | undefined
+  - Test structure mirrors backend tests but with vitest describe/it/expect
+  - Type imports use `import type { Role }` from roles module
+---
+
+## Mon May 26 23:51:00 CDT 2026 - US-007
+- Widened role type unions to use the imported Role type from lib/roles module
+- Files changed:
+  - frontend/src/lib/supabase.ts: Changed Membership interface role field from 'OCA' | 'cx_engineer' to Role type
+  - frontend/src/lib/members.ts: Changed getCurrentUserRole return type from 'OCA' | 'cx_engineer' | null to Role | null and updated the cast
+- TypeScript type checking passes successfully
+- getPrimaryOrg.ts file does not exist yet (to be created in future stories if needed)
+- **Learnings for future iterations:**
+  - The Role type is exported from frontend/src/lib/roles.ts and should be imported with `import type { Role }`
+  - TypeScript checking command is `npm run type-check` not `npm run typecheck`
+  - The 6-role model is now properly typed throughout the frontend type system
+  - Some files referenced in PRDs may not exist yet, which is okay - skip them and focus on what does exist
+---

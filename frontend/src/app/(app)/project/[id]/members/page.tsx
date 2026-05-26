@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { supabase, type DisciplineScope } from '@/lib/supabase'
 import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole, type ProjectMember, type PendingInvite } from '@/lib/members'
 import { getErrorMessage } from '@/lib/error'
+import { ROLES, ROLE_LABELS } from '@/lib/roles'
 
 export default function MembersPage() {
   const params = useParams()
@@ -220,8 +221,11 @@ export default function MembersPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="cx_engineer">CX Engineer</option>
-              <option value="OCA">OCA</option>
+              {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {ROLE_LABELS[role]}
+                </option>
+              ))}
             </select>
           </div>
 
