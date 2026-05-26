@@ -8,6 +8,8 @@ import AiChatDrawer from '@/components/AiChatDrawer'
 import ActivityTab from '@/components/ActivityTab'
 import CitationChip from '@/components/CitationChip'
 import { getErrorMessage } from '@/lib/error'
+import type { Role } from '@/lib/roles'
+import { canManageTeam } from '@/lib/permissions'
 
 interface TestProcedureInstance {
   id: string
@@ -78,7 +80,7 @@ interface AgentRun {
 interface User {
   id: string
   email: string
-  role: 'OCA' | 'cx_engineer'
+  role: Role
 }
 
 export default function EntityDetailPage() {
@@ -125,7 +127,7 @@ export default function EntityDetailPage() {
         setUser({
           id: session.user.id,
           email: session.user.email || '',
-          role: participation.role
+          role: participation.role as Role
         })
 
         // Load test procedure instance
@@ -205,7 +207,7 @@ export default function EntityDetailPage() {
   }, [])
 
   const handleAcceptDraft = async () => {
-    if (!testProcedure || !user || user.role !== 'OCA') return
+    if (!testProcedure || !user || !canManageTeam(user.role)) return
 
     try {
       // Get inbox item ID if exists
@@ -305,7 +307,7 @@ export default function EntityDetailPage() {
             </div>
 
             {/* Accept Draft Button (OCA only) */}
-            {testProcedure.status === 'draft' && user?.role === 'OCA' && (
+            {testProcedure.status === 'draft' && canManageTeam(user?.role) && (
               <div className="bp-entity-actions">
                 <button 
                   className="bp-btn-primary"

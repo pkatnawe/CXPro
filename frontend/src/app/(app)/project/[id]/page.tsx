@@ -6,6 +6,8 @@ import { supabase, type Project } from '@/lib/supabase'
 import { getProjectDashboard, type DashboardSummary, type AgentRunSummary } from '@/lib/dashboard'
 import UploadModal from '@/components/UploadModal'
 import { getErrorMessage } from '@/lib/error'
+import type { Role } from '@/lib/roles'
+import { canManageTeam } from '@/lib/permissions'
 
 export default function DashboardPage() {
   const params = useParams()
@@ -15,7 +17,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
   const [project, setProject] = useState<Project | null>(null)
   const [dashboard, setDashboard] = useState<DashboardSummary | null>(null)
-  const [userRole, setUserRole] = useState<'OCA' | 'cx_engineer' | null>(null)
+  const [userRole, setUserRole] = useState<Role | null>(null)
   const [loading, setLoading] = useState(true)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
@@ -54,7 +56,7 @@ export default function DashboardPage() {
         return
       }
 
-      setUserRole(membershipData.role)
+      setUserRole(membershipData.role as Role)
 
       // Load dashboard data
       const dashboardData = await getProjectDashboard(projectId)
@@ -550,7 +552,7 @@ export default function DashboardPage() {
             )}
           </div>
           <div className="bp-page-tools">
-            {userRole === 'OCA' && (
+            {canManageTeam(userRole) && (
               <button 
                 className="bp-btn-primary"
                 onClick={() => setUploadModalOpen(true)}

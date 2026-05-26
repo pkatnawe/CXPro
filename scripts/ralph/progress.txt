@@ -123,3 +123,16 @@ Started: Mon May 26 23:28:43 CDT 2026
   - The map pattern for generating options keeps UI consistent with the source of truth
   - TypeScript check command in frontend directory is `npm run type-check`
 ---
+
+## Mon May 25 23:59:31 CDT 2026 - US-009
+- Replaced OCA-only permission gates with canManageTeam predicate on members page
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx: Imported canManageTeam from lib/permissions, replaced isOCA state with canManage boolean, updated all UI gates
+- TypeScript type checking passes successfully
+- CMs can now see the invite form and manage team members along with OCAs
+- **Learnings for future iterations:**
+  - State variable names like isOCA should be replaced with semantic names like canManage for clarity
+  - Permission predicates (canManageTeam) provide better abstraction than role string comparisons
+  - The members page doesn't currently have a resend button feature (mentioned in criteria but not implemented)
+  - Import both type Role and the permission functions when updating permission checks
+---
