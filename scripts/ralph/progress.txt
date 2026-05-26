@@ -111,6 +111,22 @@ Started: Mon May 26 23:28:43 CDT 2026
   - Some files referenced in PRDs may not exist yet, which is okay - skip them and focus on what does exist
 ---
 
+## Tue May 26 00:10:15 CDT 2026 - US-012
+- Implemented project switcher dropdown at the top of the members page
+- Files changed:
+  - Created frontend/src/components/ProjectSwitcher.tsx with client component that fetches user's projects
+  - Modified frontend/src/app/(app)/project/[id]/members/page.tsx to import and mount ProjectSwitcher
+- ProjectSwitcher uses getProjectsForUser from lib/projects (which relies on RLS policies)
+- Component automatically hides when user has fewer than 2 projects
+- TypeScript type checking passes successfully
+- **Learnings for future iterations:**
+  - The projects are fetched using the same getProjectsForUser function from lib/projects that the /projects page uses
+  - RLS policies handle filtering projects to only those the user has access to
+  - The ProjectSwitcher component is client-side and uses router.push for navigation
+  - No browser testing tools available (no MCP configured), manual verification needed
+  - Project switcher displays project name and org name for clarity
+---
+
 ## Mon May 26 23:57:00 CDT 2026 - US-008
 - Implemented dynamic Role dropdown generation using ROLES array from lib/roles module
 - Files changed:
