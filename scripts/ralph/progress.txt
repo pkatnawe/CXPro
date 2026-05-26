@@ -1,3 +1,69 @@
 # Ralph Progress Log
 Started: Mon May 26 23:28:43 CDT 2026
+
+## Codebase Patterns
+- Use psycopg2 (not psycopg) for database connections in migration apply scripts
+- Apply scripts pattern: load_dotenv('../.env.local') to get DATABASE_URL
+- Migrations use DO blocks with IF NOT EXISTS checks for idempotency
+- Migration numbering continues sequentially (last was 016, so next is 017)
+- PostgreSQL constraint names follow pattern: <table>_<column>_check
+---
+
+## Mon May 26 23:34:00 CDT 2026 - US-001
+- Implemented DB migration to extend memberships.role CHECK constraint to support 6 canonical human roles
+- Files changed:
+  - Created migrations/017_extend_membership_roles.sql with idempotent migration
+  - Created backend/apply_extend_roles_migration.py following existing apply script convention
+- Migration successfully applied to dev database
+- Extended role values: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm
+- **Learnings for future iterations:**
+  - Both memberships and pending_invitations tables have role CHECK constraints that need updating in sync
+  - PostgreSQL requires dropping existing CHECK constraint before adding a new one
+  - Use pg_constraint system catalog to query existing constraints
+  - Migration verified that existing OCA and cx_engineer roles were preserved
+---
+
+## Mon May 25 23:38:39 CDT 2026 - US-002
+- Implemented backend roles module with is_valid_role function and unit tests
+- Files changed:
+  - Created backend/roles.py with ROLES tuple, ROLE_LABELS dict, and is_valid_role() function
+  - Created backend/tests/test_roles.py with comprehensive test coverage
+- All 5 tests pass successfully
+- Validated the 6 canonical role values: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm
+- **Learnings for future iterations:**
+  - Backend uses pytest for testing, tests are placed in backend/tests/ directory
+  - Test files use sys.path.insert to import modules from parent directory
+  - No specific type checking tool is configured (no mypy/pyright), basic Python syntax checking is sufficient
+  - The 6 roles match exactly with the migration constraints
+---
+
+## Mon May 25 23:41:48 CDT 2026 - US-003
+- Implemented backend permissions module with can_manage_team and can_create_project predicates
+- Files changed:
+  - Created backend/permissions.py with two permission predicate functions
+  - Created backend/tests/test_permissions.py with 7 comprehensive test functions
+- All 7 tests pass successfully (testing both predicates with all 6 roles plus invalid values)
+- Both predicates return True for 'OCA' and 'CM', False for all other roles and invalid inputs
+- **Learnings for future iterations:**
+  - Backend permission predicates follow same pattern as roles module
+  - Functions handle None, empty string, and non-string types defensively
+  - Test coverage includes all 6 canonical roles plus edge cases
+  - No specific Python type checker configured - basic syntax and pytest are sufficient
+---
+
+## Mon May 25 23:46:27 CDT 2026 - US-004
+- Implemented backend invite endpoint to use roles + permissions modules
+- Files changed:
+  - Modified backend/invitation_service.py to import and use is_valid_role and can_manage_team
+  - Replaced _verify_user_is_oca with more general _get_user_role method
+  - Updated create_invitation to validate role via is_valid_role (400 if invalid)
+  - Changed permission gate from "OCA only" to can_manage_team check
+  - Created backend/tests/test_invites_endpoint.py with 4 test cases
+- All 4 new tests pass successfully (CM can invite, invalid role rejected, non-manager cannot invite, OCA backwards compatible)
+- **Learnings for future iterations:**
+  - InvitationService lives in backend/invitation_service.py, not in main.py
+  - The service method _get_user_role returns Optional[str] to handle None cases
+  - Test mocking pattern: use AsyncMock for connection, Mock for Supabase client  
+  - CM users can now invite team members along with OCAs
+  - Role validation happens before permission checks to give clearer error messages
 ---
