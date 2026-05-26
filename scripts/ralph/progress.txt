@@ -67,3 +67,18 @@ Started: Mon May 26 23:28:43 CDT 2026
   - CM users can now invite team members along with OCAs
   - Role validation happens before permission checks to give clearer error messages
 ---
+
+## Mon May 25 23:49:08 CDT 2026 - US-005
+- Implemented frontend lib/roles module with isValidRole type guard and unit tests
+- Files changed:
+  - Created frontend/src/lib/roles.ts with ROLES readonly tuple, Role type union, ROLE_LABELS mapping, and isValidRole type guard
+  - Created frontend/src/lib/__tests__/roles.test.ts with 9 comprehensive test cases
+- All 9 tests pass under vitest
+- TypeScript type checking passes with npm run type-check
+- **Learnings for future iterations:**
+  - Frontend uses vitest for testing, not jest
+  - TypeScript check command is `npm run type-check` not `npm run typecheck`
+  - Role labels follow human-readable format (e.g., "Owner's Commissioning Agent" for OCA)
+  - Type guard pattern: check typeof === 'string' first, then inclusion in array
+  - Frontend role values match backend exactly: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm
+---
