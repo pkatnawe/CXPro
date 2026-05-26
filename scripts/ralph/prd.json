@@ -52,7 +52,7 @@
         "Verify in browser using dev-browser skill: signed in as shlokp98@icloud.com, page shows 'testing' org name and at least one project, Create Project button visible (OCA)"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

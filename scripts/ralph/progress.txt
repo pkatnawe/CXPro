@@ -39,3 +39,20 @@ Started: Mon May 25 21:22:03 CDT 2026
   - Test pattern follows members.test.ts approach with mock chain for from().select().eq().order()
   - All tests pass and type-check succeeds
 ---
+
+## Mon May 25 21:44:00 CDT 2026 - US-003
+- Refactored organization page to single-org view with getPrimaryOrg
+- Files changed:
+  - Modified frontend/src/app/(app)/organization/page.tsx to show single org with filtered projects
+  - Used getPrimaryOrg to fetch user's primary organization
+  - Filtered projects by org_id
+  - Removed orgs list and Create Org form
+  - Added conditional Create Project button for OCA role
+  - Applied bp-* CSS classes throughout
+- **Learnings for future iterations:**
+  - The organization page now expects getPrimaryOrg to return org with role property
+  - bp-* classes provide consistent styling: bp-screen, bp-header, bp-btn-primary, bp-card, bp-list-item, etc.
+  - Empty states must handle three cases: no org, load error, or no projects
+  - Form shows inline without modal/dropdown for better UX
+  - Browser verification still requires manual testing (MCP tools not available)
+---
