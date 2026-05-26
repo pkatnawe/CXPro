@@ -1,0 +1,73 @@
+# Ralph Progress Log
+Started: Mon May 25 14:18:52 CDT 2026
+
+## Codebase Patterns
+- Use vitest imports (describe, test, expect) in test files
+- Frontend test files go in src/lib/__tests__/
+- Type-check command is: npm run type-check (not typecheck)
+- Use bp-* CSS class names for all UI elements — no raw Tailwind color classes
+- Supabase relational joins only work through actual FKs — use multi-step queries + JS join when tables share user_id but have no direct FK
+- Theme state lives in layout.tsx (localStorage + data-theme on documentElement)
+- NEXT_PUBLIC_API_URL env var for all backend fetch calls (fallback: http://localhost:8000)
+- Auth check pattern: supabase.auth.getSession() → if no session redirect to /auth
+- getErrorMessage from @/lib/error for all error display — no instanceof Error pattern
+- maybeSingle() for queries that may legitimately return zero rows; single() only when row must exist
+---
+
+## Mon May 25 14:22:00 CDT 2026 - US-001
+- Implemented getInitials pure function in frontend/src/lib/identity.ts
+- Created comprehensive test file in frontend/src/lib/__tests__/identity.test.ts
+- Files changed:
+  - frontend/src/lib/identity.ts (new)
+  - frontend/src/lib/__tests__/identity.test.ts (new)
+- **Learnings for future iterations:**
+  - Vitest test files need to import describe, test, expect from 'vitest'
+  - Type check command is npm run type-check, not npm run typecheck
+  - Test files successfully run with: npm test -- <path>
+---
+
+## Mon May 25 14:35:45 CDT 2026 - US-002
+- Found that US-002 was already implemented in previous iteration
+- getMembersForProject already uses 6 sequential queries as specified
+- Tests including org isolation test already passing
+- Files already changed:
+  - src/lib/members.ts (already has multi-step query implementation)
+  - src/lib/__tests__/members.test.ts (already has org isolation test)
+- **Learnings for future iterations:**
+  - Always verify current implementation state before starting work
+  - The frontend directory is the root (not ./frontend from project root)
+  - Working directory is /Users/shlok/Desktop/SpareWork/CX/frontend
+---
+
+## Mon May 25 14:37:30 CDT 2026 - US-003
+- Implemented UserMenu dropdown component with initials avatar
+- Avatar displays user initials from full_name or email using getInitials
+- Dropdown opens on click, closes on outside click
+- Theme toggle moved from sidebar to dropdown
+- Manage Team link appears when projectId is present
+- Sign Out button calls supabase.auth.signOut()
+- Files changed:
+  - src/components/UserMenu.tsx (new)
+  - src/app/(app)/layout.tsx (updated to use UserMenu, removed sidebar theme toggle)
+  - src/styles/blueprint.css (added dropdown styles)
+- **Learnings for future iterations:**
+  - UserMenu needs position: relative parent (.bp-user-menu) for dropdown positioning
+  - Use document mousedown listener for outside click detection
+  - Supabase user metadata stored in user.user_metadata.full_name
+  - Next.js build shows JSX errors when running tsc directly without config
+---
+
+## Mon May 25 14:43:00 CDT 2026 - US-004
+- Implemented getCurrentUserRole function to check user's role in a project's org
+- Added OCA gate to the invite form on members page
+- Non-OCA users see "Only OCAs can invite members" notice
+- Files changed:
+  - src/lib/members.ts (added getCurrentUserRole function)
+  - src/lib/__tests__/members.test.ts (added tests for getCurrentUserRole)
+  - src/app/(app)/project/[id]/members/page.tsx (added OCA check and conditional rendering)
+- **Learnings for future iterations:**
+  - Use maybeSingle() instead of single() when membership might not exist
+  - Gate features by checking role before render, not just disabling
+  - Always test role checks with null case (user not in org)
+  - Tests all passing: 13 tests in members.test.ts
+---
