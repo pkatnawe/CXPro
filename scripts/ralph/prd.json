@@ -84,7 +84,7 @@
         "Typecheck passes",
         "Verify in browser using dev-browser skill: sign in fresh, land on /projects"
       ],
-      "priority": 5,
+      "priority": 4,
       "passes": true,
       "notes": ""
     },
