@@ -201,3 +201,16 @@ Started: Mon May 25 21:22:03 CDT 2026
   - 201 for CreateNew/ReplaceExpired, 200 for IncrementResend, 409 for rejections
   - Tests for invite_decision module all pass with pytest
 ---
+
+## Mon May 25 22:16:00 CDT 2026 - US-009
+- Implemented endpoint integration tests for POST /invites covering all 6 scenarios
+- Files changed:
+  - Created backend/tests/test_invites_endpoint.py with FastAPI TestClient integration tests
+- **Learnings for future iterations:**
+  - Tests directory should be in backend/tests/ not backend/ root
+  - Use mocking for service layer to avoid DB conflicts in unit tests  
+  - TestClient from fastapi.testclient is the correct way to test endpoints
+  - Import path needs sys.path.insert when tests are in subdirectory
+  - All 6 scenarios tested: new invite (201), immediate resend (200), cap reached (409), self-invite (409), already-member (409), cx_engineer forbidden (403)
+  - Tests pass both with pytest and standalone execution
+---
