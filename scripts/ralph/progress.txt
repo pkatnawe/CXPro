@@ -56,3 +56,15 @@ Started: Mon May 25 21:22:03 CDT 2026
   - Form shows inline without modal/dropdown for better UX
   - Browser verification still requires manual testing (MCP tools not available)
 ---
+
+## Mon May 25 21:43:16 CDT 2026 - US-004
+- Added Organization link to UserMenu dropdown
+- Files changed:
+  - Modified frontend/src/components/UserMenu.tsx to add Organization link item between theme toggle and Manage Team
+- **Learnings for future iterations:**
+  - UserMenu uses inline SVG icons with viewBox="0 0 24 24" and strokeWidth="1.5"
+  - Building/org icon created using path elements to form a simple building shape
+  - Link component from Next.js handles routing, onClick={() => setIsOpen(false)} closes dropdown
+  - Organization link is visible on all routes (not gated on projectId like Manage Team)
+  - Type-check passes without issues for the new Link component
+---
