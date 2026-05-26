@@ -122,7 +122,7 @@
         "Tests pass via: cd backend && python -m pytest tests/test_invite_decision.py"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
@@ -142,7 +142,7 @@
         "Manual smoke: hit POST /invites twice with the same email and observe send_count incrementing"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

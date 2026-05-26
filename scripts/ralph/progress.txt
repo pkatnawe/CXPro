@@ -171,3 +171,33 @@ Started: Mon May 25 21:22:03 CDT 2026
   - Backend dependencies need to be installed with python3 -m pip (psycopg2-binary, python-dotenv)
   - Migration successfully added send_count column with default value 1 and partial unique index
 ---
+
+## Mon May 25 21:57:22 CDT 2026 - US-007
+- Implemented InviteDecision pure module with comprehensive unit tests
+- Files changed:
+  - Created backend/invite_decision.py with decide_invite_action function and Action union types
+  - Created backend/test_invite_decision.py with 9 comprehensive test cases covering all scenarios
+- **Learnings for future iterations:**
+  - Dataclass fields with defaults must come after fields without defaults (fixed ordering issue)
+  - Backend tests live directly in backend/ directory, not in a tests/ subdirectory
+  - Tests are written in test_*.py format and run with python3 -m pytest
+  - pytest warning about asyncio_mode config option can be ignored (comes from pytest.ini)
+  - All 6 decision scenarios plus edge cases are tested and passing
+  - Pure functions simplify testing - no database or mocking required
+---
+
+## Mon May 25 22:15:00 CDT 2026 - US-008
+- Refactored InvitationService to use InviteDecision module and add pre-flight guards
+- Files changed:
+  - Modified backend/invitation_service.py to integrate decide_invite_action and add self-invite/already-member checks
+  - Modified backend/main.py to support returning different status codes (201 vs 200)
+- **Learnings for future iterations:**
+  - InvitationService.create_invitation now returns tuple of (result_dict, status_code)
+  - Pre-flight guards check self-invite and already-member before decision logic
+  - Self-invite check: compare invited_by user's email with target email
+  - Already-member check: join memberships with users table on email and org_id
+  - Partial unique index ensures at most one pending invite per (email, project_id)
+  - FastAPI Response parameter used to set dynamic status codes in endpoint
+  - 201 for CreateNew/ReplaceExpired, 200 for IncrementResend, 409 for rejections
+  - Tests for invite_decision module all pass with pytest
+---
