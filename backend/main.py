@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -82,7 +82,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 @app.post("/invites")
 async def create_invitation(
     request: InvitationRequest,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    response: Response = None
 ):
     """
     Create a new invitation and send magic link email
@@ -90,6 +91,12 @@ async def create_invitation(
     Requires:
     - Caller must be OCA of the target organization
     - Valid JWT token in Authorization header
+    
+    Returns:
+    - 201 for new invitations (CreateNew or ReplaceExpired)
+    - 200 for resends (IncrementResend)
+    - 409 for cap reached, self-invite, or already-member
+    - 403 for non-OCA attempts
     """
     # Get current user from token
     current_user = await get_current_user(credentials)
@@ -101,8 +108,8 @@ async def create_invitation(
         # Create service instance
         service = InvitationService(supabase, conn)
         
-        # Create invitation
-        result = await service.create_invitation(
+        # Create invitation (now returns tuple of result dict and status code)
+        result, status_code = await service.create_invitation(
             email=request.email,
             org_id=request.org_id,
             project_id=request.project_id,
@@ -110,6 +117,9 @@ async def create_invitation(
             discipline_scope_id=request.discipline_scope_id,
             invited_by=current_user.id
         )
+        
+        # Set the response status code
+        response.status_code = status_code
         
         return result
     
