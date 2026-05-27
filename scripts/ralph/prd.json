@@ -140,7 +140,7 @@
         "Verify in browser using dev-browser skill: UserMenu renders identically pre/post move, no visual regression on the signed-in app shell"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

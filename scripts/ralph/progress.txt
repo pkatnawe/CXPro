@@ -98,3 +98,15 @@ Started: PRD-9 refactor — attempt 2, re-running on top of merged PRD-8 (main @
   - The 2 getPendingInvitesForProject failures are pre-existing (toEqual assertion missing send_count field) — preserved as-is per "assertions unchanged" requirement
   - US-007 will move UserMenu.tsx → contexts/identity/ui.tsx
 ---
+
+## 2026-05-27 - US-007
+- Created frontend/src/contexts/identity/ui.tsx: exports UserMenu as named export (moved verbatim from components/UserMenu.tsx)
+- Deleted frontend/src/components/UserMenu.tsx (no shim)
+- Updated frontend/src/app/(app)/layout.tsx: changed `import UserMenu from "@/components/UserMenu"` to `import { UserMenu } from "@/contexts/identity/ui"`
+- Created frontend/src/contexts/identity/ui.test.tsx: colocated test asserting UserMenu is exported (no pre-existing tests to migrate)
+- Typecheck passes; vitest: 4 failed (same 2 dashboard + 2 members pre-existing failures), 67 passed (one new test added)
+- **Learnings for future iterations:**
+  - UserMenu exported as named export in ui.tsx (not default); consumers must use `{ UserMenu }` destructuring
+  - No other Identity-only components existed beyond UserMenu — cross-cutting components (CommandPalette, UploadModal, etc.) correctly left in place
+  - US-008 will delete the empty frontend/src/contexts/commissioning/ stub
+---
