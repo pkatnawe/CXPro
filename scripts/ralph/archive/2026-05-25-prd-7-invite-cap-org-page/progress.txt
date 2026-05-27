@@ -1,0 +1,9 @@
+# Ralph Progress Log
+Started: PRD-8 Members UX cleanup
+
+## Codebase Patterns
+- Use vitest imports (describe, test, expect) in frontend test files
+- Pure lib modules go in frontend/src/lib/, tests in frontend/src/lib/__tests__/
+- Backend tests live in backend/tests/ and use pytest
+- The 'OCA' | 'cx_engineer' literal union is duplicated across multiple files — consolidate via lib/roles
+- Role === 'OCA' gate appears in 6+ files (FE + BE) — consolidate via lib/permissions and backend permissions module

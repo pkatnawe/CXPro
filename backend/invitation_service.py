@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 import uuid
 from fastapi import HTTPException
 import asyncpg
+from roles import is_valid_role
+from permissions import can_manage_team
 
 
 class InvitationService:
@@ -43,7 +45,7 @@ class InvitationService:
             email: Email address of the invitee
             org_id: Organization ID
             project_id: Project ID
-            role: Role to grant ('OCA' or 'cx_engineer')
+            role: Role to grant (one of the 6 valid role values)
             discipline_scope_id: Discipline scope ID
             invited_by: User ID of the inviter
             
@@ -51,12 +53,16 @@ class InvitationService:
             Dict with invitation ID and success flag
             
         Raises:
-            HTTPException: If inviter is not OCA of the organization
+            HTTPException: If inviter cannot manage team or role is invalid
         """
-        # Verify caller is OCA of the target org
-        is_oca = await self._verify_user_is_oca(invited_by, org_id)
-        if not is_oca:
-            raise HTTPException(status_code=403, detail="Only OCAs can invite users to the organization")
+        # Validate the role
+        if not is_valid_role(role):
+            raise HTTPException(status_code=400, detail=f"Invalid role: {role}")
+        
+        # Verify caller can manage the team
+        caller_role = await self._get_user_role(invited_by, org_id)
+        if not can_manage_team(caller_role):
+            raise HTTPException(status_code=403, detail="You do not have permission to invite users to the organization")
         
         # Generate a secure token
         token = secrets.token_urlsafe(32)
@@ -102,23 +108,23 @@ class InvitationService:
             'success': True
         }
     
-    async def _verify_user_is_oca(self, user_id: str, org_id: str) -> bool:
+    async def _get_user_role(self, user_id: str, org_id: str) -> Optional[str]:
         """
-        Verify if a user is an OCA of the given organization
+        Get the role of a user in the given organization
         
         Args:
             user_id: User ID to check
             org_id: Organization ID
             
         Returns:
-            True if user is OCA, False otherwise
+            User's role string if found, None otherwise
         """
         if not self.conn:
-            return False
+            return None
             
         result = await self.conn.fetchrow("""
             SELECT role FROM memberships 
             WHERE user_id = $1 AND org_id = $2
         """, user_id, org_id)
         
-        return result is not None and result['role'] == 'OCA'
+        return result['role'] if result else None
