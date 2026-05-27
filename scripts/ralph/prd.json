@@ -1,212 +1,161 @@
 {
   "project": "CXPro",
-  "branchName": "ralph/prd-8-members-ux-cleanup",
-  "description": "PRD-8 Members UX cleanup: expand the role enum to the 6 human roles from docs/architecture.md, consolidate role list + permission gates into pure modules on both FE and BE, add project switcher + Name column to members page, add inline Manage Team action to /projects rows, delete the redundant /organization route. See GitHub issue #31.",
+  "branchName": "ralph/refactor-identity-access-pilot",
+  "description": "Pilot the bounded-context layout (deep modules, Supabase-pragmatic) using Identity & Access as the reference implementation. Paired backend + frontend refactor; pure restructure with zero behavior change. See GitHub issue #33 (parent PRD) and tracer-bullet issues #34-#39. Stories US-002..US-004 split #35 into three iteration-sized pieces.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "DB migration — extend memberships.role to permit 4 new values",
-      "description": "As a developer, I need the memberships.role constraint to accept the new role values so that downstream code can insert them without a CHECK violation.",
+      "title": "Backend — extract shared deep modules (db, auth, outbox)",
+      "description": "As a backend developer, I need shared infrastructure (Supabase/asyncpg factories, JWT/permission enforcement edge, outbox writer) consolidated into three deep modules at the backend root, so that every context imports the same narrow public API instead of inlining setup. Foundation for slices US-002..US-005. GitHub issue #34.",
       "acceptanceCriteria": [
-        "Create a new migration in migrations/ that extends the memberships.role CHECK constraint (or enum, whichever the current schema uses) to permit values: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm",
-        "Existing rows with role 'OCA' or 'cx_engineer' are not modified",
-        "Migration applies cleanly against a fresh DB and is idempotent on re-apply",
-        "Typecheck passes"
+        "backend/db.py exists with a narrow public API for Supabase and asyncpg client/connection factories",
+        "backend/auth.py exists with JWT extraction, current_user resolution, and permission-enforcement helpers (e.g. require_permission)",
+        "backend/outbox.py exists with a single function callers use to emit a domain event into the outbox table",
+        "No other backend module duplicates the internals of db/auth/outbox (no second JWT parser, no second outbox INSERT helper)",
+        "backend/permissions.py is reduced to administrative helpers awaiting US-003, or deleted; no parallel enforcement path remains",
+        "Record the pytest pass count before changes; after changes, pytest pass count is identical",
+        "No SQL migration added; no requirements.txt change; no FastAPI route shape change",
+        "Diff consists exclusively of file moves, extractions, and import-path updates — no behavioral changes",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Backend roles module with is_valid_role + unit tests",
-      "description": "As a developer, I need one Python source of truth for valid role values so that the invite validator and any future gate cannot drift from the DB.",
+      "title": "Backend — create contexts/identity_access/invitations.py (absorb invitation_service.py + InviteDecision)",
+      "description": "As a backend developer, I need all invitation lifecycle logic in one deep module at backend/contexts/identity_access/invitations.py, so that the existing invitation_service.py and the InviteDecision pure module are consolidated behind a small public API (send_invite, resend_invite, redeem_invite). Part 1/3 of GitHub issue #35.",
       "acceptanceCriteria": [
-        "Create backend/roles.py exporting ROLES (the 6 canonical string values) and is_valid_role(s: str) -> bool",
-        "Display labels are exported as ROLE_LABELS dict keyed by role value",
-        "Create backend/tests/test_roles.py with cases: is_valid_role returns True for each of the 6 values, False for '', None, 'ADMIN', and case-variants like 'oca'",
-        "Tests pass",
-        "Typecheck passes"
+        "backend/contexts/__init__.py and backend/contexts/identity_access/__init__.py exist",
+        "backend/contexts/identity_access/invitations.py exists with a small public API covering the invitation lifecycle (send/resend/redeem)",
+        "The InviteDecision pure module from prior work is colocated inside invitations.py or imported privately; it is not exposed as a separate public file",
+        "backend/invitation_service.py is deleted; no shim re-export file remains",
+        "All invitation-related tests (test_invitation_service.py, test_invitation_service_simple.py) updated for the new import path; assertions unchanged",
+        "invitations.py uses backend/db.py, backend/auth.py, backend/outbox.py from US-001 rather than inlining their internals",
+        "POST /invites returns identical request/response shapes — verified by test_main.py continuing to pass",
+        "pytest pass count unchanged from US-001 baseline",
+        "No SQL migration; no Supabase RPC signature change; no RLS change",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Backend permissions module with can_manage_team / can_create_project + unit tests",
-      "description": "As a developer, I need named predicates for permission gates so that scattered role-string checks in the backend can be consolidated.",
+      "title": "Backend — create contexts/identity_access/memberships.py (absorb roles.py + admin side of permissions.py)",
+      "description": "As a backend developer, I need Role/Permission administration and Membership lifecycle consolidated in one deep module at backend/contexts/identity_access/memberships.py, so that the existing roles.py and the administrative side of permissions.py live behind a small public API. Part 2/3 of GitHub issue #35.",
       "acceptanceCriteria": [
-        "Create backend/permissions.py exporting can_manage_team(role) and can_create_project(role), both returning True for 'OCA' and 'CM', False otherwise",
-        "Both predicates return False for None, empty string, and unknown roles",
-        "Create backend/tests/test_permissions.py covering all 6 roles plus None/empty/unknown for both predicates",
-        "Tests pass",
-        "Typecheck passes"
+        "backend/contexts/identity_access/memberships.py exists with a small public API for Role/Permission administration and Membership lifecycle operations",
+        "backend/roles.py is deleted; no shim",
+        "backend/permissions.py — administrative helpers move into memberships.py; the file is either deleted entirely or contains only items still pending removal; no duplication of enforcement-edge logic already in backend/auth.py from US-001",
+        "Any test files that previously imported from roles.py or permissions.py are updated to the new path; assertions unchanged",
+        "memberships.py uses backend/db.py and backend/auth.py from US-001 rather than inlining their internals",
+        "pytest pass count unchanged from US-002 baseline",
+        "No SQL migration; no RLS change",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Backend invite endpoint uses roles + permissions modules",
-      "description": "As an OCA or CM, I want the invite endpoint to accept any of the 6 role values and to permit CM (not only OCA) to invite, so that the expanded role model is honored end-to-end.",
+      "title": "Backend — create contexts/identity_access/api.py router and reduce main.py to a composition root",
+      "description": "As a backend developer, I need the FastAPI router for Identity & Access in its own thin module that delegates to invitations.py and memberships.py, and backend/main.py to contain only app setup plus include_router calls. Part 3/3 of GitHub issue #35.",
       "acceptanceCriteria": [
-        "InvitationService (or the FastAPI route in main.py) validates the incoming role via is_valid_role and rejects with a 400 if invalid",
-        "The 'Only OCAs can invite' 403 gate is replaced by a can_manage_team(caller_role) check, so CM is also permitted",
-        "Extend backend/tests/test_invites_endpoint.py with a case that POSTs role='CM' and asserts 200, and one that POSTs role='not_a_role' and asserts 400",
-        "Existing invite tests continue to pass",
-        "Typecheck passes"
+        "backend/contexts/identity_access/api.py exists and defines an APIRouter for /invites (and any other Identity HTTP endpoints currently in main.py)",
+        "api.py route handlers are thin: extract request, delegate to invitations.py or memberships.py, return response — no business logic in handlers",
+        "backend/main.py contains only FastAPI instantiation, middleware wiring, and include_router calls; zero route handlers and zero business logic remain",
+        "test_main.py continues to cover POST /invites with all existing scenarios; assertions unchanged",
+        "POST /invites returns identical request/response shapes pre and post merge — verified by test_main.py passing",
+        "pytest pass count unchanged from US-003 baseline",
+        "No SQL migration; no Supabase RPC name or signature change; no RLS change",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Frontend lib/roles module with isValidRole + unit tests",
-      "description": "As a developer, I need one TypeScript source of truth for valid role values so that role dropdowns and type unions stop being duplicated across files.",
+      "title": "Backend — relocate workers to backend/workers/",
+      "description": "As a backend developer, I need both long-running background processes under backend/workers/, so that worker processes are visibly separated from request-handling code. GitHub issue #36.",
       "acceptanceCriteria": [
-        "Create frontend/src/lib/roles.ts exporting ROLES (readonly tuple of the 6 values), Role type (union derived from ROLES), ROLE_LABELS (Record<Role, string>), and isValidRole(s: unknown): s is Role",
-        "Create frontend/src/lib/__tests__/roles.test.ts with cases: isValidRole returns true for each of the 6 values, false for '', null, undefined, 'ADMIN', and case-variants",
-        "Tests pass under vitest",
-        "Typecheck passes"
+        "backend/workers/__init__.py exists",
+        "backend/workers/outbox_dispatcher.py and backend/workers/inbox_subscriber.py exist with content moved verbatim from the old locations (only internal imports updated)",
+        "backend/outbox_dispatcher.py and backend/inbox_subscriber.py are deleted; no shims",
+        "Worker tests (test_outbox_dispatcher.py, verify_outbox_dispatcher.py) travel with the sources and continue to pass",
+        "Any process-manager or deployment config (railway.json, Dockerfile, scripts) referencing the old paths is updated to the new paths",
+        "Workers consume backend/db.py and backend/outbox.py from US-001 rather than re-implementing their internals",
+        "pytest pass count unchanged from US-004 baseline",
+        "No behavior change in dispatch frequency, retry semantics, or event handling",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-006",
-      "title": "Frontend lib/permissions module with canManageTeam / canCreateProject + unit tests",
-      "description": "As a developer, I need named predicates so that scattered role === 'OCA' checks across the frontend can be consolidated.",
+      "title": "Frontend — consolidate Identity data access into contexts/identity/api.ts",
+      "description": "As a frontend developer, I need frontend/src/lib/{members,identity,roles,permissions}.ts merged into a single deep module at frontend/src/contexts/identity/api.ts, so that all Identity data access lives behind one narrow public API. GitHub issue #37.",
       "acceptanceCriteria": [
-        "Create frontend/src/lib/permissions.ts exporting canManageTeam(role: Role | null | undefined): boolean and canCreateProject(role: Role | null | undefined): boolean, both returning true only for 'OCA' and 'CM'",
-        "Create frontend/src/lib/__tests__/permissions.test.ts covering all 6 roles plus null/undefined for both predicates",
-        "Tests pass under vitest",
-        "Typecheck passes"
+        "frontend/src/contexts/identity/api.ts exists and exports the union of public functions previously in lib/members.ts, lib/identity.ts, lib/roles.ts, lib/permissions.ts — same function names, same signatures, same return shapes",
+        "frontend/src/lib/members.ts, lib/identity.ts, lib/roles.ts, lib/permissions.ts are deleted; no shim re-export files",
+        "All consumer files across frontend/src/app/, frontend/src/components/, and tests use the new import path",
+        "Grep for the old import paths (lib/members, lib/identity, lib/roles, lib/permissions) across frontend/src/ returns zero hits",
+        "frontend/src/contexts/identity/types.ts remains and is the canonical source of Identity-related TypeScript types",
+        "Identity tests (members.test.ts, identity.test.ts, roles.test.ts, permissions.test.ts) move to colocate with api.ts; assertions unchanged",
+        "Vitest pass count unchanged from baseline",
+        "No Supabase call signature change; no RPC name change; no UI behavior change",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill: sign in, open /projects, open /project/[id]/members, send an invite, click resend — all behaviors identical to pre-refactor"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-007",
-      "title": "Widen role type unions in supabase.ts, getPrimaryOrg, members.ts",
-      "description": "As a developer, I want the existing 'OCA' | 'cx_engineer' literal unions widened to the full Role type, so that the 6-role model flows through type signatures without manual re-typing.",
+      "title": "Frontend — consolidate Identity UI into contexts/identity/ui.tsx",
+      "description": "As a frontend developer, I need Identity-only UI components (UserMenu and any others surfaced during US-006) moved into a single deep module at frontend/src/contexts/identity/ui.tsx, so that Identity UI is colocated with Identity data access. GitHub issue #38.",
       "acceptanceCriteria": [
-        "frontend/src/lib/supabase.ts: change the membership role type alias to the imported Role from lib/roles",
-        "frontend/src/lib/getPrimaryOrg.ts: change the return-type role field to Role and the cast on firstMembership.role to Role",
-        "frontend/src/lib/members.ts: change getCurrentUserRole return type from 'OCA' | 'cx_engineer' | null to Role | null and update the cast",
-        "Typecheck passes"
+        "frontend/src/contexts/identity/ui.tsx exists and exports <UserMenu/> plus any other Identity-only components surfaced during US-006",
+        "frontend/src/components/UserMenu.tsx is deleted; no shim",
+        "All consumers reference the new import path; grep for the old path returns zero hits",
+        "Cross-cutting components (CommandPalette, UploadModal, AiChatDrawer, CitationChip, ActivityTab, ProjectSwitcher) are NOT moved in this story — out of scope",
+        "Component tests are colocated with ui.tsx (e.g. frontend/src/contexts/identity/ui.test.tsx); assertions unchanged",
+        "The Manage Team button persistence bug is preserved exactly as-is — fixing it is explicitly out of scope and deferred to a follow-up PR",
+        "Vitest pass count unchanged from US-006 baseline",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill: UserMenu renders identically pre/post move, no visual regression on the signed-in app shell"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-008",
-      "title": "Members page — expand Role dropdown to 6 values",
-      "description": "As an OCA or CM, I want to pick from all 6 role values when inviting a new member so that I can assign Construction Manager, Field Technician, Design Engineer, and Owner/FM in addition to OCA and Cx Engineer.",
+      "title": "Frontend — delete empty contexts/commissioning/ stub",
+      "description": "As a frontend developer, I need the empty frontend/src/contexts/commissioning/ directory removed, so that empty scaffolding cannot become load-bearing in import paths. GitHub issue #39.",
       "acceptanceCriteria": [
-        "frontend/src/app/(app)/project/[id]/members/page.tsx: replace the hardcoded <option> elements with options generated by mapping over ROLES from lib/roles, using ROLE_LABELS for the visible text",
-        "Default formData.role remains 'cx_engineer'",
+        "Pre-deletion grep for 'contexts/commissioning' in frontend/src/ (excluding the directory itself) returns zero hits; if any reference exists, this story is blocked and the reference is reported back rather than force-deleted",
+        "frontend/src/contexts/commissioning/ directory and its files (types.ts, index.ts) are removed",
+        "Vitest pass count unchanged from US-007 baseline",
         "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "No other files modified"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-009",
-      "title": "Replace OCA-only gates with canManageTeam on members page",
-      "description": "As a CM, I want to see the invite form and resend buttons on the members page, so that I can manage my team without OCA bottleneck.",
-      "acceptanceCriteria": [
-        "frontend/src/app/(app)/project/[id]/members/page.tsx: replace setIsOCA(role === 'OCA') and the isOCA state with a canManage boolean computed via canManageTeam(role)",
-        "All UI gates that referenced isOCA (invite form, resend button column) now reference canManage",
-        "Tests in frontend/src/lib/__tests__/members.test.ts (if any reference the role-gate shape) continue to pass",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 9,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-010",
-      "title": "Replace OCA gates on project and entity pages with canManageTeam / canCreateProject",
-      "description": "As a CM, I want the project and entity pages to expose admin actions to me, so that capability matches the documented CM role.",
-      "acceptanceCriteria": [
-        "frontend/src/app/(app)/project/[id]/page.tsx: replace the two userRole === 'OCA' gates with canManageTeam(userRole) and widen useState type to Role | null",
-        "frontend/src/app/(app)/entity/[id]/page.tsx: replace the two user.role !== 'OCA' / user?.role === 'OCA' gates with calls to canManageTeam(user?.role); widen the role type on the user shape to Role",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 10,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-011",
-      "title": "Members page — add Name column to Current Members table",
-      "description": "As any user, I want to see member names alongside emails so that I can identify teammates by name.",
-      "acceptanceCriteria": [
-        "frontend/src/app/(app)/project/[id]/members/page.tsx: prepend a 'Name' <th> before Email in the Current Members table header",
-        "Each row renders member.full_name as the first <td>, falling back to '—' when full_name is null/undefined/empty",
-        "Pending Invitations table is not modified",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 11,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-012",
-      "title": "Members page — add project switcher at top",
-      "description": "As an OCA or CM, I want to switch between my projects' membership pages without navigating back to /projects so that managing multiple projects is fast.",
-      "acceptanceCriteria": [
-        "Create frontend/src/components/ProjectSwitcher.tsx: a client component that fetches the current user's projects (via the participations + projects join already used in lib/members.ts patterns) and renders a <select> with the current projectId selected",
-        "onChange calls router.push(`/project/${newId}/members`)",
-        "Mount ProjectSwitcher at the top of frontend/src/app/(app)/project/[id]/members/page.tsx, above the H1 or directly under it",
-        "Picker hides itself (renders null) if the user has fewer than 2 projects",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 12,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-013",
-      "title": "Projects page — add inline Manage Team action per project row",
-      "description": "As an OCA or CM, I want a Manage Team button on each project row in /projects, so that I can jump straight to membership management without entering the project first.",
-      "acceptanceCriteria": [
-        "frontend/src/app/(app)/projects/page.tsx (or whichever component renders the projects list): add a 'Manage Team' button/link per row linking to /project/<id>/members",
-        "The action is rendered only when canManageTeam(currentUserRole) returns true",
-        "Currently-rendered project info (name, etc.) is preserved",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 13,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-014",
-      "title": "Delete /organization route and remove Organization link from UserMenu",
-      "description": "As an end-user, I want the redundant /organization page gone so that /projects is the single canonical home for my project list and the user dropdown stops linking to a broken page.",
-      "acceptanceCriteria": [
-        "Delete frontend/src/app/(app)/organization/page.tsx and the organization directory",
-        "Remove the <Link href=\"/organization\"> Organization item from frontend/src/components/UserMenu.tsx (including its surrounding icon/markup)",
-        "Navigating to /organization returns 404 (or Next.js's default not-found behavior)",
-        "User dropdown no longer shows an Organization entry between Dark mode and Manage Team",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 14,
-      "passes": true,
+      "passes": false,
       "notes": ""
     }
   ]
