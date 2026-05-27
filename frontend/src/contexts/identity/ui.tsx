@@ -12,7 +12,7 @@ interface UserMenuProps {
   onThemeChange: (theme: "light" | "dark") => void;
 }
 
-export default function UserMenu({ projectId, theme, onThemeChange }: UserMenuProps) {
+export function UserMenu({ projectId, theme, onThemeChange }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const [fullName, setFullName] = useState<string | undefined>(undefined);
