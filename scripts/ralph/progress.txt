@@ -66,3 +66,19 @@ Started: PRD-9 refactor — attempt 2, re-running on top of merged PRD-8 (main @
   - main.py exception_handler and CORS middleware remain in main.py (app-level concerns, not context-specific)
   - US-005 will relocate workers to backend/workers/
 ---
+
+## 2026-05-27 - US-005
+- Created backend/workers/__init__.py
+- Moved backend/outbox_dispatcher.py → backend/workers/outbox_dispatcher.py (verbatim, no internal imports to update — self-contained)
+- Moved backend/inbox_subscriber.py → backend/workers/inbox_subscriber.py (updated `from outbox_dispatcher` → `from workers.outbox_dispatcher`)
+- Moved backend/test_outbox_dispatcher.py → backend/workers/test_outbox_dispatcher.py (updated import path)
+- Moved backend/verify_outbox_dispatcher.py → backend/workers/verify_outbox_dispatcher.py (no imports to update)
+- Updated backend/cx_execution_agent.py: lazy import `from outbox_dispatcher` → `from workers.outbox_dispatcher`
+- Updated backend/pytest.ini: `--ignore=test_outbox_dispatcher.py` → `--ignore=workers/test_outbox_dispatcher.py`
+- pytest: 37 passed, 5 failed — identical to US-004 baseline
+- **Learnings for future iterations:**
+  - railway.json start command is `uvicorn main:app` — no worker process entry points referenced, so no deploy config update needed
+  - apply_outbox_migration.py references a migration SQL path string (not an import), so no import update needed
+  - test_outbox_dispatcher.py is already ignored in pytest.ini (requires live DB); only needed to update the --ignore path
+  - US-006 starts frontend consolidation: lib/{members,identity,roles,permissions}.ts → contexts/identity/api.ts
+---
