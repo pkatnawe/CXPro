@@ -120,7 +120,7 @@
         "Verify in browser using dev-browser skill: sign in, open /projects, open /project/[id]/members, send an invite, click resend — all behaviors identical to pre-refactor"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

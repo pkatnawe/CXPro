@@ -82,3 +82,19 @@ Started: PRD-9 refactor — attempt 2, re-running on top of merged PRD-8 (main @
   - test_outbox_dispatcher.py is already ignored in pytest.ini (requires live DB); only needed to update the --ignore path
   - US-006 starts frontend consolidation: lib/{members,identity,roles,permissions}.ts → contexts/identity/api.ts
 ---
+
+## 2026-05-27 - US-006
+- Created frontend/src/contexts/identity/api.ts: merges ROLES/ROLE_LABELS/isValidRole from roles.ts, canManageTeam/canCreateProject from permissions.ts, getInitials from identity.ts, and all members.ts functions (getMembersForProject, getPendingInvitesForProject, getCurrentUserRole, updateDiscipline) plus ProjectMember/PendingInvite interfaces
+- Deleted frontend/src/lib/{members,identity,roles,permissions}.ts (no shims)
+- Moved test files: lib/__tests__/{members,identity,roles,permissions}.test.ts → contexts/identity/{members,identity,roles,permissions}.test.ts with import paths updated to ./api; assertions unchanged
+- Updated consumers: app/(app)/project/[id]/members/page.tsx, project/[id]/page.tsx, projects/page.tsx, entity/[id]/page.tsx, components/UserMenu.tsx
+- Updated lib/supabase.ts: changed `import type { Role } from './roles'` → `import type { Role } from '@/contexts/identity/api'`
+- Fixed pre-existing isOCA undefined variable in members/page.tsx → replaced with canManage (existing state variable)
+- Added vi.mock('@/lib/supabase') to identity/roles/permissions test files to prevent supabase init error at module load
+- Typecheck passes; vitest: 4 failed (2 dashboard pre-existing + 2 members getPendingInvites pre-existing), 66 passed
+- **Learnings for future iterations:**
+  - When tests import from a module that imports supabase at module load time, must mock supabase even if the test doesn't use DB functions
+  - contexts/identity/api.ts imports supabase at top level; pure-function tests (getInitials, roles, permissions) need vi.mock('@/lib/supabase') to avoid init error
+  - The 2 getPendingInvitesForProject failures are pre-existing (toEqual assertion missing send_count field) — preserved as-is per "assertions unchanged" requirement
+  - US-007 will move UserMenu.tsx → contexts/identity/ui.tsx
+---
