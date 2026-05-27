@@ -11,3 +11,20 @@ Started: PRD-9 refactor — attempt 2, re-running on top of merged PRD-8 (main @
 - Use vitest imports (describe, test, expect) in frontend test files.
 - Frontend test files go in src/lib/__tests__/ or colocated with deep modules.
 - Type-check command: npm run type-check (not typecheck).
+- Backend pytest baseline (before refactor): 37 passed, 5 failed (pre-existing failures: test_redeem_pending_invitations, test_invitation_service*, tests/test_invites_endpoint::test_cm_can_invite, tests/test_invites_endpoint::test_oca_can_still_invite)
+- auth.py imports can_manage_team from permissions.py to avoid a parallel enforcement path
+- outbox table schema: INSERT INTO outbox (event_type, event_data) VALUES ($1, $2)
+
+## 2026-05-27 - US-001
+- Created backend/db.py: get_supabase_client() and get_db_connection() factories
+- Created backend/auth.py: security (HTTPBearer), get_current_user(), require_permission() delegating to permissions.py
+- Created backend/outbox.py: emit_event(conn, event_type, event_data) single public function
+- Updated backend/main.py: removed inline Supabase/asyncpg setup and get_current_user, now imports from db.py and auth.py
+- permissions.py unchanged — keeps can_manage_team/can_create_project as administrative predicates; auth.py delegates to it (no parallel enforcement path)
+- Files changed: backend/db.py (new), backend/auth.py (new), backend/outbox.py (new), backend/main.py (updated)
+- pytest: 37 passed, 5 failed — identical to baseline
+- **Learnings for future iterations:**
+  - The 5 pre-existing test failures are: test_redeem_pending_invitations (unique constraint on live DB), test_invitation_service* (live DB KeyError), tests/test_invites_endpoint::test_cm/oca (mock side_effect exhausted before all 3 fetchrow calls)
+  - invitation_service.py still imports from permissions.py directly — US-002 will move invitation logic to contexts/identity_access/invitations.py
+  - contexts/__init__.py and contexts/identity_access/__init__.py don't exist yet as .py files (only __pycache__) — US-002 must create them
+---
