@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import type { Role } from './roles'
 
 export interface ProjectMember {
   user_id: string
@@ -158,7 +159,7 @@ export async function getPendingInvitesForProject(projectId: string): Promise<Pe
 export async function getCurrentUserRole(
   userId: string,
   projectId: string
-): Promise<'OCA' | 'cx_engineer' | null> {
+): Promise<Role | null> {
   try {
     // First get the project's org_id
     const { data: project, error: projectError } = await supabase
@@ -183,7 +184,7 @@ export async function getCurrentUserRole(
     
     if (!membership) return null
     
-    return membership.role as 'OCA' | 'cx_engineer'
+    return membership.role as Role
   } catch (error) {
     console.error('Error fetching user role:', error)
     throw error

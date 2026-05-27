@@ -5,6 +5,9 @@ import { useRouter, useParams } from 'next/navigation'
 import { supabase, type DisciplineScope } from '@/lib/supabase'
 import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole, type ProjectMember, type PendingInvite } from '@/lib/members'
 import { getErrorMessage } from '@/lib/error'
+import { ROLES, ROLE_LABELS, type Role } from '@/lib/roles'
+import { canManageTeam } from '@/lib/permissions'
+import { ProjectSwitcher } from '@/components/ProjectSwitcher'
 
 export default function MembersPage() {
   const params = useParams()
@@ -24,7 +27,7 @@ export default function MembersPage() {
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([])
   const [membersLoading, setMembersLoading] = useState(true)
   const [updatingDiscipline, setUpdatingDiscipline] = useState<string | null>(null)
-  const [isOCA, setIsOCA] = useState(false)
+  const [canManage, setCanManage] = useState(false)
   const [roleLoading, setRoleLoading] = useState(true)
   const [resendingInvite, setResendingInvite] = useState<string | null>(null)
 
@@ -39,13 +42,13 @@ export default function MembersPage() {
         return
       }
 
-      // Check if user is OCA
+      // Check if user can manage team
       try {
         const role = await getCurrentUserRole(session.user.id, projectId)
-        setIsOCA(role === 'OCA')
+        setCanManage(canManageTeam(role))
       } catch (error) {
         console.error('Error checking user role:', error)
-        setIsOCA(false)
+        setCanManage(false)
       } finally {
         setRoleLoading(false)
       }
@@ -277,12 +280,14 @@ export default function MembersPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Project Members</h1>
+      
+      <ProjectSwitcher />
 
       {roleLoading ? (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="text-gray-500">Loading permissions...</div>
         </div>
-      ) : isOCA ? (
+      ) : canManage ? (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Invite Team Member</h2>
           
@@ -313,8 +318,11 @@ export default function MembersPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="cx_engineer">CX Engineer</option>
-              <option value="OCA">OCA</option>
+              {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {ROLE_LABELS[role]}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -362,7 +370,7 @@ export default function MembersPage() {
       ) : (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="text-gray-500 text-center py-4">
-            Only OCAs can invite members
+            Only OCAs and CMs can invite members
           </div>
         </div>
       )}
@@ -379,6 +387,9 @@ export default function MembersPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -392,6 +403,9 @@ export default function MembersPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {members.map((member) => (
                   <tr key={member.user_id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {member.full_name || '—'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {member.email}
                     </td>

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Role } from './roles'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
@@ -26,7 +27,7 @@ export interface Membership {
   id: string
   user_id: string
   org_id: string
-  role: 'OCA' | 'cx_engineer'
+  role: Role
   created_at: string
 }
 

@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { getProjectsForUser, type ProjectCard } from "@/lib/projects"
 import { supabase } from "@/lib/supabase"
+import { getCurrentUserRole } from "@/lib/members"
+import { canManageTeam } from "@/lib/permissions"
+import type { Role } from "@/lib/roles"
 
 // ProjectThumb SVG component matching blueprint-app.jsx pattern
 function ProjectThumb({ kind }: { kind?: string }) {
@@ -41,6 +44,7 @@ function ProjectThumb({ kind }: { kind?: string }) {
 export default function ProjectsPage() {
   const router = useRouter()
   const [projects, setProjects] = useState<ProjectCard[]>([])
+  const [userRoles, setUserRoles] = useState<Record<string, Role | null>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -52,6 +56,25 @@ export default function ProjectsPage() {
     try {
       const data = await getProjectsForUser()
       setProjects(data)
+      
+      // Get current user
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        // Fetch user roles for each project
+        const roles: Record<string, Role | null> = {}
+        await Promise.all(
+          data.map(async (project) => {
+            try {
+              const role = await getCurrentUserRole(session.user.id, project.project_id)
+              roles[project.project_id] = role
+            } catch (err) {
+              console.error(`Failed to get role for project ${project.project_id}:`, err)
+              roles[project.project_id] = null
+            }
+          })
+        )
+        setUserRoles(roles)
+      }
     } catch (err) {
       console.error("Failed to load projects:", err)
       setError("Failed to load projects")
@@ -103,34 +126,46 @@ export default function ProjectsPage() {
         </div>
       ) : (
         <div className="bp-proj-grid">
-          {projects.map((project, index) => (
-            <Link 
-              key={project.project_id} 
-              href={`/project/${project.project_id}`}
-              className="bp-proj-tile"
-            >
-              <div className="bp-proj-tile-thumb">
-                <ProjectThumb kind={paletteKinds[index % paletteKinds.length]} />
+          {projects.map((project, index) => {
+            const userRole = userRoles[project.project_id]
+            const showManageTeam = canManageTeam(userRole)
+            
+            return (
+              <div key={project.project_id} className="bp-proj-tile">
+                <Link href={`/project/${project.project_id}`} className="bp-proj-tile-link">
+                  <div className="bp-proj-tile-thumb">
+                    <ProjectThumb kind={paletteKinds[index % paletteKinds.length]} />
+                  </div>
+                  <div className="bp-proj-tile-body">
+                    <div className="bp-proj-tile-name">{project.name}</div>
+                    <div className="bp-proj-tile-meta">
+                      <span>{project.org_name}</span>
+                      {project.description && (
+                        <>
+                          <span className="bp-dot"/>
+                          <span>{project.description}</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="bp-proj-tile-foot">
+                      <span className="bp-mono">
+                        {new Date(project.created_at).toLocaleDateString()}
+                      </span>
+                      {showManageTeam && (
+                        <Link 
+                          href={`/project/${project.project_id}/members`}
+                          className="bp-manage-team-btn"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Manage Team
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </Link>
               </div>
-              <div className="bp-proj-tile-body">
-                <div className="bp-proj-tile-name">{project.name}</div>
-                <div className="bp-proj-tile-meta">
-                  <span>{project.org_name}</span>
-                  {project.description && (
-                    <>
-                      <span className="bp-dot"/>
-                      <span>{project.description}</span>
-                    </>
-                  )}
-                </div>
-                <div className="bp-proj-tile-foot">
-                  <span className="bp-mono">
-                    {new Date(project.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -207,21 +242,23 @@ export default function ProjectsPage() {
         }
 
         .bp-proj-tile {
-          display: block;
           background: var(--bp-surface);
           border: 1px solid var(--bp-border);
           border-radius: 8px;
           overflow: hidden;
           transition: all 0.2s;
-          cursor: pointer;
-          text-decoration: none;
-          color: inherit;
         }
 
         .bp-proj-tile:hover {
           border-color: var(--bp-accent);
           transform: translateY(-2px);
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bp-proj-tile-link {
+          display: block;
+          text-decoration: none;
+          color: inherit;
         }
 
         .bp-proj-tile-thumb {
@@ -262,12 +299,31 @@ export default function ProjectsPage() {
           border-top: 1px solid var(--bp-border-subtle);
           display: flex;
           justify-content: space-between;
+          align-items: center;
           font-size: 12px;
           color: var(--bp-text-tertiary);
         }
 
         .bp-mono {
           font-family: var(--font-jetbrains-mono);
+        }
+        
+        .bp-manage-team-btn {
+          padding: 4px 12px;
+          background: var(--bp-bg-secondary);
+          color: var(--bp-text);
+          border: 1px solid var(--bp-border);
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 500;
+          text-decoration: none;
+          transition: all 0.2s;
+        }
+        
+        .bp-manage-team-btn:hover {
+          background: var(--bp-accent);
+          color: white;
+          border-color: var(--bp-accent);
         }
       `}</style>
     </div>
