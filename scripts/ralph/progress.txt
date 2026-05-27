@@ -28,3 +28,16 @@ Started: PRD-9 refactor — attempt 2, re-running on top of merged PRD-8 (main @
   - invitation_service.py still imports from permissions.py directly — US-002 will move invitation logic to contexts/identity_access/invitations.py
   - contexts/__init__.py and contexts/identity_access/__init__.py don't exist yet as .py files (only __pycache__) — US-002 must create them
 ---
+
+## 2026-05-27 - US-002
+- Created backend/contexts/__init__.py and backend/contexts/identity_access/__init__.py
+- Created backend/contexts/identity_access/invitations.py: inlines InviteDecision pure logic (_decide_invite_action, ExistingInvite, action dataclasses) and contains InvitationService class plus send_invite() public function
+- Deleted backend/invitation_service.py and backend/invite_decision.py (no shims)
+- Updated backend/main.py: imports InvitationService from contexts.identity_access.invitations
+- Updated tests: test_invite_decision.py, test_invitation_service.py, test_invitation_service_simple.py, tests/test_invites_endpoint.py — all import paths updated; assertions unchanged
+- pytest: 37 passed, 5 failed — identical to US-001 baseline
+- **Learnings for future iterations:**
+  - InviteDecision functions are private (_decide_invite_action) inside invitations.py; test_invite_decision.py imports them with alias `as decide_invite_action`
+  - contexts/identity_access/ is now a proper Python package with __init__.py files
+  - roles.py and permissions.py still exist at backend root — US-003 will move roles.py and admin side of permissions.py into memberships.py
+---
