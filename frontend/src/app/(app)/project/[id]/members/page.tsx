@@ -29,6 +29,7 @@ export default function MembersPage() {
   const [updatingDiscipline, setUpdatingDiscipline] = useState<string | null>(null)
   const [canManage, setCanManage] = useState(false)
   const [roleLoading, setRoleLoading] = useState(true)
+  const [resendingInvite, setResendingInvite] = useState<string | null>(null)
 
   // Check authentication and load disciplines
   useEffect(() => {
@@ -113,6 +114,85 @@ export default function MembersPage() {
     }
   }
 
+  const handleResendInvite = async (invite: PendingInvite) => {
+    setResendingInvite(invite.id)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      // Get current session for JWT
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.access_token) {
+        setError('Authentication required')
+        return
+      }
+
+      // Get project's org_id
+      const { data: projectData, error: projectError } = await supabase
+        .from('projects')
+        .select('org_id')
+        .eq('id', projectId)
+        .single()
+
+      if (projectError || !projectData) {
+        setError('Failed to load project information')
+        return
+      }
+
+      // Get discipline_scope_id from discipline_name
+      const discipline = disciplines.find(d => d.name === invite.discipline_name)
+
+      // Call the backend API with the same invite data (this will trigger IncrementResend)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/invites`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          email: invite.email,
+          org_id: projectData.org_id,
+          project_id: projectId,
+          role: invite.role,
+          discipline_scope_id: discipline?.id || ''
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        if (errorData?.detail?.error) {
+          // Handle specific error codes
+          const errorCode = errorData.detail.error
+          if (errorCode === 'self_invite') {
+            throw new Error('You cannot invite yourself')
+          } else if (errorCode === 'already_member') {
+            throw new Error(`${invite.email} is already a member of this org`)
+          } else if (errorCode === 'cap_reached') {
+            throw new Error('Invite limit reached for this email')
+          } else {
+            throw new Error(errorData.detail.error)
+          }
+        }
+        throw new Error(errorData?.detail || `Failed to resend invitation (${response.status})`)
+      }
+
+      const result = await response.json()
+      setSuccess(`Invitation resent successfully to ${invite.email}`)
+      
+      // Reload pending invites to show the updated send_count
+      const invitesData = await getPendingInvitesForProject(projectId)
+      setPendingInvites(invitesData)
+      
+    } catch (err) {
+      console.error('Error resending invitation:', err)
+      setError(getErrorMessage(err))
+    } finally {
+      setResendingInvite(null)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -159,6 +239,19 @@ export default function MembersPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
+        if (errorData?.detail?.error) {
+          // Handle specific error codes
+          const errorCode = errorData.detail.error
+          if (errorCode === 'self_invite') {
+            throw new Error('You cannot invite yourself')
+          } else if (errorCode === 'already_member') {
+            throw new Error(`${formData.email} is already a member of this org`)
+          } else if (errorCode === 'cap_reached') {
+            throw new Error('Invite limit reached for this email')
+          } else {
+            throw new Error(errorData.detail.error)
+          }
+        }
         throw new Error(errorData?.detail || `Failed to send invitation (${response.status})`)
       }
 
@@ -376,6 +469,14 @@ export default function MembersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Expires At
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sends
+                  </th>
+                  {isOCA && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -396,6 +497,21 @@ export default function MembersPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(invite.expires_at).toLocaleDateString()}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {invite.send_count}/3
+                    </td>
+                    {isOCA && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => handleResendInvite(invite)}
+                          disabled={resendingInvite === invite.id || invite.send_count >= 3}
+                          title={invite.send_count >= 3 ? 'Limit reached — ask invitee to check spam' : 'Resend invitation'}
+                          className="px-3 py-1 text-blue-600 hover:text-blue-800 border border-blue-600 hover:border-blue-800 rounded-md disabled:text-gray-400 disabled:border-gray-400 disabled:cursor-not-allowed transition duration-200"
+                        >
+                          {resendingInvite === invite.id ? 'Sending...' : 'Resend'}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

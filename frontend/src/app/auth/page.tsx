@@ -17,7 +17,7 @@ export default function AuthPage() {
       setUser(session?.user ?? null)
       
       if (session?.user) {
-        router.push('/dashboard')
+        router.push('/projects')
       }
     }
 
@@ -28,7 +28,7 @@ export default function AuthPage() {
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          router.push('/dashboard')
+          router.push('/projects')
         }
       }
     )
@@ -37,7 +37,7 @@ export default function AuthPage() {
   }, [router])
 
   const handleSuccess = () => {
-    router.push('/dashboard')
+    router.push('/projects')
   }
 
   if (user) {
@@ -45,7 +45,7 @@ export default function AuthPage() {
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <p>Redirecting to dashboard...</p>
+            <p>Redirecting to projects...</p>
           </div>
         </div>
       </div>

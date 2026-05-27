@@ -17,6 +17,7 @@ export interface PendingInvite {
   invited_by: string
   expires_at: string
   created_at: string
+  send_count: number
 }
 
 export async function getMembersForProject(projectId: string): Promise<ProjectMember[]> {
@@ -122,6 +123,7 @@ export async function getPendingInvitesForProject(projectId: string): Promise<Pe
         role,
         expires_at,
         created_at,
+        send_count,
         users!pending_invitations_invited_by_fkey(
           email
         ),
@@ -143,7 +145,8 @@ export async function getPendingInvitesForProject(projectId: string): Promise<Pe
       discipline_name: invitation.discipline_scopes?.name || null,
       invited_by: invitation.users?.email || '',
       expires_at: invitation.expires_at,
-      created_at: invitation.created_at
+      created_at: invitation.created_at,
+      send_count: invitation.send_count || 1
     })) || []
 
     return invites

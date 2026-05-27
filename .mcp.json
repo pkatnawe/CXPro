@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "code-review-graph": {
+      "command": "/Users/shlok/.pyenv/versions/3.11.5/bin/python",
+      "args": [
+        "-m",
+        "code_review_graph",
+        "serve"
+      ],
+      "cwd": "/Users/shlok/Desktop/SpareWork/CX",
+      "type": "stdio"
+    }
+  }
+}

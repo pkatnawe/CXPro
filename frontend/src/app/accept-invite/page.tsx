@@ -144,7 +144,7 @@ export default function AcceptInvitePage() {
         } else {
           setError('Unable to verify your project access. Please contact support.')
           setLoading(false)
-          setTimeout(() => router.push('/dashboard'), 3000)
+          setTimeout(() => router.push('/organization'), 3000)
         }
       } catch (err) {
         console.error('Error handling invitation:', err)

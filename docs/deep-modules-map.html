@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CXPro — Deep Modules Map</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  body { font-family: -apple-system, sans-serif; background:#0e1116; color:#e6e6e6; margin:0; padding:24px; }
+  h1 { font-weight:500; margin:0 0 4px; }
+  .sub { color:#8a8a8a; margin-bottom:24px; font-size:14px; }
+  .legend { display:flex; gap:16px; margin-bottom:20px; font-size:13px; }
+  .chip { padding:4px 10px; border-radius:4px; }
+  .impl { background:#1f6f3a; }
+  .partial { background:#7a5a00; }
+  .mock { background:#444; border:1px dashed #888; }
+  .mermaid { background:#161b22; padding:24px; border-radius:8px; }
+</style>
+</head>
+<body>
+  <h1>CXPro — Deep Modules Map</h1>
+  <div class="sub">Solid arrow = sync (FK / RLS / data-flow) · Dashed = async (outbox event)</div>
+  <div class="legend">
+    <span class="chip impl">Implemented</span>
+    <span class="chip partial">Partial</span>
+    <span class="chip mock">Mock / Stub</span>
+  </div>
+
+<div class="mermaid">
+graph TD
+    IDENTITY["IDENTITY<br/><i>users · orgs · memberships</i>"]:::impl
+    PROJECT_PORTFOLIO["PROJECT_PORTFOLIO<br/><i>projects · discipline_scopes</i>"]:::impl
+    DOCUMENT_KNOWLEDGE["DOCUMENT_KNOWLEDGE<br/><i>pdf → chunks → specs (DSPy)</i>"]:::impl
+    COMMISSIONING_EXECUTION["COMMISSIONING_EXECUTION<br/><i>checklist gen · TPIs</i>"]:::impl
+    AI_CONVERSATION["AI_CONVERSATION<br/><i>agent_runs · citations</i>"]:::impl
+    OUTBOX["OUTBOX_PATTERN<br/><i>NOTIFY/LISTEN bus</i>"]:::impl
+
+    ASSET_REGISTRY["ASSET_REGISTRY<br/><i>cols on TPI — not its own aggregate</i>"]:::partial
+    NOTIFICATION_INBOX["NOTIFICATION_INBOX<br/><i>inbox_items · subscriptions</i>"]:::partial
+
+    ISSUE_RFI["ISSUE_RFI"]:::mock
+    WORKFORCE["WORKFORCE_SCHEDULING"]:::mock
+    HANDOVER["HANDOVER_COMPLIANCE"]:::mock
+    ANALYTICS["ANALYTICS_REPORTING"]:::mock
+    COST["COST_COMMERCIAL"]:::mock
+
+    IDENTITY -->|FK + RLS| PROJECT_PORTFOLIO
+    IDENTITY -->|FK + RLS| DOCUMENT_KNOWLEDGE
+    IDENTITY -->|RLS via Participation| COMMISSIONING_EXECUTION
+    PROJECT_PORTFOLIO -->|project_id FK| ASSET_REGISTRY
+    PROJECT_PORTFOLIO -->|scope| DOCUMENT_KNOWLEDGE
+    PROJECT_PORTFOLIO -->|scope| COMMISSIONING_EXECUTION
+    DOCUMENT_KNOWLEDGE -->|equipment_type| ASSET_REGISTRY
+    DOCUMENT_KNOWLEDGE -->|chunks + specs| COMMISSIONING_EXECUTION
+    COMMISSIONING_EXECUTION -->|run rows| AI_CONVERSATION
+
+    DOCUMENT_KNOWLEDGE -.->|DocumentUploaded| OUTBOX
+    COMMISSIONING_EXECUTION -.->|TPI_Activated| OUTBOX
+    AI_CONVERSATION -.->|AgentRunCompleted · AIRefusal| OUTBOX
+    OUTBOX -.->|fan-out| AI_CONVERSATION
+    OUTBOX -.->|fan-out| NOTIFICATION_INBOX
+
+    classDef impl fill:#1f6f3a,stroke:#2ecc71,color:#fff
+    classDef partial fill:#7a5a00,stroke:#f1c40f,color:#fff
+    classDef mock fill:#3a3a3a,stroke:#777,color:#bbb,stroke-dasharray: 4 3
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad:true, theme:'dark', flowchart:{ curve:'basis', nodeSpacing:60, rankSpacing:70 } });
+</script>
+</body>
+</html>

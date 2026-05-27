@@ -64,7 +64,7 @@ export default function DashboardPage() {
 
     } catch (error) {
       console.error('Error loading project data:', error)
-      router.push('/dashboard')
+      router.push('/organization')
     } finally {
       setLoading(false)
     }
@@ -268,10 +268,10 @@ export default function DashboardPage() {
         <div>
           <p className="bp-error-text">You do not have access to this project</p>
           <a 
-            href="/dashboard"
+            href="/organization"
             className="bp-btn-ghost"
           >
-            Back to Dashboard
+            Back to Organization
           </a>
         </div>
       </div>

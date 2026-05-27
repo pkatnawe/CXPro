@@ -1,3 +1,230 @@
 # Ralph Progress Log
-Started: Tue May 26 19:03:17 CDT 2026
+Started: Mon May 25 21:22:03 CDT 2026
+
+## Codebase Patterns
+- Use vitest imports (describe, test, expect) in test files
+- Frontend test files go in src/lib/__tests__/
+- Type-check command is: npm run type-check (not typecheck)
+- Use bp-* CSS class names for all UI elements — no raw Tailwind color classes
+- Supabase relational joins only work through actual FKs — use multi-step queries + JS join when tables share user_id but have no direct FK
+- Theme state lives in layout.tsx (localStorage + data-theme on documentElement)
+- NEXT_PUBLIC_API_URL env var for all backend fetch calls (fallback: http://localhost:8000)
+- Auth check pattern: supabase.auth.getSession() → if no session redirect to /auth
+- getErrorMessage from @/lib/error for all error display — no instanceof Error pattern
+- maybeSingle() for queries that may legitimately return zero rows; single() only when row must exist
+- Backend tests use pytest; pytest.ini and requirements-test.txt already exist in backend/
+- Frontend test mocks: chain-mock supabase.from(...).select(...).eq(...) — see members.test.ts for pattern
+---
+
+## Mon May 25 21:53:51 CDT 2026 - US-006
+- Implemented schema migration for pending_invitations send_count column and partial unique index
+- Files changed:
+  - Created migrations/017_pending_invitations_send_count.sql with idempotent migration
+  - Created backend/apply_send_count_migration.py following existing apply script convention
+- **Learnings for future iterations:**
+  - Migration numbering continues sequentially (last was 016, so next is 017)
+  - Apply scripts use psycopg2 (not psycopg) for database connections
+  - Apply scripts pattern: load_dotenv('../.env.local') to get DATABASE_URL
+  - Migrations use DO blocks with IF NOT EXISTS checks for idempotency
+  - Partial unique indexes use WHERE clause syntax: WHERE accepted_at IS NULL
+  - Backend dependencies need to be installed with python3 -m pip (psycopg2-binary, python-dotenv)
+  - Migration successfully added send_count column with default value 1 and partial unique index
+---
+
+## Mon May 25 21:30:31 CDT 2026 - US-001
+- Renamed /dashboard route to /organization with redirect
+- Files changed:
+  - Created frontend/src/app/(app)/organization/page.tsx (verbatim copy of dashboard content)
+  - Modified frontend/src/app/(app)/dashboard/page.tsx to be a redirect component using router.replace
+- **Learnings for future iterations:**
+  - The frontend app structure uses (app) folder for authenticated routes
+  - Redirect pattern uses 'use client', useEffect, and router.replace for client-side redirects
+  - Type-check command confirmed as: npm run type-check
+  - Browser testing tools not available via MCP, manual testing needed for UI verification
+---
+
+## Mon May 25 21:53:51 CDT 2026 - US-006
+- Implemented schema migration for pending_invitations send_count column and partial unique index
+- Files changed:
+  - Created migrations/017_pending_invitations_send_count.sql with idempotent migration
+  - Created backend/apply_send_count_migration.py following existing apply script convention
+- **Learnings for future iterations:**
+  - Migration numbering continues sequentially (last was 016, so next is 017)
+  - Apply scripts use psycopg2 (not psycopg) for database connections
+  - Apply scripts pattern: load_dotenv('../.env.local') to get DATABASE_URL
+  - Migrations use DO blocks with IF NOT EXISTS checks for idempotency
+  - Partial unique indexes use WHERE clause syntax: WHERE accepted_at IS NULL
+  - Backend dependencies need to be installed with python3 -m pip (psycopg2-binary, python-dotenv)
+  - Migration successfully added send_count column with default value 1 and partial unique index
+---
+
+## Mon May 25 21:33:42 CDT 2026 - US-002
+- Implemented getPrimaryOrg deep module with unit tests
+- Files changed:
+  - Created frontend/src/lib/getPrimaryOrg.ts with function that queries memberships joined with orgs
+  - Created frontend/src/lib/__tests__/getPrimaryOrg.test.ts with comprehensive test coverage
+- **Learnings for future iterations:**
+  - Supabase join syntax uses nested column names like `orgs(id, name)` in select clause
+  - When accessing joined data in TypeScript, may need to cast to `any` to satisfy type checker
+  - Test pattern follows members.test.ts approach with mock chain for from().select().eq().order()
+  - All tests pass and type-check succeeds
+---
+
+## Mon May 25 21:53:51 CDT 2026 - US-006
+- Implemented schema migration for pending_invitations send_count column and partial unique index
+- Files changed:
+  - Created migrations/017_pending_invitations_send_count.sql with idempotent migration
+  - Created backend/apply_send_count_migration.py following existing apply script convention
+- **Learnings for future iterations:**
+  - Migration numbering continues sequentially (last was 016, so next is 017)
+  - Apply scripts use psycopg2 (not psycopg) for database connections
+  - Apply scripts pattern: load_dotenv('../.env.local') to get DATABASE_URL
+  - Migrations use DO blocks with IF NOT EXISTS checks for idempotency
+  - Partial unique indexes use WHERE clause syntax: WHERE accepted_at IS NULL
+  - Backend dependencies need to be installed with python3 -m pip (psycopg2-binary, python-dotenv)
+  - Migration successfully added send_count column with default value 1 and partial unique index
+---
+
+## Mon May 25 21:44:00 CDT 2026 - US-003
+- Refactored organization page to single-org view with getPrimaryOrg
+- Files changed:
+  - Modified frontend/src/app/(app)/organization/page.tsx to show single org with filtered projects
+  - Used getPrimaryOrg to fetch user's primary organization
+  - Filtered projects by org_id
+  - Removed orgs list and Create Org form
+  - Added conditional Create Project button for OCA role
+  - Applied bp-* CSS classes throughout
+- **Learnings for future iterations:**
+  - The organization page now expects getPrimaryOrg to return org with role property
+  - bp-* classes provide consistent styling: bp-screen, bp-header, bp-btn-primary, bp-card, bp-list-item, etc.
+  - Empty states must handle three cases: no org, load error, or no projects
+  - Form shows inline without modal/dropdown for better UX
+  - Browser verification still requires manual testing (MCP tools not available)
+---
+
+## Mon May 25 21:53:51 CDT 2026 - US-006
+- Implemented schema migration for pending_invitations send_count column and partial unique index
+- Files changed:
+  - Created migrations/017_pending_invitations_send_count.sql with idempotent migration
+  - Created backend/apply_send_count_migration.py following existing apply script convention
+- **Learnings for future iterations:**
+  - Migration numbering continues sequentially (last was 016, so next is 017)
+  - Apply scripts use psycopg2 (not psycopg) for database connections
+  - Apply scripts pattern: load_dotenv('../.env.local') to get DATABASE_URL
+  - Migrations use DO blocks with IF NOT EXISTS checks for idempotency
+  - Partial unique indexes use WHERE clause syntax: WHERE accepted_at IS NULL
+  - Backend dependencies need to be installed with python3 -m pip (psycopg2-binary, python-dotenv)
+  - Migration successfully added send_count column with default value 1 and partial unique index
+---
+
+## Mon May 25 21:43:16 CDT 2026 - US-004
+- Added Organization link to UserMenu dropdown
+- Files changed:
+  - Modified frontend/src/components/UserMenu.tsx to add Organization link item between theme toggle and Manage Team
+- **Learnings for future iterations:**
+  - UserMenu uses inline SVG icons with viewBox="0 0 24 24" and strokeWidth="1.5"
+  - Building/org icon created using path elements to form a simple building shape
+  - Link component from Next.js handles routing, onClick={() => setIsOpen(false)} closes dropdown
+  - Organization link is visible on all routes (not gated on projectId like Manage Team)
+  - Type-check passes without issues for the new Link component
+---
+
+## Mon May 25 21:53:51 CDT 2026 - US-006
+- Implemented schema migration for pending_invitations send_count column and partial unique index
+- Files changed:
+  - Created migrations/017_pending_invitations_send_count.sql with idempotent migration
+  - Created backend/apply_send_count_migration.py following existing apply script convention
+- **Learnings for future iterations:**
+  - Migration numbering continues sequentially (last was 016, so next is 017)
+  - Apply scripts use psycopg2 (not psycopg) for database connections
+  - Apply scripts pattern: load_dotenv('../.env.local') to get DATABASE_URL
+  - Migrations use DO blocks with IF NOT EXISTS checks for idempotency
+  - Partial unique indexes use WHERE clause syntax: WHERE accepted_at IS NULL
+  - Backend dependencies need to be installed with python3 -m pip (psycopg2-binary, python-dotenv)
+  - Migration successfully added send_count column with default value 1 and partial unique index
+---
+
+## Mon May 25 21:46:41 CDT 2026 - US-005
+- Changed post-login redirect from /dashboard to /projects
+- Files changed:
+  - Modified frontend/src/app/auth/page.tsx to redirect to /projects after sign-in/sign-up
+  - Modified frontend/src/app/(app)/project/[id]/page.tsx to redirect to /organization on error
+  - Modified frontend/src/app/accept-invite/page.tsx to redirect to /organization on error
+- **Learnings for future iterations:**
+  - Auth page has three redirect locations: session check on mount, auth state listener, and handleSuccess callback
+  - Project page error redirects should go to /organization now (the new home for org management)
+  - The redirect stub from US-001 (/dashboard -> /organization) handles any remaining legacy /dashboard links
+  - All auth success redirects now point to /projects as the immediate landing page
+---
+
+## Mon May 25 21:53:51 CDT 2026 - US-006
+- Implemented schema migration for pending_invitations send_count column and partial unique index
+- Files changed:
+  - Created migrations/017_pending_invitations_send_count.sql with idempotent migration
+  - Created backend/apply_send_count_migration.py following existing apply script convention
+- **Learnings for future iterations:**
+  - Migration numbering continues sequentially (last was 016, so next is 017)
+  - Apply scripts use psycopg2 (not psycopg) for database connections
+  - Apply scripts pattern: load_dotenv('../.env.local') to get DATABASE_URL
+  - Migrations use DO blocks with IF NOT EXISTS checks for idempotency
+  - Partial unique indexes use WHERE clause syntax: WHERE accepted_at IS NULL
+  - Backend dependencies need to be installed with python3 -m pip (psycopg2-binary, python-dotenv)
+  - Migration successfully added send_count column with default value 1 and partial unique index
+---
+
+## Mon May 25 21:57:22 CDT 2026 - US-007
+- Implemented InviteDecision pure module with comprehensive unit tests
+- Files changed:
+  - Created backend/invite_decision.py with decide_invite_action function and Action union types
+  - Created backend/test_invite_decision.py with 9 comprehensive test cases covering all scenarios
+- **Learnings for future iterations:**
+  - Dataclass fields with defaults must come after fields without defaults (fixed ordering issue)
+  - Backend tests live directly in backend/ directory, not in a tests/ subdirectory
+  - Tests are written in test_*.py format and run with python3 -m pytest
+  - pytest warning about asyncio_mode config option can be ignored (comes from pytest.ini)
+  - All 6 decision scenarios plus edge cases are tested and passing
+  - Pure functions simplify testing - no database or mocking required
+---
+
+## Mon May 25 22:15:00 CDT 2026 - US-008
+- Refactored InvitationService to use InviteDecision module and add pre-flight guards
+- Files changed:
+  - Modified backend/invitation_service.py to integrate decide_invite_action and add self-invite/already-member checks
+  - Modified backend/main.py to support returning different status codes (201 vs 200)
+- **Learnings for future iterations:**
+  - InvitationService.create_invitation now returns tuple of (result_dict, status_code)
+  - Pre-flight guards check self-invite and already-member before decision logic
+  - Self-invite check: compare invited_by user's email with target email
+  - Already-member check: join memberships with users table on email and org_id
+  - Partial unique index ensures at most one pending invite per (email, project_id)
+  - FastAPI Response parameter used to set dynamic status codes in endpoint
+  - 201 for CreateNew/ReplaceExpired, 200 for IncrementResend, 409 for rejections
+  - Tests for invite_decision module all pass with pytest
+---
+
+## Mon May 25 22:16:00 CDT 2026 - US-009
+- Implemented endpoint integration tests for POST /invites covering all 6 scenarios
+- Files changed:
+  - Created backend/tests/test_invites_endpoint.py with FastAPI TestClient integration tests
+- **Learnings for future iterations:**
+  - Tests directory should be in backend/tests/ not backend/ root
+  - Use mocking for service layer to avoid DB conflicts in unit tests  
+  - TestClient from fastapi.testclient is the correct way to test endpoints
+  - Import path needs sys.path.insert when tests are in subdirectory
+  - All 6 scenarios tested: new invite (201), immediate resend (200), cap reached (409), self-invite (409), already-member (409), cx_engineer forbidden (403)
+  - Tests pass both with pytest and standalone execution
+---
+
+## Mon May 25 22:17:06 CDT 2026 - US-010
+- Implemented frontend members page resend functionality with send_count indicator and error mapping
+- Files changed:
+  - Modified frontend/src/lib/members.ts to add send_count to PendingInvite interface and query
+  - Modified frontend/src/app/(app)/project/[id]/members/page.tsx to add Sends column, Resend button, handleResendInvite function, and error message mapping
+- **Learnings for future iterations:**
+  - PendingInvite interface now includes send_count field (defaults to 1 if not present)
+  - Resend functionality works by calling POST /invites with same invite data (triggers IncrementResend)
+  - Error handling maps backend error codes to user-friendly messages: self_invite, already_member, cap_reached
+  - Resend button disabled when send_count >= 3 with hover text explaining the limit
+  - After successful resend, pending invites list refetches to update the send_count display
+  - Type-check passes without issues for all TypeScript changes
 ---

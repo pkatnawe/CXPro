@@ -88,6 +88,23 @@ export default function UserMenu({ projectId, theme, onThemeChange }: UserMenuPr
             <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
           </button>
 
+          <Link
+            href="/organization"
+            className="bp-dropdown-item"
+            onClick={() => setIsOpen(false)}
+          >
+            <span className="bp-dropdown-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M3 21h18"/>
+                <path d="M5 21V7l7-4 7 4v14"/>
+                <path d="M9 21v-6h6v6"/>
+                <path d="M10 12h4"/>
+                <path d="M10 8h4"/>
+              </svg>
+            </span>
+            <span>Organization</span>
+          </Link>
+
           {projectId && (
             <Link
               href={`/project/${projectId}/members`}
