@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import UserMenu from "@/components/UserMenu";
+import { UserMenu } from "@/contexts/identity/ui";
 
 export default function AppLayout({
   children,

@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole } from '../members'
+import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole } from './api'
 
-// Mock the supabase module
-vi.mock('../supabase', () => ({
+vi.mock('@/lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
     auth: {
@@ -11,10 +10,9 @@ vi.mock('../supabase', () => ({
   }
 }))
 
-import { supabase } from '../supabase'
+import { supabase } from '@/lib/supabase'
 
 describe('getMembersForProject', () => {
-  // In-memory fake data store
   let mockData: {
     users: any[]
     memberships: any[]
@@ -28,7 +26,6 @@ describe('getMembersForProject', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     
-    // Reset the fake data store
     mockData = {
       users: [],
       memberships: [],
@@ -39,7 +36,6 @@ describe('getMembersForProject', () => {
       currentUserId: 'user-1'
     }
 
-    // Setup the mock chain for from().select().eq()
     const mockFrom = vi.mocked(supabase.from) as any
     
     mockFrom.mockImplementation((table: string) => {
@@ -169,7 +165,6 @@ describe('getMembersForProject', () => {
   })
 
   it('returns joined rows with email, role, and discipline for project members', async () => {
-    // Setup test data
     mockData.projects = [
       { id: 'project-1', org_id: 'org-1' },
       { id: 'project-2', org_id: 'org-2' }
@@ -190,7 +185,7 @@ describe('getMembersForProject', () => {
     mockData.participations = [
       { user_id: 'user-1', project_id: 'project-1', org_id: 'org-1' },
       { user_id: 'user-2', project_id: 'project-1', org_id: 'org-1' },
-      { user_id: 'user-3', project_id: 'project-2', org_id: 'org-2' } // Different project
+      { user_id: 'user-3', project_id: 'project-2', org_id: 'org-2' }
     ]
     
     mockData.discipline_scopes = [
@@ -249,7 +244,7 @@ describe('getMembersForProject', () => {
       { user_id: 'user-1', project_id: 'project-1', org_id: 'org-1' }
     ]
     
-    mockData.assignments = [] // No discipline assignment
+    mockData.assignments = []
     
     const result = await getMembersForProject('project-1')
     
@@ -263,7 +258,6 @@ describe('getMembersForProject', () => {
   })
 
   it('verifies org isolation - returns org-A role for user in both orgs when querying org-A project', async () => {
-    // Setup: user is member of both org-A and org-B with different roles
     mockData.projects = [
       { id: 'project-a1', org_id: 'org-a' },
       { id: 'project-b1', org_id: 'org-b' }
@@ -274,8 +268,8 @@ describe('getMembersForProject', () => {
     ]
     
     mockData.memberships = [
-      { user_id: 'user-1', org_id: 'org-a', role: 'OCA' }, // OCA in org-A
-      { user_id: 'user-1', org_id: 'org-b', role: 'cx_engineer' } // cx_engineer in org-B
+      { user_id: 'user-1', org_id: 'org-a', role: 'OCA' },
+      { user_id: 'user-1', org_id: 'org-b', role: 'cx_engineer' }
     ]
     
     mockData.participations = [
@@ -286,26 +280,23 @@ describe('getMembersForProject', () => {
     mockData.discipline_scopes = []
     mockData.assignments = []
     
-    // Query project-a1 (belongs to org-a)
     const result = await getMembersForProject('project-a1')
     
-    // Should get OCA role from org-a membership, NOT cx_engineer from org-b
     expect(result).toEqual([{
       user_id: 'user-1',
       email: 'alice@example.com',
       full_name: 'Alice Smith',
-      role: 'OCA', // Should be OCA, not cx_engineer
+      role: 'OCA',
       discipline_name: null
     }])
     
-    // Also verify the opposite: querying project-b1 should return cx_engineer role
     const resultB = await getMembersForProject('project-b1')
     
     expect(resultB).toEqual([{
       user_id: 'user-1',
       email: 'alice@example.com',
       full_name: 'Alice Smith',
-      role: 'cx_engineer', // Should be cx_engineer for org-b project
+      role: 'cx_engineer',
       discipline_name: null
     }])
   })
@@ -348,18 +339,15 @@ describe('getPendingInvitesForProject', () => {
           gt: vi.fn().mockImplementation((column: string, value: any) => {
             filters[`${column}_gt`] = value
             
-            // Apply filters and return data
             const projectId = filters['project_id']
             const now = new Date()
             
-            // Filter pending invitations for the project
             const projectInvitations = mockData.pending_invitations.filter(
               inv => inv.project_id === projectId &&
                      inv.accepted_at === null &&
                      new Date(inv.expires_at) > now
             )
             
-            // Join with users and discipline_scopes
             const invitationsData = projectInvitations.map(invitation => {
               const invitedByUser = mockData.users.find(u => u.id === invitation.invited_by)
               const disciplineScope = invitation.discipline_scope_id
@@ -441,7 +429,7 @@ describe('getPendingInvitesForProject', () => {
         role: 'cx_engineer',
         discipline_scope_id: 'ds-1',
         invited_by: 'user-admin',
-        expires_at: pastDate.toISOString(), // Expired
+        expires_at: pastDate.toISOString(),
         accepted_at: null,
         created_at: new Date().toISOString()
       },
@@ -453,7 +441,7 @@ describe('getPendingInvitesForProject', () => {
         discipline_scope_id: 'ds-1',
         invited_by: 'user-admin',
         expires_at: futureDate.toISOString(),
-        accepted_at: new Date().toISOString(), // Already accepted
+        accepted_at: new Date().toISOString(),
         created_at: new Date().toISOString()
       }
     ]
@@ -503,7 +491,7 @@ describe('getPendingInvitesForProject', () => {
         email: 'newuser@example.com',
         project_id: 'project-1',
         role: 'OCA',
-        discipline_scope_id: null, // No discipline scope
+        discipline_scope_id: null,
         invited_by: 'user-admin',
         expires_at: futureDate.toISOString(),
         accepted_at: null,
@@ -552,14 +540,12 @@ describe('updateDiscipline', () => {
                   return {
                     eq: vi.fn().mockImplementation((column2: string, value2: any) => {
                       if (column2 === 'discipline_scope_id') {
-                        // Find assignments to delete based on user_id and discipline_scope_id
                         const disciplineScopeId = value2
                         const projectDiscipline = mockData.discipline_scopes.find(
                           ds => ds.id === disciplineScopeId
                         )
                         
                         if (projectDiscipline) {
-                          // Remove assignments for this user and project
                           mockData.assignments = mockData.assignments.filter(
                             a => !(a.user_id === userId && 
                                    mockData.discipline_scopes.some(
@@ -583,7 +569,6 @@ describe('updateDiscipline', () => {
             }
           }),
           insert: vi.fn().mockImplementation((data: any) => {
-            // Add new assignment
             mockData.assignments.push(data)
             return {
               data: data,
@@ -597,7 +582,6 @@ describe('updateDiscipline', () => {
                   const userId = value
                   return {
                     eq: vi.fn().mockImplementation((column2: string, value2: any) => {
-                      // Return assignments for the user
                       const userAssignments = mockData.assignments.filter(
                         a => a.user_id === userId
                       )
@@ -647,7 +631,6 @@ describe('updateDiscipline', () => {
   })
 
   it('replaces user assignment with new discipline_scope_id', async () => {
-    // Setup test data
     mockData.discipline_scopes = [
       { id: 'ds-1', project_id: 'project-1', name: 'Mechanical' },
       { id: 'ds-2', project_id: 'project-1', name: 'Electrical' },
@@ -655,21 +638,18 @@ describe('updateDiscipline', () => {
     ]
     
     mockData.assignments = [
-      { user_id: 'user-1', discipline_scope_id: 'ds-1' }, // User is in Mechanical
-      { user_id: 'user-2', discipline_scope_id: 'ds-3' }  // Different project
+      { user_id: 'user-1', discipline_scope_id: 'ds-1' },
+      { user_id: 'user-2', discipline_scope_id: 'ds-3' }
     ]
     
-    // Update user-1 from Mechanical to Electrical
     await updateDiscipline('user-1', 'project-1', 'ds-2')
     
-    // Verify old assignment is removed and new one is added
     expect(mockData.assignments).not.toContainEqual(
       { user_id: 'user-1', discipline_scope_id: 'ds-1' }
     )
     expect(mockData.assignments).toContainEqual(
       { user_id: 'user-1', discipline_scope_id: 'ds-2' }
     )
-    // Other user's assignment should remain
     expect(mockData.assignments).toContainEqual(
       { user_id: 'user-2', discipline_scope_id: 'ds-3' }
     )
@@ -683,11 +663,9 @@ describe('updateDiscipline', () => {
     
     mockData.assignments = []
     
-    // Call twice with same parameters
     await updateDiscipline('user-1', 'project-1', 'ds-2')
     await updateDiscipline('user-1', 'project-1', 'ds-2')
     
-    // Should only have one assignment
     const userAssignments = mockData.assignments.filter(
       a => a.user_id === 'user-1' && a.discipline_scope_id === 'ds-2'
     )
@@ -701,7 +679,6 @@ describe('updateDiscipline', () => {
     
     mockData.assignments = []
     
-    // Add assignment for user with no prior assignment
     await updateDiscipline('user-1', 'project-1', 'ds-1')
     
     expect(mockData.assignments).toContainEqual(
@@ -814,7 +791,7 @@ describe('getCurrentUserRole', () => {
     ]
     
     mockData.memberships = [
-      { user_id: 'user-3', org_id: 'org-2', role: 'OCA' } // Different org
+      { user_id: 'user-3', org_id: 'org-2', role: 'OCA' }
     ]
     
     const result = await getCurrentUserRole('user-3', 'project-1')

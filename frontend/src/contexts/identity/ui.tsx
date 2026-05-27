@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { getInitials } from "@/lib/identity";
+import { getInitials } from "@/contexts/identity/api";
 
 interface UserMenuProps {
   projectId: string | null;
@@ -12,7 +12,7 @@ interface UserMenuProps {
   onThemeChange: (theme: "light" | "dark") => void;
 }
 
-export default function UserMenu({ projectId, theme, onThemeChange }: UserMenuProps) {
+export function UserMenu({ projectId, theme, onThemeChange }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const [fullName, setFullName] = useState<string | undefined>(undefined);

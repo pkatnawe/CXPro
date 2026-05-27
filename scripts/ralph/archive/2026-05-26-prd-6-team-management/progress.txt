@@ -1,0 +1,210 @@
+# Ralph Progress Log
+Started: Mon May 26 23:28:43 CDT 2026
+
+## Codebase Patterns
+- Use psycopg2 (not psycopg) for database connections in migration apply scripts
+- Apply scripts pattern: load_dotenv('../.env.local') to get DATABASE_URL
+- Migrations use DO blocks with IF NOT EXISTS checks for idempotency
+- Migration numbering continues sequentially (last was 016, so next is 017)
+- PostgreSQL constraint names follow pattern: <table>_<column>_check
+---
+
+## Mon May 26 23:34:00 CDT 2026 - US-001
+- Implemented DB migration to extend memberships.role CHECK constraint to support 6 canonical human roles
+- Files changed:
+  - Created migrations/017_extend_membership_roles.sql with idempotent migration
+  - Created backend/apply_extend_roles_migration.py following existing apply script convention
+- Migration successfully applied to dev database
+- Extended role values: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm
+- **Learnings for future iterations:**
+  - Both memberships and pending_invitations tables have role CHECK constraints that need updating in sync
+  - PostgreSQL requires dropping existing CHECK constraint before adding a new one
+  - Use pg_constraint system catalog to query existing constraints
+  - Migration verified that existing OCA and cx_engineer roles were preserved
+---
+
+## Mon May 25 23:38:39 CDT 2026 - US-002
+- Implemented backend roles module with is_valid_role function and unit tests
+- Files changed:
+  - Created backend/roles.py with ROLES tuple, ROLE_LABELS dict, and is_valid_role() function
+  - Created backend/tests/test_roles.py with comprehensive test coverage
+- All 5 tests pass successfully
+- Validated the 6 canonical role values: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm
+- **Learnings for future iterations:**
+  - Backend uses pytest for testing, tests are placed in backend/tests/ directory
+  - Test files use sys.path.insert to import modules from parent directory
+  - No specific type checking tool is configured (no mypy/pyright), basic Python syntax checking is sufficient
+  - The 6 roles match exactly with the migration constraints
+---
+
+## Mon May 25 23:41:48 CDT 2026 - US-003
+- Implemented backend permissions module with can_manage_team and can_create_project predicates
+- Files changed:
+  - Created backend/permissions.py with two permission predicate functions
+  - Created backend/tests/test_permissions.py with 7 comprehensive test functions
+- All 7 tests pass successfully (testing both predicates with all 6 roles plus invalid values)
+- Both predicates return True for 'OCA' and 'CM', False for all other roles and invalid inputs
+- **Learnings for future iterations:**
+  - Backend permission predicates follow same pattern as roles module
+  - Functions handle None, empty string, and non-string types defensively
+  - Test coverage includes all 6 canonical roles plus edge cases
+  - No specific Python type checker configured - basic syntax and pytest are sufficient
+---
+
+## Mon May 25 23:46:27 CDT 2026 - US-004
+- Implemented backend invite endpoint to use roles + permissions modules
+- Files changed:
+  - Modified backend/invitation_service.py to import and use is_valid_role and can_manage_team
+  - Replaced _verify_user_is_oca with more general _get_user_role method
+  - Updated create_invitation to validate role via is_valid_role (400 if invalid)
+  - Changed permission gate from "OCA only" to can_manage_team check
+  - Created backend/tests/test_invites_endpoint.py with 4 test cases
+- All 4 new tests pass successfully (CM can invite, invalid role rejected, non-manager cannot invite, OCA backwards compatible)
+- **Learnings for future iterations:**
+  - InvitationService lives in backend/invitation_service.py, not in main.py
+  - The service method _get_user_role returns Optional[str] to handle None cases
+  - Test mocking pattern: use AsyncMock for connection, Mock for Supabase client  
+  - CM users can now invite team members along with OCAs
+  - Role validation happens before permission checks to give clearer error messages
+---
+
+## Mon May 25 23:49:08 CDT 2026 - US-005
+- Implemented frontend lib/roles module with isValidRole type guard and unit tests
+- Files changed:
+  - Created frontend/src/lib/roles.ts with ROLES readonly tuple, Role type union, ROLE_LABELS mapping, and isValidRole type guard
+  - Created frontend/src/lib/__tests__/roles.test.ts with 9 comprehensive test cases
+- All 9 tests pass under vitest
+- TypeScript type checking passes with npm run type-check
+- **Learnings for future iterations:**
+  - Frontend uses vitest for testing, not jest
+  - TypeScript check command is `npm run type-check` not `npm run typecheck`
+  - Role labels follow human-readable format (e.g., "Owner's Commissioning Agent" for OCA)
+  - Type guard pattern: check typeof === 'string' first, then inclusion in array
+  - Frontend role values match backend exactly: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm
+---
+## Mon May 26 23:50:35 CDT 2026 - US-006
+- Implemented frontend lib/permissions module with canManageTeam and canCreateProject predicates
+- Files changed:
+  - Created frontend/src/lib/permissions.ts with two permission predicate functions
+  - Created frontend/src/lib/__tests__/permissions.test.ts with 16 comprehensive test cases
+- All 16 tests pass successfully under vitest (8 for each predicate)
+- TypeScript type checking passes with npm run type-check
+- Both predicates return true for 'OCA' and 'CM', false for all other roles and invalid inputs
+- **Learnings for future iterations:**
+  - Frontend permissions module follows same pattern as backend
+  - Functions handle null and undefined defensively using type union Role | null | undefined
+  - Test structure mirrors backend tests but with vitest describe/it/expect
+  - Type imports use `import type { Role }` from roles module
+---
+
+## Mon May 26 23:51:00 CDT 2026 - US-007
+- Widened role type unions to use the imported Role type from lib/roles module
+- Files changed:
+  - frontend/src/lib/supabase.ts: Changed Membership interface role field from 'OCA' | 'cx_engineer' to Role type
+  - frontend/src/lib/members.ts: Changed getCurrentUserRole return type from 'OCA' | 'cx_engineer' | null to Role | null and updated the cast
+- TypeScript type checking passes successfully
+- getPrimaryOrg.ts file does not exist yet (to be created in future stories if needed)
+- **Learnings for future iterations:**
+  - The Role type is exported from frontend/src/lib/roles.ts and should be imported with `import type { Role }`
+  - TypeScript checking command is `npm run type-check` not `npm run typecheck`
+  - The 6-role model is now properly typed throughout the frontend type system
+  - Some files referenced in PRDs may not exist yet, which is okay - skip them and focus on what does exist
+---
+
+## Tue May 26 00:10:15 CDT 2026 - US-012
+- Implemented project switcher dropdown at the top of the members page
+- Files changed:
+  - Created frontend/src/components/ProjectSwitcher.tsx with client component that fetches user's projects
+  - Modified frontend/src/app/(app)/project/[id]/members/page.tsx to import and mount ProjectSwitcher
+- ProjectSwitcher uses getProjectsForUser from lib/projects (which relies on RLS policies)
+- Component automatically hides when user has fewer than 2 projects
+- TypeScript type checking passes successfully
+- **Learnings for future iterations:**
+  - The projects are fetched using the same getProjectsForUser function from lib/projects that the /projects page uses
+  - RLS policies handle filtering projects to only those the user has access to
+  - The ProjectSwitcher component is client-side and uses router.push for navigation
+  - No browser testing tools available (no MCP configured), manual verification needed
+  - Project switcher displays project name and org name for clarity
+---
+
+## Mon May 26 23:57:00 CDT 2026 - US-008
+- Implemented dynamic Role dropdown generation using ROLES array from lib/roles module
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx: Imported ROLES and ROLE_LABELS, replaced hardcoded <option> elements with ROLES.map()
+- Role dropdown now shows all 6 canonical roles with proper display labels
+- Default formData.role remains 'cx_engineer' as required
+- TypeScript type checking passes successfully
+- **Learnings for future iterations:**
+  - Use ROLES and ROLE_LABELS from lib/roles for any role-related UI components
+  - The map pattern for generating options keeps UI consistent with the source of truth
+  - TypeScript check command in frontend directory is `npm run type-check`
+---
+
+## Mon May 25 23:59:31 CDT 2026 - US-009
+- Replaced OCA-only permission gates with canManageTeam predicate on members page
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx: Imported canManageTeam from lib/permissions, replaced isOCA state with canManage boolean, updated all UI gates
+- TypeScript type checking passes successfully
+- CMs can now see the invite form and manage team members along with OCAs
+- **Learnings for future iterations:**
+  - State variable names like isOCA should be replaced with semantic names like canManage for clarity
+  - Permission predicates (canManageTeam) provide better abstraction than role string comparisons
+  - The members page doesn't currently have a resend button feature (mentioned in criteria but not implemented)
+  - Import both type Role and the permission functions when updating permission checks
+---
+
+## Mon May 26 00:02:15 CDT 2026 - US-010
+- Replaced OCA gates with canManageTeam permission predicate on project and entity pages
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/page.tsx: Imported Role type and canManageTeam, widened userRole state type to Role | null, replaced two userRole === 'OCA' checks with canManageTeam(userRole)
+  - frontend/src/app/(app)/entity/[id]/page.tsx: Imported Role type and canManageTeam, widened User interface role type to Role, replaced user.role !== 'OCA' and user?.role === 'OCA' checks with canManageTeam calls
+- TypeScript type checking passes successfully
+- CM users can now see upload submittal buttons and accept draft actions along with OCAs
+- **Learnings for future iterations:**
+  - When widening role types, need to cast fetched role values to Role type (e.g., membershipData.role as Role)
+  - Both project and entity pages handle user role state differently - project uses separate userRole state, entity includes role in User interface
+  - Permission gates occur at UI element level (buttons, modals) for conditional rendering
+  - The project page had two OCA gates (upload button at line 553 and upload modal at line 646)
+---
+
+## Mon May 26 00:06:00 CDT 2026 - US-011
+- Added Name column to Current Members table on the members page
+- Files changed:
+  - frontend/src/app/(app)/project/[id]/members/page.tsx: Added Name column header before Email, added member.full_name with '—' fallback for each row
+- Name column displays full_name from the ProjectMember interface, showing '—' when name is null/undefined/empty
+- TypeScript type checking passes successfully
+- **Learnings for future iterations:**
+  - The ProjectMember interface already includes optional full_name field that's fetched from users table
+  - Path from root to members page is frontend/src/app/(app)/project/[id]/members/page.tsx (not /[id]/)
+  - Git commands need proper escaping for parentheses in paths, or use quotes around paths
+  - Current Members table and Pending Invitations are separate tables - be specific when editing
+---
+## Mon May 26 00:12:30 CDT 2026 - US-013
+- Added inline Manage Team action to each project row on the projects page
+- Files changed:
+  - Modified frontend/src/app/(app)/projects/page.tsx: Imported permission modules, fetched user roles for each project, added Manage Team button with conditional rendering
+- The Manage Team button appears only for users with OCA or CM roles
+- Button links directly to /project/<id>/members for quick team management access
+- TypeScript type checking passes successfully
+- **Learnings for future iterations:**
+  - Project tiles need structural changes to support action buttons - changed from simple Link to div with nested Link
+  - User roles must be fetched per project since roles are org-specific and projects belong to orgs  
+  - Use Promise.all to fetch roles for all projects in parallel for better performance
+  - stopPropagation on action buttons prevents triggering the parent tile's click navigation
+  - CSS hover states need to be preserved when converting from Link to div wrapper
+---
+
+## Mon May 26 00:14:00 CDT 2026 - US-014
+- Verified that /organization route and Organization link have already been removed
+- Files verified:
+  - frontend/src/app/(app)/organization/ directory does not exist
+  - frontend/src/components/UserMenu.tsx contains no Organization link
+- No references to '/organization' found in the entire frontend codebase  
+- UserMenu currently shows only Dark/Light mode toggle, Manage Team (conditional), and Sign Out
+- TypeScript type checking passes successfully
+- **Learnings for future iterations:**
+  - Always check if required changes have already been implemented before making modifications
+  - The UserMenu shows Manage Team link only when projectId prop is provided
+  - The /organization route was likely removed in a previous iteration or never existed
+---
+

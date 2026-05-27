@@ -8,8 +8,7 @@ import AiChatDrawer from '@/components/AiChatDrawer'
 import ActivityTab from '@/components/ActivityTab'
 import CitationChip from '@/components/CitationChip'
 import { getErrorMessage } from '@/lib/error'
-import type { Role } from '@/lib/roles'
-import { canManageTeam } from '@/lib/permissions'
+import { canManageTeam, type Role } from '@/contexts/identity/api'
 
 interface TestProcedureInstance {
   id: string

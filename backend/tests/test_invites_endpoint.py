@@ -14,7 +14,7 @@ import uuid
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from invitation_service import InvitationService
+from contexts.identity_access.invitations import InvitationService
 from fastapi import HTTPException
 
 

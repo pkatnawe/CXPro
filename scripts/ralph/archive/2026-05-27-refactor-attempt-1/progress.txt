@@ -1,0 +1,144 @@
+## 2026-05-27 - US-008
+- Pre-deletion grep for 'contexts/commissioning' in frontend/src/ returned zero hits (safe to delete)
+- Deleted frontend/src/contexts/commissioning/index.ts and types.ts (empty stubs with no real implementations)
+- Tests: 48 vitest tests passing (unchanged from US-007 baseline)
+- Typecheck passes (no errors outside .next/)
+- **Learnings for future iterations:**
+  - The commissioning context was a pure empty scaffold; no consumers existed anywhere in the codebase
+---
+
+# Ralph Progress Log
+Started: Tue May 26 20:05:00 CDT 2026
+
+## 2026-05-27 - US-007
+- Created frontend/src/contexts/identity/ui.tsx with UserMenu component
+  - Updated import from `@/lib/identity` to `@/contexts/identity/api` for getInitials
+  - Exported as named export `UserMenu` (not default) to match module style
+- UserMenu.tsx did not exist in this branch (was from a prior PRD branch); created from git history
+- No consumers of old path existed — grep for `components/UserMenu` returns zero hits
+- Created colocated frontend/src/contexts/identity/ui.test.tsx with 5 tests
+- Tests: 48 vitest tests passing (43 from api.test.ts + 5 new from ui.test.tsx)
+- Typecheck passes (no new errors outside .next/)
+- **Learnings for future iterations:**
+  - UserMenu.tsx was already removed from this branch before US-007; git show [commit]:path used to recover it
+  - No React Testing Library installed; tests use vitest with pure logic assertions
+  - Named exports preferred over default exports in this context module pattern
+---
+
+## Codebase Patterns
+- Use raw asyncpg for database operations (no Supabase SDK)
+- Use db.get_asyncpg_connection() for single operations, db.get_asyncpg_pool() for long-running services
+- Tests live in backend/ directory alongside source files (or colocated with deep modules in contexts/)
+- Database URL comes from DATABASE_URL environment variable
+- roles_temp.py and permissions_temp.py were untracked scratch files (not in git); the canonical content for roles/permissions now lives in contexts/identity_access/memberships.py
+- Frontend: old lib files (members, identity, roles, permissions) don't exist on this branch — Identity API lives in frontend/src/contexts/identity/api.ts
+- Frontend: vitest config lives at frontend/vitest.config.ts; run tests with `npm run test` from frontend/
+- Frontend: .next/ build cache may have stale type errors; only check types outside .next/ for accuracy
+---
+
+## 2026-05-27 01:20 - US-001
+- Implemented shared deep modules for backend infrastructure
+- Files created:
+  - backend/db.py - Database connection factories for asyncpg and connection pooling
+  - backend/auth.py - JWT extraction, current user resolution, and permission enforcement helpers
+  - backend/outbox.py - Domain event emission with single function API
+- Updated 16 existing files to use the new modules instead of inlining database/auth logic:
+  - All migration files (apply_*.py) now use db.get_asyncpg_connection()
+  - Worker files (outbox_dispatcher, inbox_subscriber, ingestion_pipeline) use db module
+  - Test files updated to use db.get_asyncpg_pool() for fixtures
+  - Added pyjwt>=2.8.0 to requirements.txt for auth module
+- **Learnings for future iterations:**
+  - This codebase uses raw asyncpg for all database operations (no Supabase SDK)
+  - Database URL is loaded from DATABASE_URL env var
+  - Tests are in the backend directory, not in a separate tests/ folder
+  - The existing test files suggest invitation/permission/role modules existed but were deleted
+  - Use db.get_asyncpg_connection() for single operations, db.get_asyncpg_pool() for long-running services
+  - Import from new deep modules using relative imports when in backend/ directory (e.g., from contexts.identity_access.invitations import send_invite)
+  - Tests that use mock connections expect multiple execute calls when events are emitted (insert + notify)
+---
+
+## 2026-05-27 01:30 - US-002
+- Created deep module at backend/contexts/identity_access/invitations.py
+- Files created:
+  - backend/contexts/__init__.py and backend/contexts/identity_access/__init__.py
+  - backend/contexts/identity_access/invitations.py - Consolidated invitation_service.py and invite_decision.py
+- Restored invitation-related test files from git history and updated imports:
+  - test_invite_decision.py - All 9 tests passing
+  - test_invitation_service.py and test_invitation_service_simple.py 
+  - tests/test_invites_endpoint.py - All 4 tests passing
+- Updated main.py to use the new invitations module for POST /invites endpoint
+- **Learnings for future iterations:**
+  - Files may need to be restored from git history using commands like: git show commit:path/to/file
+  - When consolidating modules, include all helper functions (roles validation, permissions checks) that are tightly coupled
+  - The new module emits outbox events which tests need to account for (multiple execute calls)
+  - Import paths from within backend/ should be relative (from contexts.identity_access.invitations not backend.contexts...)
+---
+
+## 2026-05-27 - US-003
+- Created backend/contexts/identity_access/memberships.py with small public API:
+  - Role constants: ROLES, ROLE_LABELS
+  - Permission predicates: is_valid_role, can_manage_team, can_create_project
+  - Membership query helper: get_membership
+- Deleted untracked scratch files: roles_temp.py, permissions_temp.py
+- Created colocated test file: backend/contexts/identity_access/test_memberships.py
+  - All assertions from original test_roles.py and test_permissions.py preserved
+- memberships.py uses db.get_asyncpg_connection() from US-001 (no inlining)
+- Tests: went from 25 → 37 passed; same 2 pre-existing failures (async mock issue in test_invitation_service.py)
+- **Learnings for future iterations:**
+  - roles_temp.py / permissions_temp.py were untracked scratch files left by a previous iteration; not in git
+  - The canonical ROLES tuple and permission predicates now live in memberships.py
+  - invitations.py already inlined its own copy of ROLES/can_manage_team; US-004 could optionally refactor invitations.py to import from memberships.py, but it's not required per the story
+  - Test discovery works recursively — pytest finds tests in contexts/ subdirectories automatically
+---
+
+## 2026-05-27 - US-005
+- Created backend/workers/ directory and moved both long-running workers
+- Files created:
+  - backend/workers/__init__.py
+  - backend/workers/outbox_dispatcher.py (moved from backend/outbox_dispatcher.py, import updated)
+  - backend/workers/inbox_subscriber.py (moved from backend/inbox_subscriber.py, import of outbox_dispatcher updated)
+  - backend/workers/test_outbox_dispatcher.py (moved with source, import updated)
+  - backend/workers/verify_outbox_dispatcher.py (moved with source)
+- Files deleted:
+  - backend/outbox_dispatcher.py
+  - backend/inbox_subscriber.py
+  - backend/test_outbox_dispatcher.py
+  - backend/verify_outbox_dispatcher.py
+- Updated backend/cx_execution_agent.py lazy import from `outbox_dispatcher` to `workers.outbox_dispatcher`
+- railway.json only references `main:app` (no worker paths), so no change needed
+- Tests: 37 passed, same 2 pre-existing failures — unchanged from US-004 baseline
+- **Learnings for future iterations:**
+  - Workers run from backend/ as CWD, so `from workers.outbox_dispatcher import` works (no relative import needed)
+  - inbox_subscriber.py had `Path(__file__).parent.parent / ".env.local"` — updated to `.parent.parent.parent` after moving one level deeper
+  - railway.json only has the main uvicorn start command; no worker process config exists there
+---
+
+## 2026-05-27 - US-006
+- Created frontend/src/contexts/identity/api.ts merging public API from members.ts, identity.ts, roles.ts, permissions.ts
+- Functions exported: ROLES, ROLE_LABELS, Role type, isValidRole, canManageTeam, canCreateProject, getInitials, getMembersForProject, getPendingInvitesForProject, getCurrentUserRole, updateDiscipline
+- Created colocated frontend/src/contexts/identity/api.test.ts with 43 tests (all passing)
+- Added vitest back to frontend/package.json (test/test:watch scripts) and vitest.config.ts
+- Updated frontend/src/lib/supabase.ts to import Role type from contexts/identity/api
+- Note: lib/members.ts, lib/identity.ts, lib/roles.ts, lib/permissions.ts did not exist on this branch (were from prior PRD branch) — created api.ts from scratch using git history
+- Tests: 43 vitest tests passing (baseline established)
+- **Learnings for future iterations:**
+  - The old lib files (members, identity, roles, permissions) don't exist on this branch; they were from a prior PRD run on a different branch
+  - vitest was removed from package.json during branch switch; needed to be re-added
+  - The .next/ build cache contains stale type errors from old app/(app) directory structure — these are pre-existing and not caused by our changes
+  - typecheck passes when excluding .next/ directory (no new errors introduced)
+---
+
+## 2026-05-27 - US-004
+- Created backend/contexts/identity_access/api.py with thin APIRouter
+  - InvitationRequest Pydantic model
+  - _get_supabase() lazy singleton for the Supabase client
+  - _get_current_user() dependency
+  - POST /invites handler delegates entirely to invitations.send_invite()
+- Reduced backend/main.py to pure composition root:
+  - Only FastAPI instantiation, CORS middleware, exception handler, include_router, /health, /
+  - Zero route handlers with business logic remain
+- Tests: 37 passed, same 2 pre-existing failures
+- **Learnings for future iterations:**
+  - api.py initializes Supabase lazily via a module-level singleton to avoid env-var issues at import time
+  - The router prefix can be left empty (routes are already /invites) — no prefix needed on include_router
+---

@@ -5,13 +5,13 @@ Tests for the invite_decision pure module.
 
 import pytest
 from datetime import datetime, timezone, timedelta
-from invite_decision import (
-    decide_invite_action,
+from contexts.identity_access.invitations import (
+    _decide_invite_action as decide_invite_action,
     ExistingInvite,
     CreateNew,
     ReplaceExpired,
     IncrementResend,
-    RejectCapReached
+    RejectCapReached,
 )
 
 

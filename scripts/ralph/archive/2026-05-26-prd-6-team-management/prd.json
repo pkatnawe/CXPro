@@ -1,0 +1,213 @@
+{
+  "project": "CXPro",
+  "branchName": "ralph/prd-8-members-ux-cleanup",
+  "description": "PRD-8 Members UX cleanup: expand the role enum to the 6 human roles from docs/architecture.md, consolidate role list + permission gates into pure modules on both FE and BE, add project switcher + Name column to members page, add inline Manage Team action to /projects rows, delete the redundant /organization route. See GitHub issue #31.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "DB migration — extend memberships.role to permit 4 new values",
+      "description": "As a developer, I need the memberships.role constraint to accept the new role values so that downstream code can insert them without a CHECK violation.",
+      "acceptanceCriteria": [
+        "Create a new migration in migrations/ that extends the memberships.role CHECK constraint (or enum, whichever the current schema uses) to permit values: OCA, CM, cx_engineer, field_technician, design_engineer, owner_fm",
+        "Existing rows with role 'OCA' or 'cx_engineer' are not modified",
+        "Migration applies cleanly against a fresh DB and is idempotent on re-apply",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Backend roles module with is_valid_role + unit tests",
+      "description": "As a developer, I need one Python source of truth for valid role values so that the invite validator and any future gate cannot drift from the DB.",
+      "acceptanceCriteria": [
+        "Create backend/roles.py exporting ROLES (the 6 canonical string values) and is_valid_role(s: str) -> bool",
+        "Display labels are exported as ROLE_LABELS dict keyed by role value",
+        "Create backend/tests/test_roles.py with cases: is_valid_role returns True for each of the 6 values, False for '', None, 'ADMIN', and case-variants like 'oca'",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Backend permissions module with can_manage_team / can_create_project + unit tests",
+      "description": "As a developer, I need named predicates for permission gates so that scattered role-string checks in the backend can be consolidated.",
+      "acceptanceCriteria": [
+        "Create backend/permissions.py exporting can_manage_team(role) and can_create_project(role), both returning True for 'OCA' and 'CM', False otherwise",
+        "Both predicates return False for None, empty string, and unknown roles",
+        "Create backend/tests/test_permissions.py covering all 6 roles plus None/empty/unknown for both predicates",
+        "Tests pass",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Backend invite endpoint uses roles + permissions modules",
+      "description": "As an OCA or CM, I want the invite endpoint to accept any of the 6 role values and to permit CM (not only OCA) to invite, so that the expanded role model is honored end-to-end.",
+      "acceptanceCriteria": [
+        "InvitationService (or the FastAPI route in main.py) validates the incoming role via is_valid_role and rejects with a 400 if invalid",
+        "The 'Only OCAs can invite' 403 gate is replaced by a can_manage_team(caller_role) check, so CM is also permitted",
+        "Extend backend/tests/test_invites_endpoint.py with a case that POSTs role='CM' and asserts 200, and one that POSTs role='not_a_role' and asserts 400",
+        "Existing invite tests continue to pass",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Frontend lib/roles module with isValidRole + unit tests",
+      "description": "As a developer, I need one TypeScript source of truth for valid role values so that role dropdowns and type unions stop being duplicated across files.",
+      "acceptanceCriteria": [
+        "Create frontend/src/lib/roles.ts exporting ROLES (readonly tuple of the 6 values), Role type (union derived from ROLES), ROLE_LABELS (Record<Role, string>), and isValidRole(s: unknown): s is Role",
+        "Create frontend/src/lib/__tests__/roles.test.ts with cases: isValidRole returns true for each of the 6 values, false for '', null, undefined, 'ADMIN', and case-variants",
+        "Tests pass under vitest",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Frontend lib/permissions module with canManageTeam / canCreateProject + unit tests",
+      "description": "As a developer, I need named predicates so that scattered role === 'OCA' checks across the frontend can be consolidated.",
+      "acceptanceCriteria": [
+        "Create frontend/src/lib/permissions.ts exporting canManageTeam(role: Role | null | undefined): boolean and canCreateProject(role: Role | null | undefined): boolean, both returning true only for 'OCA' and 'CM'",
+        "Create frontend/src/lib/__tests__/permissions.test.ts covering all 6 roles plus null/undefined for both predicates",
+        "Tests pass under vitest",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Widen role type unions in supabase.ts, getPrimaryOrg, members.ts",
+      "description": "As a developer, I want the existing 'OCA' | 'cx_engineer' literal unions widened to the full Role type, so that the 6-role model flows through type signatures without manual re-typing.",
+      "acceptanceCriteria": [
+        "frontend/src/lib/supabase.ts: change the membership role type alias to the imported Role from lib/roles",
+        "frontend/src/lib/getPrimaryOrg.ts: change the return-type role field to Role and the cast on firstMembership.role to Role",
+        "frontend/src/lib/members.ts: change getCurrentUserRole return type from 'OCA' | 'cx_engineer' | null to Role | null and update the cast",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Members page — expand Role dropdown to 6 values",
+      "description": "As an OCA or CM, I want to pick from all 6 role values when inviting a new member so that I can assign Construction Manager, Field Technician, Design Engineer, and Owner/FM in addition to OCA and Cx Engineer.",
+      "acceptanceCriteria": [
+        "frontend/src/app/(app)/project/[id]/members/page.tsx: replace the hardcoded <option> elements with options generated by mapping over ROLES from lib/roles, using ROLE_LABELS for the visible text",
+        "Default formData.role remains 'cx_engineer'",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Replace OCA-only gates with canManageTeam on members page",
+      "description": "As a CM, I want to see the invite form and resend buttons on the members page, so that I can manage my team without OCA bottleneck.",
+      "acceptanceCriteria": [
+        "frontend/src/app/(app)/project/[id]/members/page.tsx: replace setIsOCA(role === 'OCA') and the isOCA state with a canManage boolean computed via canManageTeam(role)",
+        "All UI gates that referenced isOCA (invite form, resend button column) now reference canManage",
+        "Tests in frontend/src/lib/__tests__/members.test.ts (if any reference the role-gate shape) continue to pass",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Replace OCA gates on project and entity pages with canManageTeam / canCreateProject",
+      "description": "As a CM, I want the project and entity pages to expose admin actions to me, so that capability matches the documented CM role.",
+      "acceptanceCriteria": [
+        "frontend/src/app/(app)/project/[id]/page.tsx: replace the two userRole === 'OCA' gates with canManageTeam(userRole) and widen useState type to Role | null",
+        "frontend/src/app/(app)/entity/[id]/page.tsx: replace the two user.role !== 'OCA' / user?.role === 'OCA' gates with calls to canManageTeam(user?.role); widen the role type on the user shape to Role",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Members page — add Name column to Current Members table",
+      "description": "As any user, I want to see member names alongside emails so that I can identify teammates by name.",
+      "acceptanceCriteria": [
+        "frontend/src/app/(app)/project/[id]/members/page.tsx: prepend a 'Name' <th> before Email in the Current Members table header",
+        "Each row renders member.full_name as the first <td>, falling back to '—' when full_name is null/undefined/empty",
+        "Pending Invitations table is not modified",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Members page — add project switcher at top",
+      "description": "As an OCA or CM, I want to switch between my projects' membership pages without navigating back to /projects so that managing multiple projects is fast.",
+      "acceptanceCriteria": [
+        "Create frontend/src/components/ProjectSwitcher.tsx: a client component that fetches the current user's projects (via the participations + projects join already used in lib/members.ts patterns) and renders a <select> with the current projectId selected",
+        "onChange calls router.push(`/project/${newId}/members`)",
+        "Mount ProjectSwitcher at the top of frontend/src/app/(app)/project/[id]/members/page.tsx, above the H1 or directly under it",
+        "Picker hides itself (renders null) if the user has fewer than 2 projects",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Projects page — add inline Manage Team action per project row",
+      "description": "As an OCA or CM, I want a Manage Team button on each project row in /projects, so that I can jump straight to membership management without entering the project first.",
+      "acceptanceCriteria": [
+        "frontend/src/app/(app)/projects/page.tsx (or whichever component renders the projects list): add a 'Manage Team' button/link per row linking to /project/<id>/members",
+        "The action is rendered only when canManageTeam(currentUserRole) returns true",
+        "Currently-rendered project info (name, etc.) is preserved",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Delete /organization route and remove Organization link from UserMenu",
+      "description": "As an end-user, I want the redundant /organization page gone so that /projects is the single canonical home for my project list and the user dropdown stops linking to a broken page.",
+      "acceptanceCriteria": [
+        "Delete frontend/src/app/(app)/organization/page.tsx and the organization directory",
+        "Remove the <Link href=\"/organization\"> Organization item from frontend/src/components/UserMenu.tsx (including its surrounding icon/markup)",
+        "Navigating to /organization returns 404 (or Next.js's default not-found behavior)",
+        "User dropdown no longer shows an Organization entry between Dark mode and Manage Team",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

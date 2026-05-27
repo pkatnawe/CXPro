@@ -29,7 +29,7 @@ async def test_invitation_service_create_invitation():
     """Test creating invitations via InvitationService"""
     
     # Import the service (will fail initially)
-    from invitation_service import InvitationService
+    from contexts.identity_access.invitations import InvitationService
     
     # Connect to database
     conn = await asyncpg.connect(DATABASE_URL)

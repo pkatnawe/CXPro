@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import our dispatcher
-from outbox_dispatcher import OutboxDispatcher, OutboxEvent
+from workers.outbox_dispatcher import OutboxDispatcher, OutboxEvent
 
 class TestResults:
     """Track test results across workers"""

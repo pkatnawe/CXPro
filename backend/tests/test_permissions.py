@@ -9,8 +9,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
-from permissions import can_manage_team, can_create_project
-from roles import ROLES  # Import to test all 6 canonical roles
+from contexts.identity_access.memberships import can_manage_team, can_create_project, ROLES
 
 
 def test_can_manage_team_with_valid_roles():

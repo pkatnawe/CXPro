@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
-from roles import ROLES, ROLE_LABELS, is_valid_role
+from contexts.identity_access.memberships import ROLES, ROLE_LABELS, is_valid_role
 
 
 def test_roles_constant():

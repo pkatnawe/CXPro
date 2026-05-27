@@ -12,7 +12,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-from outbox_dispatcher import OutboxDispatcher, OutboxEvent
+from workers.outbox_dispatcher import OutboxDispatcher, OutboxEvent
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

@@ -21,7 +21,7 @@
       ],
       "priority": 1,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-05-27: Created db.py, auth.py, and outbox.py modules. Updated all existing files to use these modules. Tests remain at 10 passing."
     },
     {
       "id": "US-002",
@@ -42,7 +42,7 @@
       ],
       "priority": 2,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-05-27: Created contexts/identity_access/invitations.py consolidating invitation_service.py and invite_decision.py. Updated main.py and all tests to use the new module. Tests remain at 15 passing."
     },
     {
       "id": "US-003",
@@ -61,7 +61,7 @@
       ],
       "priority": 3,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-05-27: Created contexts/identity_access/memberships.py consolidating roles and permissions admin logic. Deleted roles_temp.py and permissions_temp.py. Created colocated test_memberships.py with all assertions from original test_roles.py and test_permissions.py. Tests went from 25 to 37 passing (same 2 pre-existing failures)."
     },
     {
       "id": "US-004",
@@ -80,7 +80,7 @@
       ],
       "priority": 4,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-05-27: Created contexts/identity_access/api.py with thin APIRouter for /invites. Reduced main.py to composition root with only app setup, middleware, include_router, and /health + / endpoints. Tests remain at 37 passing (same 2 pre-existing failures)."
     },
     {
       "id": "US-005",
@@ -100,7 +100,7 @@
       ],
       "priority": 5,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-05-27: Created backend/workers/ directory with __init__.py. Moved outbox_dispatcher.py and inbox_subscriber.py verbatim (only imports updated). Worker tests and verify script moved with sources. Updated cx_execution_agent.py import. Tests remain at 37 passing (same 2 pre-existing failures)."
     },
     {
       "id": "US-006",
@@ -121,7 +121,7 @@
       ],
       "priority": 6,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-05-27: Created contexts/identity/api.ts merging members.ts, identity.ts, roles.ts, permissions.ts. Added vitest back to package.json with vitest.config.ts. Created colocated api.test.ts with 43 passing tests. Updated supabase.ts to use Role type from api.ts."
     },
     {
       "id": "US-007",
@@ -141,7 +141,7 @@
       ],
       "priority": 7,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-05-27: Created contexts/identity/ui.tsx with UserMenu component (imported getInitials from contexts/identity/api instead of lib/identity). UserMenu.tsx did not exist on this branch. Created colocated ui.test.tsx with 5 tests. Total tests: 48 passing."
     },
     {
       "id": "US-008",
@@ -156,7 +156,7 @@
       ],
       "priority": 8,
       "passes": true,
-      "notes": ""
+      "notes": "Completed 2026-05-27: Pre-deletion grep for 'contexts/commissioning' in frontend/src/ returned zero hits. Deleted index.ts and types.ts (empty stubs). Tests remain at 48 passing. Typecheck passes."
     }
   ]
 }

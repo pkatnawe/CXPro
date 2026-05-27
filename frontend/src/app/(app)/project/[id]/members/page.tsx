@@ -3,10 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase, type DisciplineScope } from '@/lib/supabase'
-import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole, type ProjectMember, type PendingInvite } from '@/lib/members'
+import { getMembersForProject, getPendingInvitesForProject, updateDiscipline, getCurrentUserRole, ROLES, ROLE_LABELS, canManageTeam, type ProjectMember, type PendingInvite, type Role } from '@/contexts/identity/api'
 import { getErrorMessage } from '@/lib/error'
-import { ROLES, ROLE_LABELS, type Role } from '@/lib/roles'
-import { canManageTeam } from '@/lib/permissions'
 import { ProjectSwitcher } from '@/components/ProjectSwitcher'
 
 export default function MembersPage() {
@@ -472,7 +470,7 @@ export default function MembersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Sends
                   </th>
-                  {isOCA && (
+                  {canManage && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
@@ -500,7 +498,7 @@ export default function MembersPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {invite.send_count}/3
                     </td>
-                    {isOCA && (
+                    {canManage && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
                           onClick={() => handleResendInvite(invite)}

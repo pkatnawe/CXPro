@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { getProjectsForUser, type ProjectCard } from "@/lib/projects"
 import { supabase } from "@/lib/supabase"
-import { getCurrentUserRole } from "@/lib/members"
-import { canManageTeam } from "@/lib/permissions"
-import type { Role } from "@/lib/roles"
+import { getCurrentUserRole, canManageTeam, type Role } from "@/contexts/identity/api"
 
 // ProjectThumb SVG component matching blueprint-app.jsx pattern
 function ProjectThumb({ kind }: { kind?: string }) {

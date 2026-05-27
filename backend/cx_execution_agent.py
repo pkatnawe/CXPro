@@ -404,7 +404,7 @@ class CxExecutionAgent:
 
 async def register_with_dispatcher(db_pool: asyncpg.Pool):
     """Register the agent with the outbox dispatcher."""
-    from outbox_dispatcher import OutboxDispatcher
+    from workers.outbox_dispatcher import OutboxDispatcher
     
     # Create agent
     agent = CxExecutionAgent(db_pool)

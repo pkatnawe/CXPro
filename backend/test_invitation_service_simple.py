@@ -4,7 +4,7 @@ Simple test to verify InvitationService works
 """
 
 import pytest
-from invitation_service import InvitationService
+from contexts.identity_access.invitations import InvitationService
 from unittest.mock import MagicMock, AsyncMock
 from fastapi import HTTPException
 import secrets

@@ -1,5 +1,53 @@
-import { supabase } from './supabase'
-import type { Role } from './roles'
+import { supabase } from '@/lib/supabase'
+
+export const ROLES = [
+  'OCA',
+  'CM',
+  'cx_engineer',
+  'field_technician',
+  'design_engineer',
+  'owner_fm'
+] as const
+
+export type Role = typeof ROLES[number]
+
+export const ROLE_LABELS: Record<Role, string> = {
+  'OCA': 'Owner\'s Commissioning Agent',
+  'CM': 'Construction Manager',
+  'cx_engineer': 'Cx Engineer',
+  'field_technician': 'Field Technician',
+  'design_engineer': 'Design Engineer',
+  'owner_fm': 'Owner/FM'
+}
+
+export function isValidRole(s: unknown): s is Role {
+  return typeof s === 'string' && (ROLES as readonly string[]).includes(s)
+}
+
+export function canManageTeam(role: Role | null | undefined): boolean {
+  return role === 'OCA' || role === 'CM'
+}
+
+export function canCreateProject(role: Role | null | undefined): boolean {
+  return role === 'OCA' || role === 'CM'
+}
+
+export function getInitials(fullName: string | undefined, email: string): string {
+  if (!fullName || fullName.trim() === '') {
+    return email.charAt(0).toUpperCase()
+  }
+
+  const trimmedName = fullName.trim()
+  const words = trimmedName.split(/\s+/)
+
+  if (words.length === 1) {
+    return words[0].charAt(0).toUpperCase()
+  } else if (words.length === 2) {
+    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase()
+  } else {
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
+  }
+}
 
 export interface ProjectMember {
   user_id: string
@@ -22,22 +70,19 @@ export interface PendingInvite {
 
 export async function getMembersForProject(projectId: string): Promise<ProjectMember[]> {
   try {
-    // Step 1: Get participations for the project
     const { data: participations, error: participationsError } = await supabase
       .from('participations')
       .select('user_id')
       .eq('project_id', projectId)
 
     if (participationsError) throw participationsError
-    
-    // Return early if no participations found
+
     if (!participations || participations.length === 0) {
       return []
     }
 
     const userIds = participations.map(p => p.user_id)
 
-    // Step 2: Get the project's org_id
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('org_id')
@@ -47,7 +92,6 @@ export async function getMembersForProject(projectId: string): Promise<ProjectMe
     if (projectError) throw projectError
     const orgId = project.org_id
 
-    // Step 3: Get user details
     const { data: users, error: usersError } = await supabase
       .from('users')
       .select('id, email, full_name')
@@ -55,7 +99,6 @@ export async function getMembersForProject(projectId: string): Promise<ProjectMe
 
     if (usersError) throw usersError
 
-    // Step 4: Get memberships for users in this specific org
     const { data: memberships, error: membershipsError } = await supabase
       .from('memberships')
       .select('user_id, role')
@@ -64,17 +107,15 @@ export async function getMembersForProject(projectId: string): Promise<ProjectMe
 
     if (membershipsError) throw membershipsError
 
-    // Step 5: Get discipline scopes for the project
     const { data: disciplineScopes, error: disciplineScopesError } = await supabase
       .from('discipline_scopes')
       .select('id, name')
       .eq('project_id', projectId)
 
     if (disciplineScopesError) throw disciplineScopesError
-    
+
     const scopeIds = disciplineScopes?.map(ds => ds.id) || []
 
-    // Step 6: Get assignments for users in project discipline scopes
     let assignments: any[] = []
     if (scopeIds.length > 0) {
       const { data: assignmentsData, error: assignmentsError } = await supabase
@@ -87,12 +128,11 @@ export async function getMembersForProject(projectId: string): Promise<ProjectMe
       assignments = assignmentsData || []
     }
 
-    // Map everything together
     const members: ProjectMember[] = userIds.map(userId => {
       const user = users?.find(u => u.id === userId)
       const membership = memberships?.find(m => m.user_id === userId)
       const assignment = assignments.find(a => a.user_id === userId)
-      const disciplineScope = assignment 
+      const disciplineScope = assignment
         ? disciplineScopes?.find(ds => ds.id === assignment.discipline_scope_id)
         : null
 
@@ -114,7 +154,6 @@ export async function getMembersForProject(projectId: string): Promise<ProjectMe
 
 export async function getPendingInvitesForProject(projectId: string): Promise<PendingInvite[]> {
   try {
-    // Query pending invitations that are not accepted and not expired
     const { data, error } = await supabase
       .from('pending_invitations')
       .select(`
@@ -137,7 +176,6 @@ export async function getPendingInvitesForProject(projectId: string): Promise<Pe
 
     if (error) throw error
 
-    // Map to PendingInvite format
     const invites: PendingInvite[] = data?.map((invitation: any) => ({
       id: invitation.id,
       email: invitation.email,
@@ -161,7 +199,6 @@ export async function getCurrentUserRole(
   projectId: string
 ): Promise<Role | null> {
   try {
-    // First get the project's org_id
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('org_id')
@@ -169,10 +206,9 @@ export async function getCurrentUserRole(
       .single()
 
     if (projectError) throw projectError
-    
+
     const orgId = project.org_id
 
-    // Then get the user's role in that org
     const { data: membership, error: membershipError } = await supabase
       .from('memberships')
       .select('role')
@@ -181,9 +217,9 @@ export async function getCurrentUserRole(
       .maybeSingle()
 
     if (membershipError) throw membershipError
-    
+
     if (!membership) return null
-    
+
     return membership.role as Role
   } catch (error) {
     console.error('Error fetching user role:', error)
@@ -192,25 +228,21 @@ export async function getCurrentUserRole(
 }
 
 export async function updateDiscipline(
-  userId: string, 
-  projectId: string, 
+  userId: string,
+  projectId: string,
   newDisciplineScopeId: string
 ): Promise<void> {
   try {
-    // First, get all discipline scopes for this project to find existing assignments
     const { data: projectDisciplines, error: disciplinesError } = await supabase
       .from('discipline_scopes')
       .select('id')
       .eq('project_id', projectId)
-    
+
     if (disciplinesError) throw disciplinesError
-    
-    // Delete all existing assignments for this user in this project
-    // (an assignment links a user to a discipline_scope, and discipline_scopes belong to projects)
+
     if (projectDisciplines && projectDisciplines.length > 0) {
       const disciplineScopeIds = projectDisciplines.map(ds => ds.id)
-      
-      // Delete existing assignments for this user and project
+
       for (const dsId of disciplineScopeIds) {
         await supabase
           .from('assignments')
@@ -219,17 +251,15 @@ export async function updateDiscipline(
           .eq('discipline_scope_id', dsId)
       }
     }
-    
-    // Insert the new assignment
+
     const { error: insertError } = await supabase
       .from('assignments')
       .insert({
         user_id: userId,
         discipline_scope_id: newDisciplineScopeId
       })
-    
+
     if (insertError) {
-      // If it's a duplicate key error, that's ok (idempotent)
       if (!insertError.message?.includes('duplicate')) {
         throw insertError
       }

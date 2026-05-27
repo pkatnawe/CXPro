@@ -6,8 +6,7 @@ import { supabase, type Project } from '@/lib/supabase'
 import { getProjectDashboard, type DashboardSummary, type AgentRunSummary } from '@/lib/dashboard'
 import UploadModal from '@/components/UploadModal'
 import { getErrorMessage } from '@/lib/error'
-import type { Role } from '@/lib/roles'
-import { canManageTeam } from '@/lib/permissions'
+import { canManageTeam, type Role } from '@/contexts/identity/api'
 
 export default function DashboardPage() {
   const params = useParams()

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Role } from './roles'
+import type { Role } from '@/contexts/identity/api'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
