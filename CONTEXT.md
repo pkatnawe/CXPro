@@ -83,27 +83,39 @@ The elapsed time between RFI submission and answer; a primary CM KPI.
 ### Asset Registry
 
 **Asset**:
-A single physical or logical piece of equipment — the atom of commissioning. Every test ultimately targets an Asset or a System of Assets.
-_Avoid_: Equipment record, piece, unit.
+A single physical or logical piece of equipment — the atom of commissioning. Every test ultimately targets an Asset or a System of Assets. Assets form a recursive tree via an optional `parent_asset_id` (e.g., an AHU is the parent of its supply fan; a switchgear is the parent of its breakers). Every Asset — parent or child — is first-class: it has its own Tag, tests, deviations, and dossier. The parent link is for navigation and rollup only.
+_Avoid_: Equipment record, piece, unit; a separate `Component` or `Sub-Asset` entity.
 
 **System**:
-A logical grouping of Assets that function together (e.g., AHU + ductwork + VAV boxes). Many-to-many with Asset.
+A logical grouping of Assets that function together (e.g., AHU + ductwork + VAV boxes). Many-to-many with Asset — one Asset can belong to multiple Systems (e.g., a fire damper participates in both HVAC and Fire suppression). Systems form a recursive tree via an optional `parent_system_id`; a "subsystem" is just a System with a parent (e.g., Chilled Water → Primary Loop / Secondary Loop).
+_Avoid_: A separate `Subsystem` entity.
 
 **Space**:
-A recursive location hierarchy with project-configurable level naming (Building → Floor → Room, or Campus → Building → Wing, etc.).
-_Avoid_: Location, room, zone (when used as a synonym).
+A recursive location hierarchy. One `Space` table where each row has an optional parent Space; the row's `kind` (e.g., `campus`, `building`, `floor`, `data_hall`, `wing`, `room`) names its level. Project-configurable: a hyperscale data center may go `Building → Floor → Data Hall → Rack Row`, a hospital `Building → Floor → Wing → Department → Room`. "Building" is not a separate entity — it is a Space with `kind='building'`.
+_Avoid_: Location, room, zone (when used as a synonym); a separate `Building` table.
 
 **AssetType**:
 A catalog template describing the expected attributes, tests, and dossier requirements for a class of Asset.
 
 **Tag**:
-The project-unique human-readable identifier for an Asset (e.g., `AHU-42`).
+The project-unique human-readable identifier for an Asset (e.g., `AHU-42`). For sub-assets the convention is to prefix with the parent tag (`AHU-42-SF-1`), but the system treats the full string as the project-unique identifier; rename of a parent does not cascade to children automatically.
+
+**Point**:
+A signal-level tag belonging to an Asset, typically following ISA-S5.1 conventions (e.g., `FT` for flow transmitter, `PT` for pressure transmitter, `ZS` for limit switch). Points are *referenced by* test steps (especially L3 loop-check tests) but do not have their own tests, deviations, or sub-points. Per-instance calibration data (signal type, range, units, last-cal date) lives on the Point. Points are owned by their parent Asset — delete the Asset and its Points go with it.
+_Avoid_: Treating a Point as an Asset; using "tag" generically to refer to either.
 
 **Serial**:
 The manufacturer-assigned identifier on the nameplate, distinct from the Tag.
 
 **Nameplate data**:
 Specifications stamped on the equipment by the manufacturer (model, serial, ratings).
+
+**Retire**:
+Transition an Asset out of the active commissioning population while preserving its full audit trail. A retired Asset is hidden from default views but its tests, deviations, results, and dossier remain queryable forever. Reachable only after at least one FK references the Asset (test, deviation, etc.); before that, hard-delete is allowed. After retirement, the Asset's Tag may be reused for a new Asset only with explicit confirmation.
+_Avoid_: Delete (for an Asset that has any commissioning history).
+
+**Decommission**:
+Mark a previously-installed Asset as physically removed from the facility (post-handover). Distinct from Retire (which is a workflow status change during the project). Used in O&M / facility management context.
 
 **Energized**:
 Asset state indicating power has been applied; unlocks L3 Start-Up tests.

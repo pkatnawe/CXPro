@@ -6,6 +6,8 @@ import traceback
 import os
 from dotenv import load_dotenv
 from contexts.identity_access.api import router as identity_access_router
+from contexts.asset_registry.api import router as asset_registry_router
+from contexts.commissioning_execution.api import router as commissioning_execution_router
 
 load_dotenv()
 
@@ -39,6 +41,8 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 
 app.include_router(identity_access_router)
+app.include_router(asset_registry_router)
+app.include_router(commissioning_execution_router)
 
 
 @app.get("/health")
