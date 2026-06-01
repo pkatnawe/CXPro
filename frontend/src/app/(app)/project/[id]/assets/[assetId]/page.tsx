@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useEffect, useState, useCallback } from 'react'
+import { Suspense, useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import {
   getAsset,
@@ -10,6 +10,10 @@ import {
   listSpaces,
   listSystems,
   listSystemMembers,
+  updateAsset,
+  deleteAsset,
+  retireAsset,
+  decommissionAsset,
   type Asset,
   type AssetType,
   type Space,
@@ -32,6 +36,8 @@ import {
   WSkeleton,
   WEmpty,
   WBar,
+  WBox,
+  WBtn,
   PhaseTracker,
 } from '@/lib/frontend-kit'
 
@@ -70,6 +76,227 @@ function deriveCxProgress(instances: Instance[]): number {
   return Math.round((done / instances.length) * 100)
 }
 
+interface KVRow {
+  key: string
+  value: string
+}
+
+interface InlineEditFieldProps {
+  value: string | null
+  onSave: (val: string | null) => Promise<void>
+  placeholder?: string
+  emptyDisplay?: string
+}
+
+function InlineEditField({ value, onSave, placeholder, emptyDisplay = '—' }: InlineEditFieldProps) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value ?? '')
+  const [saving, setSaving] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const startEdit = () => {
+    setDraft(value ?? '')
+    setEditing(true)
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
+  const cancel = () => {
+    setEditing(false)
+    setDraft(value ?? '')
+  }
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      await onSave(draft.trim() || null)
+      setEditing(false)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') save()
+    if (e.key === 'Escape') cancel()
+  }
+
+  if (editing) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <input
+          ref={inputRef}
+          style={{
+            background: 'var(--bp-paper-2)',
+            border: '1px solid var(--bp-blue)',
+            borderRadius: 4,
+            padding: '2px 6px',
+            fontSize: 13,
+            color: 'var(--bp-ink)',
+            outline: 'none',
+            minWidth: 120,
+          }}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          disabled={saving}
+        />
+        <button
+          style={{ fontSize: 11, color: 'var(--bp-text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px' }}
+          onClick={cancel}
+          title="Cancel (Esc)"
+        >
+          ✕
+        </button>
+      </span>
+    )
+  }
+
+  return (
+    <span
+      style={{ cursor: 'pointer', borderBottom: '1px dashed var(--bp-line-softer)', paddingBottom: 1 }}
+      onClick={startEdit}
+      title="Click to edit"
+    >
+      {value ?? emptyDisplay}
+    </span>
+  )
+}
+
+interface NameplateEditorModalProps {
+  initial: Record<string, unknown>
+  onSave: (data: Record<string, unknown>) => Promise<void>
+  onClose: () => void
+}
+
+function NameplateEditorModal({ initial, onSave, onClose }: NameplateEditorModalProps) {
+  const [rows, setRows] = useState<KVRow[]>(
+    Object.entries(initial).map(([k, v]) => ({ key: k, value: String(v) }))
+  )
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    const handleEsc = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleEsc)
+    return () => document.removeEventListener('keydown', handleEsc)
+  }, [onClose])
+
+  const addRow = () => setRows(r => [...r, { key: '', value: '' }])
+  const removeRow = (i: number) => setRows(r => r.filter((_, idx) => idx !== i))
+  const updateRow = (i: number, field: 'key' | 'value', val: string) => {
+    setRows(r => r.map((row, idx) => (idx === i ? { ...row, [field]: val } : row)))
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const data: Record<string, unknown> = {}
+      for (const row of rows) {
+        if (row.key.trim()) data[row.key.trim()] = row.value
+      }
+      await onSave(data)
+      onClose()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 16 }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <style jsx>{`
+        .npm-modal { width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto; padding: 24px; }
+        .npm-title { font-size: 15px; font-weight: 600; color: var(--bp-ink); margin: 0 0 16px 0; }
+        .npm-kv-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; margin-bottom: 6px; align-items: center; }
+        .npm-input { background: var(--bp-paper-2); border: 1px solid var(--bp-line-softer); border-radius: 6px; padding: 7px 10px; font-size: 13px; color: var(--bp-ink); outline: none; width: 100%; box-sizing: border-box; }
+        .npm-input:focus { border-color: var(--bp-blue); }
+        .npm-del { background: none; border: none; cursor: pointer; color: var(--bp-text-secondary); font-size: 16px; padding: 0 4px; line-height: 1; }
+        .npm-del:hover { color: var(--bp-red, #e53e3e); }
+        .npm-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+      `}</style>
+      <WBox className="npm-modal">
+        <p className="npm-title">Edit Nameplate Data</p>
+        {rows.map((row, i) => (
+          <div key={i} className="npm-kv-row">
+            <input className="npm-input" value={row.key} onChange={e => updateRow(i, 'key', e.target.value)} placeholder="Key" />
+            <input className="npm-input" value={row.value} onChange={e => updateRow(i, 'value', e.target.value)} placeholder="Value" />
+            <button className="npm-del" onClick={() => removeRow(i)} title="Remove">×</button>
+          </div>
+        ))}
+        <WPill variant="chip" style={{ cursor: 'pointer', marginTop: 4 }} onClick={addRow}>+ add row</WPill>
+        <div className="npm-footer">
+          <WBtn variant="ghost" onClick={onClose} disabled={saving}>Cancel</WBtn>
+          <WBtn variant="blue" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</WBtn>
+        </div>
+      </WBox>
+    </div>
+  )
+}
+
+interface DeleteConfirmModalProps {
+  assetTag: string
+  onConfirm: () => Promise<void>
+  onCancel: () => void
+}
+
+function DeleteConfirmModal({ assetTag, onConfirm, onCancel }: DeleteConfirmModalProps) {
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const handleEsc = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') onCancel() }
+    document.addEventListener('keydown', handleEsc)
+    return () => document.removeEventListener('keydown', handleEsc)
+  }, [onCancel])
+
+  const handleConfirm = async () => {
+    setDeleting(true)
+    setError('')
+    try {
+      await onConfirm()
+    } catch (err: unknown) {
+      const e = err as { status?: number; message?: string }
+      if (e?.status === 409) {
+        setError('This asset has references (child assets or test instances). Retire it instead.')
+      } else {
+        setError(e?.message ?? 'Failed to delete asset')
+      }
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 16 }}
+      onClick={e => { if (e.target === e.currentTarget) onCancel() }}
+    >
+      <style jsx>{`
+        .dcm-modal { width: 100%; max-width: 400px; padding: 24px; }
+        .dcm-title { font-size: 15px; font-weight: 600; color: var(--bp-ink); margin: 0 0 8px 0; }
+        .dcm-body { font-size: 13px; color: var(--bp-text-secondary); margin: 0 0 16px 0; }
+        .dcm-tag { font-weight: 600; color: var(--bp-ink); }
+        .dcm-error { font-size: 12px; color: var(--bp-red, #e53e3e); margin-bottom: 12px; }
+        .dcm-footer { display: flex; justify-content: flex-end; gap: 8px; }
+      `}</style>
+      <WBox className="dcm-modal">
+        <p className="dcm-title">Delete asset?</p>
+        <p className="dcm-body">
+          This will permanently delete <span className="dcm-tag">{assetTag}</span>. This action cannot be undone.
+        </p>
+        {error && <div className="dcm-error">{error}</div>}
+        <div className="dcm-footer">
+          <WBtn variant="ghost" onClick={onCancel} disabled={deleting}>Cancel</WBtn>
+          <WBtn variant="danger" onClick={handleConfirm} disabled={deleting}>
+            {deleting ? 'Deleting…' : 'Delete'}
+          </WBtn>
+        </div>
+      </WBox>
+    </div>
+  )
+}
+
 interface AssetDetailContentProps {
   projectId: string
   assetId: string
@@ -91,6 +318,11 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
   const [instances, setInstances] = useState<Instance[]>([])
   const [templateMap, setTemplateMap] = useState<Map<string, Template>>(new Map())
   const [loading, setLoading] = useState(true)
+
+  const [showOverflow, setShowOverflow] = useState(false)
+  const [showNameplateEditor, setShowNameplateEditor] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [actionError, setActionError] = useState('')
 
   const spaceMap = new Map(spaces.map(s => [s.id, s]))
 
@@ -150,6 +382,47 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', tab)
     router.replace(`/project/${projectId}/assets/${assetId}?${params.toString()}`)
+  }
+
+  const patchAsset = useCallback(async (fields: Parameters<typeof updateAsset>[2]) => {
+    if (!asset) return
+    const optimistic = { ...asset, ...fields }
+    setAsset(optimistic)
+    try {
+      const updated = await updateAsset(projectId, assetId, fields)
+      setAsset(updated)
+    } catch {
+      setAsset(asset)
+    }
+  }, [asset, projectId, assetId])
+
+  const handleRetire = async () => {
+    setShowOverflow(false)
+    setActionError('')
+    try {
+      const updated = await retireAsset(projectId, assetId)
+      setAsset(updated)
+    } catch (err: unknown) {
+      const e = err as { message?: string }
+      setActionError(e?.message ?? 'Failed to retire asset')
+    }
+  }
+
+  const handleDecommission = async () => {
+    setShowOverflow(false)
+    setActionError('')
+    try {
+      const updated = await decommissionAsset(projectId, assetId)
+      setAsset(updated)
+    } catch (err: unknown) {
+      const e = err as { message?: string }
+      setActionError(e?.message ?? 'Failed to decommission asset')
+    }
+  }
+
+  const handleDelete = async () => {
+    await deleteAsset(projectId, assetId)
+    router.push(`/project/${projectId}/assets`)
   }
 
   if (loading) {
@@ -240,16 +513,48 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
         .adp-timeline-empty { padding: 20px 0; }
         .adp-kpi-bar { margin-top: 6px; }
         .adp-kv-grid { margin-bottom: 24px; }
+        .adp-header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+        .adp-overflow-btn { background: none; border: 1px solid var(--bp-line-softer); border-radius: 6px; cursor: pointer; color: var(--bp-text-secondary); padding: 4px 8px; font-size: 16px; line-height: 1; position: relative; }
+        .adp-overflow-btn:hover { background: var(--bp-paper-2); }
+        .adp-overflow-menu { position: absolute; top: 100%; right: 0; margin-top: 4px; background: var(--bp-paper-1); border: 1px solid var(--bp-line-softer); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); min-width: 180px; z-index: 100; padding: 4px; }
+        .adp-overflow-item { display: block; width: 100%; text-align: left; background: none; border: none; border-radius: 6px; padding: 8px 12px; font-size: 13px; cursor: pointer; color: var(--bp-ink); }
+        .adp-overflow-item:hover { background: var(--bp-paper-2); }
+        .adp-overflow-item.danger { color: var(--bp-red, #e53e3e); }
+        .adp-action-error { font-size: 12px; color: var(--bp-red, #e53e3e); margin-bottom: 8px; }
       `}</style>
 
-      <WHeader
-        crumbs={[
-          { label: 'Project', onClick: () => router.push(`/project/${projectId}`) },
-          { label: 'Assets', onClick: () => router.push(`/project/${projectId}/assets`) },
-          { label: asset.tag },
-        ]}
-        title={asset.tag}
-      />
+      <div className="adp-header-row">
+        <div style={{ flex: 1 }}>
+          <WHeader
+            crumbs={[
+              { label: 'Project', onClick: () => router.push(`/project/${projectId}`) },
+              { label: 'Assets', onClick: () => router.push(`/project/${projectId}/assets`) },
+              { label: asset.tag },
+            ]}
+            title={asset.tag}
+          />
+        </div>
+        <div style={{ position: 'relative' }}>
+          <button
+            className="adp-overflow-btn"
+            onClick={() => setShowOverflow(v => !v)}
+            title="More actions"
+          >
+            ⋯
+          </button>
+          {showOverflow && (
+            <div className="adp-overflow-menu">
+              <button className="adp-overflow-item" onClick={handleRetire}>Retire</button>
+              <button className="adp-overflow-item" onClick={handleDecommission}>Decommission</button>
+              <button className="adp-overflow-item danger" onClick={() => { setShowOverflow(false); setShowDeleteConfirm(true) }}>
+                Delete asset…
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {actionError && <div className="adp-action-error">{actionError}</div>}
 
       <div className="adp-hero">
         <div className="adp-stamps">
@@ -261,14 +566,26 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
 
         <div className="adp-title-row">
           <WH level={2}>{asset.tag}</WH>
-          {asset.name && <WT size="lg" color="dim">{asset.name}</WT>}
+          <WT size="lg" color="dim">
+            <InlineEditField
+              value={asset.name}
+              onSave={val => patchAsset({ name: val })}
+              placeholder="Add name…"
+              emptyDisplay="(no name)"
+            />
+          </WT>
         </div>
 
         <div className="adp-pills-row">
           <WPill variant={STATUS_VARIANT[asset.status]}>{asset.status}</WPill>
-          {asset.vendor_name && (
-            <WPill variant="outline">{asset.vendor_name}</WPill>
-          )}
+          <WPill variant="outline">
+            <InlineEditField
+              value={asset.vendor_name}
+              onSave={val => patchAsset({ vendor_name: val })}
+              placeholder="Vendor…"
+              emptyDisplay="+ vendor"
+            />
+          </WPill>
           {scheduledDate && (
             <WPill variant="default">Scheduled: {scheduledDate}</WPill>
           )}
@@ -294,13 +611,21 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
         </div>
         <div className="adp-kpi-box">
           <div className="adp-kpi-val" style={{ fontSize: 13, fontWeight: 600, wordBreak: 'break-word' }}>
-            {asset.manufacturer ?? '—'}
+            <InlineEditField
+              value={asset.manufacturer}
+              onSave={val => patchAsset({ manufacturer: val })}
+              placeholder="Manufacturer…"
+            />
           </div>
           <div className="adp-kpi-label">Manufacturer</div>
         </div>
         <div className="adp-kpi-box">
           <div className="adp-kpi-val" style={{ fontSize: 13, fontWeight: 600, wordBreak: 'break-word' }}>
-            {asset.model ?? '—'}
+            <InlineEditField
+              value={asset.model}
+              onSave={val => patchAsset({ model: val })}
+              placeholder="Model…"
+            />
           </div>
           <div className="adp-kpi-label">Model</div>
         </div>
@@ -317,14 +642,44 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
           <div>
             <WKVGrid className="adp-kv-grid">
               <WKV label="Tag">{asset.tag}</WKV>
-              <WKV label="Name">{asset.name ?? '—'}</WKV>
+              <WKV label="Name">
+                <InlineEditField
+                  value={asset.name}
+                  onSave={val => patchAsset({ name: val })}
+                  placeholder="Add name…"
+                />
+              </WKV>
               <WKV label="Status"><WPill variant={STATUS_VARIANT[asset.status]}>{asset.status}</WPill></WKV>
               <WKV label="Type">{assetType?.name ?? '—'}</WKV>
               <WKV label="Space">{spacePath}</WKV>
-              <WKV label="Manufacturer">{asset.manufacturer ?? '—'}</WKV>
-              <WKV label="Model">{asset.model ?? '—'}</WKV>
-              <WKV label="Serial">{asset.serial ?? '—'}</WKV>
-              <WKV label="Vendor">{asset.vendor_name ?? '—'}</WKV>
+              <WKV label="Manufacturer">
+                <InlineEditField
+                  value={asset.manufacturer}
+                  onSave={val => patchAsset({ manufacturer: val })}
+                  placeholder="Add manufacturer…"
+                />
+              </WKV>
+              <WKV label="Model">
+                <InlineEditField
+                  value={asset.model}
+                  onSave={val => patchAsset({ model: val })}
+                  placeholder="Add model…"
+                />
+              </WKV>
+              <WKV label="Serial">
+                <InlineEditField
+                  value={asset.serial}
+                  onSave={val => patchAsset({ serial: val })}
+                  placeholder="Add serial…"
+                />
+              </WKV>
+              <WKV label="Vendor">
+                <InlineEditField
+                  value={asset.vendor_name}
+                  onSave={val => patchAsset({ vendor_name: val })}
+                  placeholder="Add vendor…"
+                />
+              </WKV>
               <WKV label="Created">{new Date(asset.created_at).toLocaleDateString()}</WKV>
               {asset.retired_at && <WKV label="Retired">{new Date(asset.retired_at).toLocaleDateString()}</WKV>}
               {asset.decommissioned_at && <WKV label="Decommissioned">{new Date(asset.decommissioned_at).toLocaleDateString()}</WKV>}
@@ -332,6 +687,10 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
                 <WKV key={k} label={k}>{String(v)}</WKV>
               ))}
             </WKVGrid>
+
+            <WBtn variant="ghost" onClick={() => setShowNameplateEditor(true)} style={{ marginBottom: 16 }}>
+              Edit nameplate data
+            </WBtn>
 
             <div className="adp-timeline-empty">
               <WEmpty title="No activity log yet" subtitle="Activity will appear here once available." />
@@ -445,6 +804,22 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
           </div>
         )}
       </div>
+
+      {showNameplateEditor && (
+        <NameplateEditorModal
+          initial={asset.nameplate_data ?? {}}
+          onSave={async (data) => { await patchAsset({ nameplate_data: data }) }}
+          onClose={() => setShowNameplateEditor(false)}
+        />
+      )}
+
+      {showDeleteConfirm && (
+        <DeleteConfirmModal
+          assetTag={asset.tag}
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </WFrame>
   )
 }
