@@ -127,7 +127,7 @@
         "Tests: form submits with valid data, displays 409 error, cascading space select narrows correctly"
       ],
       "priority": 7,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-008",

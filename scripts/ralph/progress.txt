@@ -98,6 +98,23 @@ Started: Sun May 31 20:03:10 CDT 2026
   - L3 and L4 both map to "Functional" step — same visual position
 ---
 
+## 2026-06-01 - US-007
+- Created `frontend/src/contexts/asset_registry/CreateAssetModal.tsx` — full create-asset modal component
+- Form fields: tag (required), name, asset_type (required select), cascading space selects (3 levels), parent_asset (select), manufacturer, model, serial, vendor_name, nameplate_data (KV editor with add/remove rows)
+- Submit → POST via `createAsset()`; on success: optimistic-prepend to list, close modal
+- 409 tag-conflict surfaced inline next to tag field
+- Cancel / Esc / click-outside all close without saving
+- Replaced stub modal placeholder in assets page.tsx with real `<CreateAssetModal>` component
+- Removed unused `WBox` import from page.tsx (only needed by old stub)
+- Created `frontend/src/contexts/asset_registry/CreateAssetModal.test.ts` — 14 unit tests covering: form validation (tag required, asset_type required, both valid), cascading space select (roots, level2, level3, resolvedSpaceId logic), API submission (valid form, 409 handling, nameplate KV building, optimistic insert), asset types display
+- type-check: clean; lint: 0 errors; 14 new tests pass; 4 pre-existing failures unchanged
+- **Learnings for future iterations:**
+  - Modal uses `document.addEventListener('keydown', ...)` + `useEffect` for Esc key handling (not onKeyDown on the overlay)
+  - Cascading space select: `childrenOf` map keyed by `parent_space_id ?? null`; resolved space = deepest non-empty level
+  - 409 tag-conflict: catch `err.status === 409` and set field error, not general error
+  - KV editor: filter out rows with empty keys before building nameplate_data object
+---
+
 ## 2026-06-01 - US-004
 - Rewrote `frontend/src/app/(app)/project/[id]/assets/page.tsx` using frontend-kit primitives (WFrame, WHeader, WPill, WT, WLiveDot, WSkeleton, WEmpty, WBox)
 - Added `vendor_name: string | null` to `Asset` interface in `api.ts`; also added to `createAsset` and `updateAsset` params
