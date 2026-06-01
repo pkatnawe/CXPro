@@ -86,7 +86,7 @@ describe('US-008 — inline edit round-trips', () => {
     const original = { ...mockAsset }
     const optimistic = { ...original, name: 'Attempted New Name' }
 
-    let current = optimistic
+    let current: Asset = optimistic
     const rollback = () => { current = original }
     rollback()
     expect(current.name).toBe('Air Handler Unit A-01')

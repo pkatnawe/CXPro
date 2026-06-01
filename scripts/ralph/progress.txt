@@ -149,3 +149,17 @@ Started: Sun May 31 20:03:10 CDT 2026
   - buildSpacePath() walks Map upward via parent_space_id; memoize spaceMap outside render
   - `useUrlFilters` returns `clearFilter` (single key) and `clearAll` — no need for `setFilter` for clearing
 ---
+
+## 2026-06-01 - US-009
+- Removed `AssetList` component from `frontend/src/contexts/asset_registry/ui.tsx` (lines 1828-2161) — no longer needed since assets page was rebuilt in US-004
+- Removed unused `import { type AssetFilters, type FilterKey } from './useUrlFilters'` from ui.tsx (only used by AssetList)
+- Fixed type error in `edit.test.ts`: annotated `let current: Asset` so TS handles `name: string | null` correctly
+- Grep confirms: no remaining `AssetList` anywhere in frontend/src
+- Grep confirms: no `'Failed to load templates'` in assets page render path (only exists in commissioning_execution/ui.tsx which is not imported by assets pages)
+- Frontend tests: 205 pass, 4 pre-existing failures in identity/members and dashboard (unrelated to assets)
+- Backend tests: 211 asset_registry tests pass; 5 pre-existing invitation-service failures (unrelated to assets)
+- **Learnings for future iterations:**
+  - Pre-existing failures: frontend members.test.ts (2), dashboard.test.ts (2); backend invitation tests (5) — these were present before US-009
+  - When removing a component from ui.tsx, also remove its type-only imports that are no longer referenced
+  - TypeScript narrows spread types: `{ ...asset, name: 'string literal' }` infers `name: string` not `name: string | null`; annotate `let current: Asset` to preserve the wider type
+---

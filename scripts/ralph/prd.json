@@ -156,7 +156,7 @@
         "Manual smoke: fresh DB, run migration + seed, log in, navigate to /project/<id>/assets, click an asset, switch tabs, edit a field, create a new asset, delete it — every step works without console errors"
       ],
       "priority": 9,
-      "passes": false
+      "passes": true
     }
   ]
 }
