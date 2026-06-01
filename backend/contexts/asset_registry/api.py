@@ -77,6 +77,7 @@ class CreateAssetRequest(BaseModel):
     manufacturer: str | None = None
     model: str | None = None
     serial: str | None = None
+    vendor_name: str | None = None
     nameplate_data: dict[str, Any] | None = None
 
 
@@ -89,6 +90,7 @@ class UpdateAssetRequest(BaseModel):
     manufacturer: str | None = None
     model: str | None = None
     serial: str | None = None
+    vendor_name: str | None = None
     nameplate_data: dict[str, Any] | None = None
 
 
@@ -497,6 +499,7 @@ async def create_asset(
             manufacturer=body.manufacturer,
             model=body.model,
             serial=body.serial,
+            vendor_name=body.vendor_name,
             nameplate_data=body.nameplate_data,
         )
         return _serialize(result)
@@ -573,6 +576,8 @@ async def update_asset(
             kwargs["model"] = body.model
         if body.serial is not None:
             kwargs["serial"] = body.serial
+        if body.vendor_name is not None:
+            kwargs["vendor_name"] = body.vendor_name
         if body.nameplate_data is not None:
             kwargs["nameplate_data"] = body.nameplate_data
         result = await assets_mod.update_asset(conn, **kwargs)

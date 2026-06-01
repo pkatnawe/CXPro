@@ -49,6 +49,7 @@ def _asset_row(
     manufacturer: str | None = None,
     model: str | None = None,
     serial: str | None = None,
+    vendor_name: str | None = None,
 ) -> dict[str, Any]:
     aid = uuid.UUID(asset_id) if asset_id else uuid.uuid4()
     pid = uuid.UUID(project_id) if project_id else uuid.uuid4()
@@ -67,6 +68,7 @@ def _asset_row(
         "manufacturer": manufacturer,
         "model": model,
         "serial": serial,
+        "vendor_name": vendor_name,
         "nameplate_data": "{}",
         "created_at": datetime.now(timezone.utc),
         "retired_at": None,
@@ -495,6 +497,43 @@ async def test_delete_asset_with_child_assets_raises_409() -> None:
         await delete_asset(conn, asset_id=asset_id, project_id=project_id)
     assert exc_info.value.status_code == 409
     assert exc_info.value.detail["counts"]["child_assets"] == 1
+
+
+# ---------------------------------------------------------------------------
+# vendor_name round-trip
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_create_asset_with_vendor_name_round_trips() -> None:
+    project_id = _make_uuid()
+    asset_type_id = _make_uuid()
+    conn = _mock_conn()
+    row = _asset_row(
+        project_id=project_id,
+        asset_type_id=asset_type_id,
+        tag="PDU-001",
+        vendor_name="Acme Power Inc.",
+    )
+    conn.fetchrow.side_effect = [
+        {"id": uuid.UUID(asset_type_id)},
+        row,
+    ]
+    conn.fetch.return_value = []
+
+    result = await create_asset(
+        conn,
+        project_id=project_id,
+        asset_type_id=asset_type_id,
+        tag="PDU-001",
+        vendor_name="Acme Power Inc.",
+    )
+    assert result["vendor_name"] == "Acme Power Inc."
+
+    get_conn = _mock_conn()
+    get_conn.fetchrow.return_value = row
+    fetched = await get_asset(get_conn, asset_id=str(row["id"]), project_id=project_id)
+    assert fetched["vendor_name"] == "Acme Power Inc."
 
 
 # ---------------------------------------------------------------------------

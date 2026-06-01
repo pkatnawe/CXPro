@@ -18,7 +18,7 @@ from contexts.commissioning_execution import instances as instances_mod
 
 _ASSET_COLUMNS = (
     "id, project_id, parent_asset_id, asset_type_id, space_id, tag, name, status, "
-    "manufacturer, model, serial, nameplate_data, created_at, retired_at, decommissioned_at"
+    "manufacturer, model, serial, vendor_name, nameplate_data, created_at, retired_at, decommissioned_at"
 )
 
 
@@ -60,6 +60,7 @@ async def create_asset(
     manufacturer: str | None = None,
     model: str | None = None,
     serial: str | None = None,
+    vendor_name: str | None = None,
     nameplate_data: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if parent_asset_id is not None:
@@ -96,9 +97,9 @@ async def create_asset(
                 f"""
                 INSERT INTO assets (
                     id, project_id, parent_asset_id, asset_type_id, space_id,
-                    tag, name, manufacturer, model, serial, nameplate_data
+                    tag, name, manufacturer, model, serial, vendor_name, nameplate_data
                 )
-                VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                 RETURNING {_ASSET_COLUMNS}
                 """,
                 uuid.UUID(project_id),
@@ -110,6 +111,7 @@ async def create_asset(
                 manufacturer,
                 model,
                 serial,
+                vendor_name,
                 json.dumps(nameplate_data or {}),
             )
         except asyncpg.UniqueViolationError:
@@ -206,6 +208,7 @@ async def update_asset(
     manufacturer: str | None = ...,  # type: ignore[assignment]
     model: str | None = ...,  # type: ignore[assignment]
     serial: str | None = ...,  # type: ignore[assignment]
+    vendor_name: str | None = ...,  # type: ignore[assignment]
     nameplate_data: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     existing = await conn.fetchrow(
@@ -232,6 +235,7 @@ async def update_asset(
     new_manufacturer = existing["manufacturer"] if manufacturer is ... else manufacturer
     new_model = existing["model"] if model is ... else model
     new_serial = existing["serial"] if serial is ... else serial
+    new_vendor_name = existing["vendor_name"] if vendor_name is ... else vendor_name
     new_nameplate_data = nameplate_data if nameplate_data is not None else existing["nameplate_data"]
 
     if new_parent_id is not None:
@@ -276,8 +280,8 @@ async def update_asset(
             UPDATE assets
             SET tag = $1, name = $2, parent_asset_id = $3, space_id = $4,
                 asset_type_id = $5, manufacturer = $6, model = $7, serial = $8,
-                nameplate_data = $9
-            WHERE id = $10 AND project_id = $11
+                vendor_name = $9, nameplate_data = $10
+            WHERE id = $11 AND project_id = $12
             RETURNING {_ASSET_COLUMNS}
             """,
             new_tag,
@@ -288,6 +292,7 @@ async def update_asset(
             new_manufacturer,
             new_model,
             new_serial,
+            new_vendor_name,
             json.dumps(new_nameplate_data) if isinstance(new_nameplate_data, dict) else new_nameplate_data,
             uuid.UUID(asset_id),
             uuid.UUID(project_id),

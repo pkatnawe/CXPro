@@ -1,151 +1,22 @@
-## 2026-05-31 - US-012
-- Refactored `AssetList` to support `externalFilters?: AssetFilters` and `onFilterChange?: (key, value) => void` props
-- `AssetList` is now a controlled component when `externalFilters` provided; uses server-side filters in `listAssets` API call
-- Updated `assets/page.tsx` to wrap in `<Suspense>` and use `useUrlFilters` hook; passes `externalFilters` + `onFilterChange`
-- Added `Link` import to `ui.tsx`; added "Assets" cross-link affordance to `SpaceTree` nodes (`?space=X`) and `SystemTree` nodes (`?system=X`)
-- Added 4 URL filter integration tests to `ui.test.tsx`
-- Typecheck passes; 134 tests pass
-- **Learnings for future iterations:**
-  - `useSearchParams` requires `<Suspense>` wrapper in Next.js App Router pages
-  - Controlled filter pattern: pass `externalFilters` + `onFilterChange` to list components to externalize state to URL
-  - `listAssets` already supports `space_id`, `system_id`, `asset_type_id`, `parent_asset_id` filters server-side
----
-
-## 2026-05-31 - US-011
-- Created `frontend/src/app/(app)/project/[id]/test-procedure-templates/[templateId]/page.tsx` — fetches Template, linked AssetTypes (via listTemplates+filter per AssetType), and Instances
-- Added `getTemplate` to `commissioning_execution/api.ts`
-- Added `template_id` filter support to `listInstances` in `commissioning_execution/api.ts`
-- Added `onRowClick?: (template: Template) => void` prop to `TemplateList`
-- Updated `test-procedure-templates/page.tsx` to pass `onRowClick`
-- Added `TemplateList row click href` test to `commissioning_execution/ui.test.tsx`
-- Typecheck passes; 49 commissioning tests pass
-- **Learnings for future iterations:**
-  - To find AssetTypes linked to a Template: iterate all AssetTypes, call `listTemplates(projectId, {asset_type_id})` for each, check if templateId is in result (no direct endpoint)
-  - `listInstances` now supports `template_id` filter
----
-
-## 2026-05-31 - US-010
-- Created `frontend/src/app/(app)/project/[id]/asset-types/[assetTypeId]/page.tsx` — fetches AssetType, linked Templates (via `listTemplates` with `asset_type_id` filter), and Assets of that type
-- Added `getAssetType` to `api.ts` (backend supports GET /asset-types/{asset_type_id})
-- Added `onRowClick?: (assetType: AssetType) => void` prop to `AssetTypeList` in `ui.tsx`
-- Updated `asset-types/page.tsx` to pass `onRowClick` navigating to `/project/[id]/asset-types/[assetTypeId]`
-- Added `AssetTypeList row click href` test case to `ui.test.tsx`
-- Typecheck passes; 130 tests pass
----
-
-## 2026-05-31 - US-009
-- Created `frontend/src/app/(app)/project/[id]/systems/[systemId]/page.tsx` — fetches system, child systems, member assets; renders cross-links and "View Assets in this System" action
-- Added `onNodeClick?: (system: System) => void` prop to `SystemTree` in `ui.tsx`; system name becomes clickable when provided
-- Added `getSystem` to `api.ts` (backend supports GET /systems/{system_id})
-- Updated `systems/page.tsx` to pass `onNodeClick` navigating to `/project/[id]/systems/[systemId]`
-- Added `SystemTree node click href` and system-member row click href test cases to `ui.test.tsx`
-- Typecheck passes; 129 tests pass
----
-
-## 2026-05-31 - US-008
-- Created `frontend/src/app/(app)/project/[id]/spaces/[spaceId]/page.tsx` — fetches space, parent space, child spaces; renders links to parent/children and "View Assets in this Space" action link
-- Added `onNodeClick?: (space: Space) => void` prop to `SpaceTree` in `ui.tsx`; space name becomes clickable link when provided
-- Updated `spaces/page.tsx` to pass `onNodeClick` navigating to `/project/[id]/spaces/[spaceId]`
-- Added `SpaceTree node click href` test case to `ui.test.tsx`
-- Typecheck passes; 127 tests pass
-- **Learnings for future iterations:**
-  - Pattern: add `onNodeClick?: (entity: T) => void` to tree components; make the name span clickable inline
-  - Space detail page uses `listSpaces` then filters for parent/children (single API call)
----
-
-## 2026-05-31 - US-007
-- Created `frontend/src/app/(app)/project/[id]/assets/[assetId]/page.tsx` — fetches asset, assetType, space, parent, children, system memberships
-- Added `onRowClick?: (asset: Asset) => void` prop to `AssetList` in `ui.tsx`; row click calls `onRowClick(asset)` when provided, else falls back to modal
-- Updated `assets/page.tsx` to pass `onRowClick` navigating to `/project/[id]/assets/[assetId]`
-- Added `AssetList row click href` test case to `ui.test.tsx`
-- Typecheck passes; 126 tests pass
-- **Learnings for future iterations:**
-  - No backend API to get systems-for-asset; must fetch all systems then check each via `listSystemMembers` (O(n) calls)
-  - `AssetDetail` component already embeds `PointList` and `InstanceList` inline
-  - Pattern for optional row navigation: add `onRowClick?: (entity: Entity) => void` to the list component props
----
-
-## 2026-05-31 - US-006
-- Renamed 'Equipment Progress' → 'Asset Progress' and 'Equipment Status' → 'Asset Status' in `frontend/src/app/(app)/project/[id]/page.tsx`
-- Did not touch `run.equipment_type` display string (legacy DB column) or `/equipment` page
-- Typecheck passes
-- **Learnings for future iterations:**
-  - Dashboard stat cards use `bp-stat-label` class — only the label text needed changing, not the CSS class names
----
-
-## 2026-05-31 - US-005
-- Created `frontend/src/contexts/navigation/breadcrumbLabel.tsx` exporting `BreadcrumbLabelProvider` and `useBreadcrumbLabel` hook
-- Updated `frontend/src/app/(app)/layout.tsx`: split into `AppLayout` (provides context) and `AppLayoutInner` (consumes it)
-- `AppLayoutInner` fetches project name via supabase when on `/project/[id]/*`, passes it to `buildBreadcrumbs` along with `entityLabel` from context
-- Topbar renders dynamic crumbs: non-terminal crumbs are `<Link>`s, terminal crumb is plain `<span>`
-- Falls back to static "Project" span until project name loads
-- Typecheck passes
-- **Learnings for future iterations:**
-  - React context provider and consumer must be in separate components — can't `useContext` in the same component that renders the `<Provider>`
-  - Split pattern: outer `AppLayout` wraps children in provider, inner `AppLayoutInner` consumes via hook
-  - `useBreadcrumbLabel` is exported from `@/contexts/navigation/breadcrumbLabel` — detail pages call `setEntityLabel` in a `useEffect`
----
-
-## 2026-05-31 - US-004
-- Updated `frontend/src/app/(app)/layout.tsx` to replace Equipment sidebar link with 6 project nav entries
-- Entries: Spaces, Asset Types, Systems, Assets, Test Procedure Templates, Members
-- Each entry uses `pathname.startsWith(href)` for active highlighting (prefix match, not exact)
-- Wrapped in a `<>` fragment inside the existing `isProjectRoute && projectId` condition
-- Top-level Inbox and Projects links remain unchanged
-- Equipment link removed entirely
-- Typecheck passes; no tests required for this story
-- **Learnings for future iterations:**
-  - Sidebar items use template literals with backtick-interpolated projectId for both href and active check
-  - Active check must be `startsWith` (not `===`) to highlight parent when on a child route (e.g., `/assets/[id]` highlights Assets)
----
-
 ## Codebase Patterns
-- useUrlFilters hook: avoid useCallback (React internals won't work in direct vitest calls); use plain nested functions that close over router/searchParams
-- Next.js router mock in vitest: `vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: mockFn }), useSearchParams: () => new URLSearchParams(str) }))`
-- Backend filter params: add as optional keyword arg with `str | None = None`, append to conditions list with parameterized `$N` placeholder, increment idx
-- Tests use `_mock_conn()` returning MagicMock with AsyncMock fetch/fetchrow; no live DB needed
-- All backend instance tests are in `backend/contexts/commissioning_execution/test_instances.py`
-- Frontend pure modules (no React/Next/fetch) live in `frontend/src/contexts/navigation/`
-- Vitest tests: table-driven with `describe/it/expect`, no mocks needed for pure functions
-- typecheck command is `npm run type-check` (not `typecheck`)
-- React context split pattern: outer component provides `<Provider>`, inner component uses `useContext` — can't do both in one component
-- BreadcrumbLabel context: `useBreadcrumbLabel()` from `@/contexts/navigation/breadcrumbLabel` — detail pages call `setEntityLabel` in a useEffect to inject crumb label into topbar
+- Backend asset column additions: update _ASSET_COLUMNS string, add param to create_asset/update_asset signatures, add to INSERT columns+VALUES (bump $N), add to UPDATE SET (bump $N), update _asset_row helper in tests
+- apply_*_migration.py pattern: psycopg2 + load_dotenv('../.env.local'), open migration file, execute, verify column exists
+- typecheck for backend: not applicable (Python), run pytest instead
 
 # Ralph Progress Log
-Started: Sun May 31 17:07:45 CDT 2026
+Started: Sun May 31 20:03:10 CDT 2026
 ---
 
-## 2026-05-31 - US-003
-- Created `frontend/src/contexts/asset_registry/useUrlFilters.ts` exporting `useUrlFilters()` returning `{ filters, setFilter, clearFilter, clearAll }`
-- Supports filter keys: status, space, system, type, parent
-- setFilter writes via Next router.replace with merged params; clearFilter removes single key; clearAll removes all five; unknown params preserved
-- Created `frontend/src/contexts/asset_registry/useUrlFilters.test.ts` with 13 vitest tests covering empty state, round-trip each key, mutations, and unknown param preservation
-- All 13 tests pass; typecheck passes
+## 2026-06-01 - US-001
+- Created `migrations/020_asset_vendor_name.sql` with `ALTER TABLE assets ADD COLUMN IF NOT EXISTS vendor_name TEXT;`
+- Created `backend/apply_vendor_name_migration.py` mirroring apply_asset_registry_migration.py pattern
+- Updated `_ASSET_COLUMNS` in `assets.py` to include `vendor_name`
+- Added `vendor_name` param to `create_asset` (INSERT col+$11) and `update_asset` (UPDATE SET col+$9, shift nameplate to $10, id/project to $11/$12)
+- Updated `CreateAssetRequest` and `UpdateAssetRequest` in `api.py` to include `vendor_name`; wired through to `assets_mod.create_asset` and `update_asset` kwargs
+- Added `vendor_name` to `_asset_row` helper in `test_assets.py`; added `test_create_asset_with_vendor_name_round_trips` asserting round-trip through create+get
+- All 31 tests pass
 - **Learnings for future iterations:**
-  - Do NOT use useCallback inside hooks tested directly in vitest — React fiber context is absent; use plain nested functions instead
-  - Mock `next/navigation` via `vi.mock` with module-level mutable variables for `mockReplace` and `mockSearchParamsString`
----
-
-## 2026-05-31 - US-002
-- Created `frontend/src/contexts/navigation/breadcrumbs.ts` exporting `buildBreadcrumbs(pathname, projectName, entityLabel?)`
-- Function recognizes `/project/[id]`, all 6 section list routes, and their `[entityId]` children
-- Last crumb always has `href: null`; earlier crumbs have `href` one level up
-- No React, Next, or fetch imports — pure TypeScript
-- Created `frontend/src/contexts/navigation/breadcrumbs.test.ts` with 16 vitest table-driven tests covering all routes, entity label presence/absence, and edge cases
-- All 16 tests pass; typecheck passes
-- **Learnings for future iterations:**
-  - Pure modules with no framework dependencies live in `frontend/src/contexts/navigation/`
-  - Vitest tests for pure functions need no mocks — just import and assert
-  - `npm run type-check` is the typecheck command
----
-
-## 2026-05-31 - US-001
-- Added `template_id: str | None = None` parameter to `list_instances` in `backend/contexts/commissioning_execution/instances.py`
-- Filter appends `template_id = $N` WHERE clause when provided, fully composable with other filters
-- Exposed `template_id` as Query param on `GET /test-procedure-instances` route in `backend/contexts/commissioning_execution/api.py`
-- Added 4 new tests: filter returns matching instances, composes with status, unknown template returns empty list, RLS honored with template_id
-- All 28 tests pass
-- **Learnings for future iterations:**
-  - Backend filter pattern: add param, append condition with parameterized idx, pass UUID-cast value to params list
-  - Test pattern: mock `conn.fetch.return_value`, call function, assert on result length/values
+  - INSERT param count changes: adding vendor_name before nameplate_data shifts nameplate from $10→$11
+  - UPDATE SET changes: vendor_name=$9, nameplate_data=$10, id=$11, project_id=$12
+  - _serialize in api.py handles all dict values via `str(v) if hasattr(v, "hex") else v` — no special handling needed for TEXT columns
 ---
