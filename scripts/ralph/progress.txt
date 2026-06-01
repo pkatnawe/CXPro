@@ -74,3 +74,15 @@ Commit: feat: US-006 - Asset Detail shell — 9-tab left rail
 - Added style prop to WSkeletonProps in frontend-kit/index.tsx
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
 
+## US-007 — Asset Detail Overview tab (real API, no AI summary card)
+Status: COMPLETE
+Commit: feat: US-007 - Asset Detail Overview tab (real API, no AI summary card)
+
+- Created contexts/asset_registry/AssetOverview.tsx component with full layout from asset-panels-a.jsx
+- PhaseTracker (existing component), nameplate & spec card, schedule & milestones, responsible parties, submittals, turnover readiness
+- AI summary WBox removed entirely (not rendered)
+- Added milestones.json, parties.json, submittals.json design-preview fixtures
+- Updated _design_preview/index.ts barrel with PreviewMilestone, PreviewParty, PreviewSubmittal types + loaders
+- Updated page.tsx to load listSpaces, pass spaceMap; render AssetOverview for #overview tab
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
