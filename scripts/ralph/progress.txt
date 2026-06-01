@@ -37,3 +37,26 @@ Commit: feat: US-003 - App shell — left rail + top bar + user menu
 - Integrated useTheme hook from US-002 ThemeProvider; removed old inline theme state management
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
 
+## US-004 — Design-preview mock fixtures for backendless Asset Detail tabs
+Status: COMPLETE
+Commit: feat: US-004 - Design-preview mock fixtures for backendless Asset Detail tabs
+
+- Created frontend/src/contexts/asset_registry/_design_preview/issues.json (5 mock issues)
+- Created files.json (6 mock files), rfis.json (4 mock RFIs), history.json (12 audit log entries)
+- Created index.ts barrel with typed interfaces (PreviewIssue, PreviewFile, PreviewRFI, PreviewHistoryEntry) and loader functions
+- Top-of-file comment: DESIGN PREVIEW — mocked; delete when backend ships
+- TypeScript typecheck: PASS
+
+## US-005 — Asset Register page — eq-register variant on wk-* kit
+Status: COMPLETE
+Commit: feat: US-005 - Asset Register page — eq-register variant on wk-* kit
+
+- Rewrote frontend/src/app/(app)/project/[id]/assets/page.tsx from equipment-register.jsx using wk-* primitives
+- Left sidebar: type-faceted filter with asset type groups, active/All state highlighting
+- Lifecycle filter chips: Active/Retired/Decommissioned backed by useUrlFilters URL state
+- Table rows link to /project/[id]/assets/[assetId], hover highlight
+- Removed AI command-bar per PRD directive
+- Kept useUrlFilters, CreateAssetModal, derivePhase, all backend API wiring
+- Created assets/page.test.ts with 5 tests covering buildSpacePath and API call contracts
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures + 5 new passing)
+

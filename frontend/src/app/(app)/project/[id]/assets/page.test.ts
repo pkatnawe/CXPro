@@ -51,6 +51,8 @@ const mockAssetType: AssetType = {
   id: 'at-1',
   project_id: 'proj-1',
   name: 'AHU · Air Handler',
+  description: null,
+  expected_attributes: {},
   created_at: '2026-01-01T00:00:00Z',
 }
 

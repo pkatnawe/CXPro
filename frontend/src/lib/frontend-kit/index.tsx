@@ -986,12 +986,13 @@ interface WSkeletonProps {
   width?: string | number
   height?: string | number
   className?: string
+  style?: CSSProperties
 }
 
-export function WSkeleton({ width, height = '1em', className = '' }: WSkeletonProps) {
+export function WSkeleton({ width, height = '1em', className = '', style = {} }: WSkeletonProps) {
   return (
     <span
-      style={{ display: 'inline-block', width, height, background: 'var(--ui-line)', borderRadius: 3 }}
+      style={{ display: 'inline-block', width, height, background: 'var(--ui-line)', borderRadius: 3, ...style }}
       className={className}
     />
   )
