@@ -21,6 +21,8 @@ import { derivePhase } from '@/contexts/asset_registry/derivePhase'
 import { useBreadcrumbLabel } from '@/contexts/navigation/breadcrumbLabel'
 import { AssetOverview } from '@/contexts/asset_registry/AssetOverview'
 import { AssetDevices } from '@/contexts/asset_registry/AssetDevices'
+import { AssetChecklists } from '@/contexts/asset_registry/AssetChecklists'
+import { AssetTests } from '@/contexts/asset_registry/AssetTests'
 import {
   WFrame,
   WH,
@@ -360,6 +362,10 @@ function AssetDetailContent({ projectId, assetId }: { projectId: string; assetId
             />
           ) : activeTab === 'devices' ? (
             <AssetDevices projectId={projectId} assetId={assetId} />
+          ) : activeTab === 'checklists' ? (
+            <AssetChecklists projectId={projectId} assetId={assetId} />
+          ) : activeTab === 'tests' ? (
+            <AssetTests projectId={projectId} assetId={assetId} />
           ) : (
             <div style={{ padding: 20 }}>
               {TABS.find(t => t.id === activeTab)?.preview && (
