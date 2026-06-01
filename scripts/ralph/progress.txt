@@ -144,3 +144,15 @@ Commit: feat: US-012 - Asset Detail RFIs + History tabs (design preview, mock da
 - Wired into page.tsx for #rfis and #history tabs
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
 
+## US-013 — Asset Detail Linked tab (real API, systems membership)
+Status: COMPLETE
+Commit: feat: US-013 - Asset Detail Linked tab (real API, systems membership)
+
+- Created contexts/asset_registry/AssetLinked.tsx
+- Extended listSystems() in api.ts to accept asset_id filter option
+- Fetches GET /systems?asset_id=:assetId; each row links to /project/[id]/systems/[system.id]
+- Empty state: "Not a member of any system"
+- No drawings subsection (no backend)
+- Wired into page.tsx for #linked tab
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
