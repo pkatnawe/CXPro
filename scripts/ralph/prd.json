@@ -55,7 +55,7 @@
         "Existing pages unaffected — bundle check: no regression in /assets page render"
       ],
       "priority": 3,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-004",

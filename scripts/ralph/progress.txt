@@ -2,6 +2,8 @@
 - Backend asset column additions: update _ASSET_COLUMNS string, add param to create_asset/update_asset signatures, add to INSERT columns+VALUES (bump $N), add to UPDATE SET (bump $N), update _asset_row helper in tests
 - apply_*_migration.py pattern: psycopg2 + load_dotenv('../.env.local'), open migration file, execute, verify column exists
 - typecheck for backend: not applicable (Python), run pytest instead
+- frontend-kit primitives: import from `@/lib/frontend-kit`; all CSS classes are fk-* (never bp-*); styles auto-loaded via layout.tsx
+- frontend-kit pattern: components use className prop pass-through + variant/size/color unions; no `any` types; `'use client'` at top
 
 # Ralph Progress Log
 Started: Sun May 31 20:03:10 CDT 2026
@@ -41,4 +43,19 @@ Started: Sun May 31 20:03:10 CDT 2026
   - participations table needs a row for the user to satisfy RLS on all asset_registry tables
   - Spaces UNIQUE constraint is (project_id, parent_space_id, name) — same name under different parents is OK
   - test_procedure_instances CHECK: (asset_id IS NOT NULL) != (system_id IS NOT NULL) — exactly one must be set
+---
+
+## 2026-06-01 - US-003
+- Created `frontend/src/lib/frontend-kit/index.tsx` — TypeScript ports of: WBox, WPill, WT, WH, WAvatar, WBar, WStamp, WIcon, WLiveDot, WSectionLabel, WBtn, WHeader, WSideNav, WFrame, plus bonus helpers WTabs, WKV, WKVGrid, WSkeleton, WEmpty
+- Created `frontend/src/lib/frontend-kit/styles.css` — all fk-* classes, no bp-* collision; uses bp-* CSS variables for theme consistency
+- Imported styles in `frontend/src/app/layout.tsx` (root layout, loaded once globally)
+- Created `frontend/src/app/frontend-kit-preview/page.tsx` (// SCRATCH) — renders all primitives for visual QA at /frontend-kit-preview
+- `npm run type-check` passes clean; `eslint` on new files: 0 errors, 1 warning (img element; acceptable for design kit)
+- `frontend-design/wireframe-kit.jsx` does not exist — primitives were designed from scratch to match the component names and semantics described in the PRD acceptance criteria and the US-004/005 screen descriptions
+- **Learnings for future iterations:**
+  - Import kit components: `import { WBox, WPill, ... } from '@/lib/frontend-kit'`
+  - All CSS vars are from `--bp-*` tokens (dark/light theme support is automatic)
+  - WTabs, WKV, WKVGrid, WSkeleton, WEmpty are bonus helpers useful for US-004/005
+  - WPill variant="chip" supports `active` boolean prop for filter chip toggles
+  - WHeader takes `crumbs[]` array for breadcrumb row
 ---
