@@ -25,6 +25,8 @@ import { AssetChecklists } from '@/contexts/asset_registry/AssetChecklists'
 import { AssetTests } from '@/contexts/asset_registry/AssetTests'
 import { AssetIssues } from '@/contexts/asset_registry/AssetIssues'
 import { AssetFiles } from '@/contexts/asset_registry/AssetFiles'
+import { AssetRFIs } from '@/contexts/asset_registry/AssetRFIs'
+import { AssetHistory } from '@/contexts/asset_registry/AssetHistory'
 import {
   WFrame,
   WH,
@@ -372,6 +374,10 @@ function AssetDetailContent({ projectId, assetId }: { projectId: string; assetId
             <AssetIssues />
           ) : activeTab === 'files' ? (
             <AssetFiles />
+          ) : activeTab === 'rfis' ? (
+            <AssetRFIs />
+          ) : activeTab === 'history' ? (
+            <AssetHistory />
           ) : (
             <div style={{ padding: 20 }}>
               <WBox style={{ padding: 20 }}>
