@@ -23,6 +23,8 @@ import { AssetOverview } from '@/contexts/asset_registry/AssetOverview'
 import { AssetDevices } from '@/contexts/asset_registry/AssetDevices'
 import { AssetChecklists } from '@/contexts/asset_registry/AssetChecklists'
 import { AssetTests } from '@/contexts/asset_registry/AssetTests'
+import { AssetIssues } from '@/contexts/asset_registry/AssetIssues'
+import { AssetFiles } from '@/contexts/asset_registry/AssetFiles'
 import {
   WFrame,
   WH,
@@ -366,28 +368,12 @@ function AssetDetailContent({ projectId, assetId }: { projectId: string; assetId
             <AssetChecklists projectId={projectId} assetId={assetId} />
           ) : activeTab === 'tests' ? (
             <AssetTests projectId={projectId} assetId={assetId} />
+          ) : activeTab === 'issues' ? (
+            <AssetIssues />
+          ) : activeTab === 'files' ? (
+            <AssetFiles />
           ) : (
             <div style={{ padding: 20 }}>
-              {TABS.find(t => t.id === activeTab)?.preview && (
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '3px 10px',
-                  borderRadius: 4,
-                  border: '1px solid var(--ui-ai-line)',
-                  background: 'var(--ui-ai-soft)',
-                  marginBottom: 14,
-                  fontSize: 11,
-                  fontFamily: 'Geist Mono, monospace',
-                  color: 'var(--ui-ai)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                }}>
-                  design preview
-                </div>
-              )}
-
               <WBox style={{ padding: 20 }}>
                 <WT size={13} color="ink-soft">
                   {TABS.find(t => t.id === activeTab)?.label} · coming in next slice
