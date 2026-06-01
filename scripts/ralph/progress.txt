@@ -20,3 +20,25 @@ Started: Sun May 31 20:03:10 CDT 2026
   - UPDATE SET changes: vendor_name=$9, nameplate_data=$10, id=$11, project_id=$12
   - _serialize in api.py handles all dict values via `str(v) if hasattr(v, "hex") else v` — no special handling needed for TEXT columns
 ---
+
+## 2026-06-01 - US-002
+- Created `scripts/seed_demo_data.py` — standalone psycopg2 + dotenv script
+- Accepts `--email` flag; resolves to auth.users.id, errors if not found
+- Idempotent: DELETE cascades existing project named 'DC-12 Hudson Valley (demo)' before inserting
+- Inserts: 1 Org (Hudson DC LLC demo), 1 Project, 4 DisciplineScopes, 1 participation
+- Spaces: Building → Hall A/B/C → Row 1/2/3 under Hall B
+- 5 AssetTypes: AHU, PDU, UPS, CRAH, Switchgear
+- 16 Assets across halls with realistic tags/mfr/model/serial/vendor_name/nameplate_data
+- Parent/child chains: SWG-A-01 → PDU-A-01 → UPS-A-01, SWG-B-01 → PDU-B-01/B-02 → UPS-B-01/B-02
+- 2 Systems: 'Cooling — Chilled Water' (6 members), 'Power — Hall B' (5 members)
+- 5 TestProcedureTemplates (L2/L3/L5) linked via asset_type_template_links
+- 13 TestProcedureInstances with varied statuses (pending/in_progress/complete)
+- Script prints project_id + clickable localhost URL
+- Backend tests: 31 pass
+- **Learnings for future iterations:**
+  - Seed scripts live in scripts/ and use `load_dotenv('../.env.local')` (relative to scripts/ dir)
+  - Org slug must be unique; use ON CONFLICT (slug) DO UPDATE to make idempotent
+  - participations table needs a row for the user to satisfy RLS on all asset_registry tables
+  - Spaces UNIQUE constraint is (project_id, parent_space_id, name) — same name under different parents is OK
+  - test_procedure_instances CHECK: (asset_id IS NOT NULL) != (system_id IS NOT NULL) — exactly one must be set
+---

@@ -38,7 +38,7 @@
         "Running the script twice succeeds (idempotent)"
       ],
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-003",
