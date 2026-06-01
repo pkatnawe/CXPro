@@ -133,3 +133,14 @@ Commit: feat: US-011 - Asset Detail Issues + Files tabs (design preview, mock da
 - Wired into page.tsx for #issues and #files tabs
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
 
+## US-012 — Asset Detail RFIs + History tabs (design preview, mock data)
+Status: COMPLETE
+Commit: feat: US-012 - Asset Detail RFIs + History tabs (design preview, mock data)
+
+- Created contexts/asset_registry/AssetRFIs.tsx — loads _design_preview/rfis.json; grid with number, subject, status pill, opened, due
+- Created contexts/asset_registry/AssetHistory.tsx — loads _design_preview/history.json; timeline rows with actor avatar, action, target, timestamp
+- Both components show sticky [design preview] badge at top
+- No AI affordances
+- Wired into page.tsx for #rfis and #history tabs
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
