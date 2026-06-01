@@ -167,3 +167,20 @@ Commit: feat: US-014 - Checklist Template library page (cl-templates variant, wk
 - No AI affordances
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
 
+
+## US-016 — Setup pages reskin — Spaces list + detail
+Status: COMPLETE
+Commit: feat: US-016 + US-017 - Setup pages reskin — Spaces + Systems list + detail
+
+- Rewrote spaces/page.tsx using wk-* (WBox, WFrame, WH, WT, WBtn, WPill, WSectionLabel, WSkeleton, WEmpty)
+- Tree-building with depth-based ordinal-sorted indentation preserved
+- Add space form with parent selection, inline CRUD, CSS variable inline styles
+- Rewrote spaces/[spaceId]/page.tsx with parent/child space display
+
+## US-017 — Setup pages reskin — Systems list + detail
+Status: COMPLETE
+Commit: feat: US-016 + US-017 - Setup pages reskin — Spaces + Systems list + detail
+
+- Rewrote systems/page.tsx using wk-* primitives with tree indentation
+- Add system form with parent selection
+- Rewrote systems/[systemId]/page.tsx with child systems + member assets lists

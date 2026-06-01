@@ -33,9 +33,11 @@ import {
   PhaseTracker,
 } from '@/lib/frontend-kit'
 import { useState } from 'react'
+import { useTheme } from '@/lib/theme/ThemeProvider'
 
 export default function FrontendKitPreview() {
   const [activeTab, setActiveTab] = useState('Overview')
+  const { theme, accent, setTheme, setAccent } = useTheme()
 
   return (
     <WFrame style={{ padding: 32 }}>
@@ -282,6 +284,35 @@ export default function FrontendKitPreview() {
       <WSectionLabel style={{ marginBottom: 12 }}>PhaseTracker</WSectionLabel>
       <div style={{ marginBottom: 24 }}>
         <WBox><PhaseTracker phase="L3" /></WBox>
+      </div>
+
+      {/* Theme + Accent toggles */}
+      <WSectionLabel style={{ marginBottom: 12 }}>Theme + Accent Toggles</WSectionLabel>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 24 }}>
+        <div>
+          <WT size={11} color="ink-faint" style={{ display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Theme</WT>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <WBtn variant={theme === 'light' ? 'solid' : 'outline'} size="sm" onClick={() => setTheme('light')}>Light</WBtn>
+            <WBtn variant={theme === 'dark' ? 'solid' : 'outline'} size="sm" onClick={() => setTheme('dark')}>Dark</WBtn>
+          </div>
+        </div>
+        <div>
+          <WT size={11} color="ink-faint" style={{ display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Accent</WT>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {(['azure', 'cobalt', 'copper', 'emerald'] as const).map(a => (
+              <div
+                key={a}
+                onClick={() => setAccent(a)}
+                style={{
+                  width: 28, height: 28, borderRadius: '50%', cursor: 'pointer',
+                  border: accent === a ? '3px solid var(--ui-ink)' : '2px solid var(--ui-line)',
+                  background: a === 'azure' ? '#0078d4' : a === 'cobalt' ? '#1e3a6e' : a === 'copper' ? '#b87333' : '#2e7d32',
+                }}
+                title={a}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Color tokens */}
