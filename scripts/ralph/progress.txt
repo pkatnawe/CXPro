@@ -59,3 +59,23 @@ Started: Sun May 31 20:03:10 CDT 2026
   - WPill variant="chip" supports `active` boolean prop for filter chip toggles
   - WHeader takes `crumbs[]` array for breadcrumb row
 ---
+
+## 2026-06-01 - US-004
+- Rewrote `frontend/src/app/(app)/project/[id]/assets/page.tsx` using frontend-kit primitives (WFrame, WHeader, WPill, WT, WLiveDot, WSkeleton, WEmpty, WBox)
+- Added `vendor_name: string | null` to `Asset` interface in `api.ts`; also added to `createAsset` and `updateAsset` params
+- Created `frontend/src/contexts/asset_registry/derivePhase.ts` — pure function, returns 'pre-install' | 'L2' | 'L3' | 'L4' | 'L5'
+- Created `frontend/src/contexts/asset_registry/derivePhase.test.ts` — 10 unit tests covering all PRD cases
+- Deleted `frontend/src/contexts/asset_registry/ui.test.tsx` (old AssetList test file)
+- Layout: WHeader crumbs, decorative ✦ AI bar (alert on Enter), action pills (+new/Import BIM/Export), filter chips (space/type/status), WLiveDot row count, dense table, skeleton loading rows, WEmpty state
+- Phase derivation: loaded all instances for project in single call, grouped by asset_id, derivePhase() per row
+- Space path: buildSpacePath() walks spaceMap to parent recursively, joins with ' / '
+- Children count: computed from parent_asset_id scan of full asset list
+- Note: ui.tsx kept intact (still used by spaces/systems/asset-types pages); full deletion in US-009
+- type-check: clean; lint: 0 errors on new files; 23 asset_registry tests pass
+- **Learnings for future iterations:**
+  - `listInstances(projectId)` with no filter loads all instances — then group by asset_id client-side to avoid N+1
+  - derivePhase() ignores L1 (not in LEVEL_ORDER); only L2-L5 rank
+  - WPill variant="chip" + active boolean + onClick clearFilter() = filter chip toggle pattern
+  - buildSpacePath() walks Map upward via parent_space_id; memoize spaceMap outside render
+  - `useUrlFilters` returns `clearFilter` (single key) and `clearAll` — no need for `setFilter` for clearing
+---
