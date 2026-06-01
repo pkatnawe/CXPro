@@ -1,0 +1,6 @@
+[
+  { "number": "23-23.10", "title": "AHU schedule & cut sheets",   "status": "approved",       "tone": "ok" },
+  { "number": "23-05.40", "title": "VFD — ABB ACS580",            "status": "appr. as noted", "tone": "ai" },
+  { "number": "23-08.13", "title": "Coil performance data",        "status": "approved",       "tone": "ok" },
+  { "number": "23-09.93", "title": "Sequence of operations",       "status": "pending",        "tone": "warn" }
+]

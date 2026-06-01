@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import {
   getAsset,
   listAssetTypes,
+  listSpaces,
   updateAsset,
   deleteAsset,
   retireAsset,
@@ -18,6 +19,7 @@ import {
 import { listInstances, type Instance } from '@/contexts/commissioning_execution/api'
 import { derivePhase } from '@/contexts/asset_registry/derivePhase'
 import { useBreadcrumbLabel } from '@/contexts/navigation/breadcrumbLabel'
+import { AssetOverview } from '@/contexts/asset_registry/AssetOverview'
 import {
   WFrame,
   WH,
@@ -78,6 +80,7 @@ function AssetDetailContent({ projectId, assetId }: { projectId: string; assetId
   const [activeTab, setActiveTabState] = useState<TabId>('overview')
   const [asset, setAsset] = useState<Asset | null>(null)
   const [assetType, setAssetType] = useState<AssetType | undefined>(undefined)
+  const [spaces, setSpaces] = useState<Space[]>([])
   const [instances, setInstances] = useState<Instance[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -99,14 +102,16 @@ function AssetDetailContent({ projectId, assetId }: { projectId: string; assetId
   }
 
   const load = useCallback(async () => {
-    const [assetData, assetTypes, instancesData] = await Promise.all([
+    const [assetData, assetTypes, spacesData, instancesData] = await Promise.all([
       getAsset(projectId, assetId),
       listAssetTypes(projectId),
+      listSpaces(projectId),
       listInstances(projectId, { asset_id: assetId }),
     ])
     setAsset(assetData)
     setEntityLabel(assetData.tag)
     setAssetType(assetTypes.find(t => t.id === assetData.asset_type_id))
+    setSpaces(spacesData)
     setInstances(instancesData)
     setLoading(false)
   }, [projectId, assetId, setEntityLabel])
@@ -343,32 +348,44 @@ function AssetDetailContent({ projectId, assetId }: { projectId: string; assetId
           })}
         </nav>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-          {TABS.find(t => t.id === activeTab)?.preview && (
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '3px 10px',
-              borderRadius: 4,
-              border: '1px solid var(--ui-ai-line)',
-              background: 'var(--ui-ai-soft)',
-              marginBottom: 14,
-              fontSize: 11,
-              fontFamily: 'Geist Mono, monospace',
-              color: 'var(--ui-ai)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}>
-              design preview
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+          {activeTab === 'overview' ? (
+            <AssetOverview
+              asset={asset}
+              assetType={assetType}
+              instances={instances}
+              spaceMap={new Map(spaces.map(s => [s.id, s]))}
+              onPatch={patchAsset}
+            />
+          ) : (
+            <div style={{ padding: 20 }}>
+              {TABS.find(t => t.id === activeTab)?.preview && (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '3px 10px',
+                  borderRadius: 4,
+                  border: '1px solid var(--ui-ai-line)',
+                  background: 'var(--ui-ai-soft)',
+                  marginBottom: 14,
+                  fontSize: 11,
+                  fontFamily: 'Geist Mono, monospace',
+                  color: 'var(--ui-ai)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                }}>
+                  design preview
+                </div>
+              )}
+
+              <WBox style={{ padding: 20 }}>
+                <WT size={13} color="ink-soft">
+                  {TABS.find(t => t.id === activeTab)?.label} · coming in next slice
+                </WT>
+              </WBox>
             </div>
           )}
-
-          <WBox style={{ padding: 20 }}>
-            <WT size={13} color="ink-soft">
-              {TABS.find(t => t.id === activeTab)?.label} · coming in next slice
-            </WT>
-          </WBox>
         </div>
       </div>
 

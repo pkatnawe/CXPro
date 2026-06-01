@@ -1,0 +1,7 @@
+[
+  { "role": "Owner",      "company": "Hudson DC LLC",    "person": "D. Reyes", "initials": "DR", "tone": "primary" },
+  { "role": "CxA (lead)", "company": "Meridian Cx",      "person": "J. Marsh", "initials": "JM", "tone": "primary" },
+  { "role": "GC",         "company": "Turner Build",     "person": "P. Okafor","initials": "PO", "tone": "ink" },
+  { "role": "Mech sub",   "company": "Acme Mechanical",  "person": "B. Lewis", "initials": "BL", "tone": "ink" },
+  { "role": "EOR",        "company": "BR+A Engineers",   "person": "S. Vance", "initials": "SV", "tone": "ink" }
+]

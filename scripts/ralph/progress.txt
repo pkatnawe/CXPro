@@ -60,3 +60,17 @@ Commit: feat: US-005 - Asset Register page — eq-register variant on wk-* kit
 - Created assets/page.test.ts with 5 tests covering buildSpacePath and API call contracts
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures + 5 new passing)
 
+## US-006 — Asset Detail shell — 9-tab left rail at /project/[id]/assets/[assetId]
+Status: COMPLETE
+Commit: feat: US-006 - Asset Detail shell — 9-tab left rail
+
+- Deleted old page.tsx, page.test.ts, edit.test.ts; rewrote page.tsx from asset-detail.jsx (nav=rail)
+- Left section rail: 9 tabs in order (Overview/Devices/Checklists/Tests/Issues/Files/RFIs/History/Linked)
+- Active tab tracked in URL hash (#overview, etc.)
+- Header strip: WStamp row, WH title, lifecycle pill, 4-cell KPI strip (cx%, sub-assets, instances, phase)
+- Edit button (WBtn) + overflow menu (Retire/Decommission/Delete) preserved
+- Issues/Files/RFIs/History tabs show [design preview] badge
+- Each tab body: WBox placeholder "{Label} · coming in next slice"
+- Added style prop to WSkeletonProps in frontend-kit/index.tsx
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+

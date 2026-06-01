@@ -4,6 +4,9 @@ import issuesData from "./issues.json";
 import filesData from "./files.json";
 import rfisData from "./rfis.json";
 import historyData from "./history.json";
+import milestonesData from "./milestones.json";
+import partiesData from "./parties.json";
+import submittalsData from "./submittals.json";
 
 export interface PreviewIssue {
   id: string;
@@ -50,4 +53,37 @@ export function getPreviewRFIs(): PreviewRFI[] {
 
 export function getPreviewHistory(): PreviewHistoryEntry[] {
   return historyData as PreviewHistoryEntry[];
+}
+
+export interface PreviewMilestone {
+  label: string;
+  date: string;
+  status: "done" | "target";
+}
+
+export interface PreviewParty {
+  role: string;
+  company: string;
+  person: string;
+  initials: string;
+  tone: string;
+}
+
+export interface PreviewSubmittal {
+  number: string;
+  title: string;
+  status: string;
+  tone: string;
+}
+
+export function getPreviewMilestones(): PreviewMilestone[] {
+  return milestonesData as PreviewMilestone[];
+}
+
+export function getPreviewParties(): PreviewParty[] {
+  return partiesData as PreviewParty[];
+}
+
+export function getPreviewSubmittals(): PreviewSubmittal[] {
+  return submittalsData as PreviewSubmittal[];
 }
