@@ -122,3 +122,14 @@ Commit: feat: US-009 + US-010 - Asset Detail Checklists and Tests tabs (real API
 - Wired into page.tsx for #tests tab
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
 
+## US-011 — Asset Detail Issues + Files tabs (design preview, mock data)
+Status: COMPLETE
+Commit: feat: US-011 - Asset Detail Issues + Files tabs (design preview, mock data)
+
+- Created contexts/asset_registry/AssetIssues.tsx — loads _design_preview/issues.json; grid with ID, title, severity pill, status pill, opened date, owner avatar
+- Created contexts/asset_registry/AssetFiles.tsx — loads _design_preview/files.json; grid with name, kind pill, size, uploaded date
+- Both components show sticky [design preview] badge at top
+- No AI affordances
+- Wired into page.tsx for #issues and #files tabs
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
