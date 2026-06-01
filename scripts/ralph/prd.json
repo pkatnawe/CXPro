@@ -1,162 +1,331 @@
 {
   "project": "CXPro",
-  "branchName": "ralph/assets-rebuild",
-  "description": "Rebuild the Assets list page and Asset detail page from the frontend-design/ V1 wireframes, scoped to what the current backend supports. Seed a realistic DC-12 Hudson Valley demo project so all pages have data to render. See scripts/ralph/prd.md for full rationale, decisions, and out-of-scope items.",
+  "branchName": "ralph/design-port",
+  "description": "Port the new frontend-design/ (wireframe-kit.jsx + screens/) into the real Next.js app. Replace the just-merged fk-* frontend-kit with wk-* primitives, rebuild the app shell (left rail + top bar + user menu), rebuild Asset Register and the 9-tab Asset Detail (left rail), ship the Template library, and reskin Setup pages (AssetTypes/Spaces/Systems) to the new kit. Features without backend (AI surfaces, Dashboard, Documents/Drawings, Checklist execution, Framework artboard) are out of scope. Backendless Asset Detail tabs (Issues/Files/RFIs/History) render the visual design with a [design preview] badge from a shared JSON fixture. See ADR-0006 for the kit-replacement rationale.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Backend — add assets.vendor_name TEXT column",
-      "description": "As a frontend developer, I want assets to have a vendor_name TEXT column so I can display vendor info on the asset list and detail pages without standing up an Organizations CRUD UI first. CONTEXT.md says vendor is properly an Organization; this column is an explicit temporary denormalized snapshot.",
+      "title": "Kit foundation — replace fk-* with wk-* primitives + Geist fonts",
+      "description": "As a frontend developer, I need the new wireframe-kit primitives (WBox, WFrame, WH, WT, WLabel, WPill, WBtn, WSectionLabel, WLines, WNote, WLiveDot, WAI, WBrandHeading) implemented in TypeScript at frontend/src/lib/frontend-kit/ so every later screen has a working primitive layer. Replaces the prior fk-* implementation entirely.",
       "acceptanceCriteria": [
-        "Create migrations/020_asset_vendor_name.sql containing `ALTER TABLE assets ADD COLUMN IF NOT EXISTS vendor_name TEXT;`",
-        "Create backend/apply_vendor_name_migration.py mirroring the existing apply_*_migration.py pattern (psycopg2 + dotenv)",
-        "Update backend/contexts/asset_registry/assets.py: add `vendor_name` to the Asset response model, accept it in create/update payloads, include in INSERT and UPDATE SQL",
-        "Update backend/contexts/asset_registry/api.py: serialize vendor_name in _serialize",
-        "Update backend/contexts/asset_registry/test_assets.py: at least one test creates an asset with vendor_name and asserts it round-trips through GET",
-        "Run apply script — column appears in assets table",
-        "Existing backend tests pass"
+        "Delete existing frontend/src/lib/frontend-kit/index.tsx and styles.css contents; rewrite from frontend-design/wireframe-kit.jsx",
+        "Implement WBox, WFrame, WH, WT, WLabel, WPill, WBtn, WSectionLabel, WLines, WNote, WLiveDot, WAI, WBrandHeading as typed React components",
+        "Define CSS variables --ui-bg, --ui-panel, --ui-panel-2, --ui-panel-3, --ui-ink, --ui-ink-soft, --ui-ink-faint, --ui-line, --ui-line-strong, --ui-ok, --ui-ok-soft, --ui-ok-line, --ui-warn, --ui-ai-line, --ui-shadow-accent on :root with light defaults",
+        "Load Geist Sans + Geist Mono via next/font/google and wire to font-family in styles.css",
+        "Visit /frontend-kit-preview and confirm primitives render with new fonts and tokens",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 1,
-      "passes": true
+      "passes": true,
+      "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Backend — idempotent seed script for DC-12 Hudson Valley demo project",
-      "description": "As a developer testing the frontend locally, I want a single command that seeds a realistic demo project bound to my logged-in user so every page renders meaningful data instead of 'Failed to load templates'.",
+      "title": "Theme + accent provider (light/dark, azure/cobalt/copper/emerald) backed by localStorage",
+      "description": "As a user, I want to switch between light/dark themes and four accent colors from the user menu, and have the choice persist across sessions.",
       "acceptanceCriteria": [
-        "Create scripts/seed_demo_data.py — standalone Python, psycopg2 + dotenv (loads ../.env.local)",
-        "Accept --email flag (default: SEED_USER_EMAIL env or 'shlokp98@gmail.com'); resolve to auth.users.id; error loudly if not found",
-        "Idempotent: DELETE prior project named 'DC-12 Hudson Valley (demo)' (cascades) before inserting",
-        "Insert: 1 Org ('Hudson DC LLC (demo)'), 1 Project, 4 DisciplineScopes (Mechanical/Electrical/Controls/General Construction), 1 participation row for the user",
-        "Spaces tree: Building → 3 Halls (A/B/C) → 3 Rows under Hall B",
-        "5 AssetTypes: AHU, PDU, UPS, CRAH, Switchgear",
-        "≥15 Assets across the halls with realistic tags/mfr/model/serial/vendor_name/nameplate_data, ≥2 parent/child relationships (e.g., Switchgear → PDU → UPS)",
-        "2 Systems with asset memberships ('Cooling — Chilled Water', 'Power — Hall B')",
-        "5 TestProcedureTemplates (mix of L2/L3/L5) linked to relevant AssetTypes via asset_type_template_links",
-        "≥12 TestProcedureInstances across assets with varied statuses (pending/in_progress/complete) so phase derivation has signal",
-        "Script prints the resulting project_id + a clickable localhost URL",
-        "Running the script twice succeeds (idempotent)"
+        "Create frontend/src/lib/theme/ThemeProvider.tsx — context provides {theme, accent, setTheme, setAccent}",
+        "Persist to localStorage keys cxp.theme and cxp.accent; default {theme:'light', accent:'azure'}",
+        "Set data-theme and data-accent attributes on <html> on mount and on change",
+        "Add dark-theme CSS variable overrides in frontend-kit/styles.css under [data-theme='dark']",
+        "Add accent CSS variable overrides for [data-accent='azure'|'cobalt'|'copper'|'emerald'] (--ui-primary, --ui-primary-line, --ui-primary-soft)",
+        "Wrap app/layout.tsx with ThemeProvider",
+        "No flash of wrong theme on hard reload (read localStorage in an inline pre-hydration script)",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 2,
-      "passes": true
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Frontend — port wireframe primitives into frontend/src/lib/frontend-kit/",
-      "description": "As a developer building screens from the frontend-design/ wireframes, I want the W* primitives (WBox, WPill, WT, etc.) available as proper TypeScript components so I can compose screens with the same density and language as the wireframes.",
+      "title": "App shell — replace (app)/layout.tsx with left rail + top bar + user menu",
+      "description": "As a user, I want the new global chrome (vertical left rail, top bar, top-right user menu dropdown) on every (app)/* route, so the app feels coherent with the design.",
       "acceptanceCriteria": [
-        "Create frontend/src/lib/frontend-kit/ with TypeScript ports of: WBox, WPill, WT, WH, WAvatar, WBar, WStamp, WIcon, WLiveDot, WSectionLabel, WBtn, WHeader, WSideNav, WFrame",
-        "Source of truth: frontend-design/wireframe-kit.jsx (read carefully — port semantics, not just markup)",
-        "All CSS classes namespaced fk-* so they don't collide with existing bp-* styles",
-        "CSS lives in frontend/src/lib/frontend-kit/styles.css, imported once from layout.tsx",
-        "Each component has prop types; no `any`",
-        "No `Object.assign(window, ...)` — proper ES module exports",
-        "Add a Storybook-style scratch route /frontend-kit-preview that renders one of each primitive for visual QA (can be deleted after sign-off; mark with a // SCRATCH comment)",
-        "Existing pages unaffected — bundle check: no regression in /assets page render"
+        "Rewrite frontend/src/app/(app)/layout.tsx using wk-* primitives",
+        "Left rail items in order: Assets, Checklists, Asset Types, Spaces, Systems; ghost (disabled) items: Issues, Drawings, Reports",
+        "Active rail item determined by current pathname",
+        "Top bar shows project name + phase when on a /project/[id] route",
+        "Top-right user-menu dropdown items: Organization (→/organization), Projects (→/projects), Team (→/project/[id]/members when in a project), Theme toggle (light/dark), Accent picker (4 swatches), Sign out",
+        "Existing routes /dashboard, /inbox, /entity/[id] remain accessible by URL but are NOT in the rail",
+        "Delete unused chrome remnants from the prior layout",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": true
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Frontend — Assets list page V1 dense-table rebuild",
-      "description": "As a user landing on /project/[id]/assets, I want a dense, scannable table of assets with filter chips so I can find the asset I'm looking for quickly. Matches V1 of frontend-design/screens/equipment.jsx.",
+      "title": "Design-preview mock fixtures for backendless Asset Detail tabs",
+      "description": "As a frontend developer, I want a shared JSON fixture for Issues/Files/RFIs/History tab content so the Asset Detail page can render the new design without backend changes.",
       "acceptanceCriteria": [
-        "Rewrite frontend/src/app/(app)/project/[id]/assets/page.tsx using frontend-kit primitives",
-        "Layout: header crumbs, decorative AI command bar (WWell + ✦ glyph; input is non-functional, shows 'coming soon' on submit), action pills (+ new opens create modal from US-007; import BIM + export are decorative stubs), filter chip row, table",
-        "Table columns: ☐ (decorative — no bulk select), Tag · description, AssetType, Space path (e.g. 'Hall B / Row 3'), Status (lifecycle pill), Phase (derived per US-006), Children count, Vendor",
-        "Phase rendering: 'Pre-install' when no instances; 'L2 / Pre-functional', 'L3 / Functional', 'L4 / Functional Performance', 'L5 / IST' otherwise (highest in_progress or complete)",
-        "Filter chips wired to existing useUrlFilters hook: space, asset_type, lifecycle status. Chip click toggles filter; X clears it",
-        "Live row count chip ('X of Y · live') with WLiveDot",
-        "Row click → navigate to /project/[id]/assets/[assetId]",
-        "Empty state: friendly empty box, no 'Failed to load' string ever shown",
-        "Loading state: skeleton rows, not a centered spinner",
-        "Delete frontend/src/contexts/asset_registry/ui.tsx (the old AssetList component) and any references",
-        "Delete frontend/src/contexts/asset_registry/ui.test.tsx",
-        "Write new tests: filter chip toggle updates URL, row click navigates, derived phase renders correctly for an asset with N instances"
+        "Create frontend/src/contexts/asset_registry/_design_preview/issues.json with 4-6 mock punch/issue entries (id, title, severity, status, opened_at, owner_initials)",
+        "Create files.json with 4-6 mock documents (name, kind, size, uploaded_at)",
+        "Create rfis.json with 3-5 mock RFIs (number, subject, status, opened, due)",
+        "Create history.json with 8-12 audit-log entries (timestamp, actor_initials, action, target)",
+        "Add a frontend/src/contexts/asset_registry/_design_preview/index.ts barrel exporting typed loaders for each fixture",
+        "Add a top-of-file comment in the barrel: DESIGN PREVIEW — mocked; delete when backend ships",
+        "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Frontend — Asset detail page rebuild with 5 tabs",
-      "description": "As a user clicking into an asset, I want a rich detail page showing everything we know about the asset (hero + KPIs + tabbed sections). Matches frontend-design/screens/asset-detail.jsx, trimmed to what the backend supports.",
+      "title": "Asset Register page — eq-register variant on wk-* kit",
+      "description": "As a user, I want the new Asset Register list (type-faceted filter, dense rows, new typography) at /project/[id]/assets, wired to GET /assets.",
       "acceptanceCriteria": [
-        "Rewrite frontend/src/app/(app)/project/[id]/assets/[assetId]/page.tsx using frontend-kit primitives",
-        "Hero: WStamps row (tag, type, disc derived from space hierarchy if any, loc=space path, asset id), big WH tag + name, lifecycle status pill (active/retired/decommissioned), vendor pill, scheduled date pill IF nameplate_data has one (else omit)",
-        "KPI strip (5 boxes): Cx progress % (per US-006), sub-asset count, instances done/total, manufacturer, model. (Drops 'submittals' and 'turnover' from design — no backend.)",
-        "Tab strip: Overview, Devices, Checklists, Tests, Linked — exactly these 5; Issues, Files, RFIs, History are NOT rendered",
-        "Active tab persisted in URL query (?tab=devices)",
-        "Overview panel: KV grid of all asset fields including all nameplate_data keys; activity timeline = empty state ('No activity log yet')",
-        "Devices panel: list of child assets (assets with parent_asset_id = this asset); click → navigate to that asset's detail",
-        "Checklists panel: list of TestProcedureInstances where level=L2 for this asset; show template name, status, created_at",
-        "Tests panel: list of TestProcedureInstances where level in (L3,L4,L5) for this asset; same columns",
-        "Linked panel: parent asset (1 row, if any) + system memberships (N rows) + space path breadcrumb",
-        "Loading + empty states for each panel; no 'Failed to load' strings",
-        "Tests for: hero renders all available fields, tab switching updates URL, each panel makes the right API call"
+        "Rewrite frontend/src/app/(app)/project/[id]/assets/page.tsx from frontend-design/screens/equipment-register.jsx using wk-* primitives",
+        "Type filter facets pull from GET /asset-types?project_id=...",
+        "Lifecycle filter chips: active / retired / decommissioned (matches existing GET /assets query params)",
+        "Each row links to /project/[id]/assets/[assetId]",
+        "Re-use existing CreateAssetModal; restyle button affordance to match new design",
+        "Strip any AI command-bar elements from the design source",
+        "Keep useUrlFilters.ts behavior — filter state persists in URL",
+        "Update assets/page.test.ts to match new markup",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": true
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-006",
-      "title": "Frontend — phase derivation helper + lifecycle phase tracker visual",
-      "description": "As both the list and detail pages need to show 'phase', I want a single shared derivation function and a PhaseTracker component matching the design.",
+      "title": "Asset Detail shell — 9-tab left rail at /project/[id]/assets/[assetId]",
+      "description": "As a developer, I need the new Asset Detail page shell (left section rail + active-tab content area + header strip) so subsequent stories can drop each tab's panel into it.",
       "acceptanceCriteria": [
-        "Add frontend/src/contexts/asset_registry/derivePhase.ts: function takes TestProcedureInstance[] and returns one of: 'pre-install' | 'L2' | 'L3' | 'L4' | 'L5'",
-        "Rule (per PRD decision #4): highest level among instances where status in ('in_progress','complete'); 'pre-install' if no instances",
-        "Unit tests: empty array → pre-install; one L2 pending → pre-install; one L2 in_progress → L2; L2 complete + L3 pending → L2; L2 complete + L3 in_progress → L3; L4 complete + L2 in_progress → L4",
-        "Add PhaseTracker component in frontend-kit: 8 phase circles (Design, Submittals, Install, Pre-functional, Functional, IST, Turnover, Operations) with done/current/upcoming states",
-        "Map derived phase → tracker state: pre-install=current at Install; L2=current at Pre-functional; L3/L4=current at Functional; L5=current at IST",
-        "Used by the detail page hero area"
+        "Delete frontend/src/app/(app)/project/[id]/assets/[assetId]/page.tsx and page.test.ts and edit.test.ts",
+        "Rewrite page.tsx from frontend-design/screens/asset-detail.jsx (nav='rail') using wk-* primitives",
+        "Left rail items in order: Overview, Devices, Checklists, Tests, Issues, Files, RFIs, History, Linked",
+        "Active tab tracked in URL hash (e.g. #overview, #devices)",
+        "Header strip shows asset tag + manufacturer/model + lifecycle pill (real data from GET /assets/:id)",
+        "Edit affordance + delete affordance preserved and restyled",
+        "Each tab body renders a placeholder WBox saying 'coming in next slice' for now",
+        "Issues/Files/RFIs/History tabs additionally show a [design preview] badge",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": true
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-007",
-      "title": "Frontend — Create-asset modal",
-      "description": "As a user, I want a 'New asset' button on the list page that opens a modal form so I can create assets without leaving the page.",
+      "title": "Asset Detail — Overview tab (real API, no AI summary card)",
+      "description": "As a user, I want the Overview tab to show the PhaseTracker, nameplate & spec card, schedule & milestones, responsible parties, and submittals layout from asset-panels-a.jsx — wired to the real asset record. The AI summary card is removed.",
       "acceptanceCriteria": [
-        "Modal triggered by the '+ new' pill on the list page",
-        "Form fields: tag (required, unique-per-project hint), name, asset_type (select, populated from /asset-types endpoint), space (cascading select: Building → Hall → child), parent_asset (optional search/select), manufacturer, model, serial, vendor_name, nameplate_data (key-value JSON editor with add/remove rows)",
-        "Submit → POST /projects/{id}/assets; on success: close modal, optimistic-insert into list, toast success",
-        "Server validation errors surfaced inline next to the offending field (especially 409 tag-conflict)",
-        "Cancel button + Esc + click-outside all close the modal without saving",
-        "Tests: form submits with valid data, displays 409 error, cascading space select narrows correctly"
+        "Implement AssetOverview component from frontend-design/screens/asset-panels-a.jsx using wk-* primitives",
+        "Nameplate card binds to asset.manufacturer, model, serial, nameplate_data JSONB, vendor_name",
+        "PhaseTracker reuses existing derivePhase.ts logic",
+        "Schedule & milestones, responsible parties, submittals use design-preview mock data; add parties.json + milestones.json + submittals.json in this story",
+        "Strip the AI summary WBox entirely — do not render the 'copilot · this asset' card",
+        "Tab renders inside the rail shell from US-006",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 7,
-      "passes": true
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-008",
-      "title": "Frontend — Asset edit + delete affordances",
-      "description": "As a user on the asset detail page, I want to edit any editable field inline and delete the asset (with confirmation).",
+      "title": "Asset Detail — Devices tab (real API, parent/child tree)",
+      "description": "As a user, I want the Devices tab to show child assets of the current asset as drawn in asset-panels-a.jsx, wired to GET /assets?parent_asset_id=:id.",
       "acceptanceCriteria": [
-        "Detail hero: each editable field (name, manufacturer, model, serial, vendor_name) becomes an inline-edit input on click; Enter saves, Esc cancels",
-        "Nameplate_data: edit via 'Edit nameplate' button that opens the same JSON KV editor from US-007",
-        "Save → PATCH /projects/{id}/assets/{assetId}; optimistic update, rollback on error",
-        "Delete button in hero overflow menu → confirmation dialog naming the asset → DELETE /projects/{id}/assets/{assetId} → navigate back to list",
-        "Retire + Decommission actions also exposed in the overflow menu (POST .../retire and .../decommission)",
-        "Tests: inline edit round-trips, delete confirmation cancels safely, retire updates the status pill"
+        "Implement AssetDevices component from frontend-design/screens/asset-panels-a.jsx using wk-* primitives",
+        "Fetch GET /assets?parent_asset_id=:assetId&project_id=...",
+        "Each child row links to its own Asset Detail page",
+        "Empty state when asset has no children: 'No sub-assets registered'",
+        "No AI affordances rendered",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": true
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-009",
-      "title": "Cleanup — purge old asset UI, complete test coverage, smoke verify",
-      "description": "Final pass to ensure no remnants of the old setup remain and the whole flow works end-to-end.",
+      "title": "Asset Detail — Checklists tab (real API, L2 instances)",
+      "description": "As a user, I want the Checklists tab to list this asset's L2 TestProcedureInstances (pre-functional checklists) per the asset-panels-a.jsx design.",
       "acceptanceCriteria": [
-        "Grep confirms no remaining import of frontend/src/contexts/asset_registry/ui (the deleted module)",
-        "Grep confirms no occurrence of the string 'Failed to load templates' anywhere in the assets page render path",
-        "Run frontend test suite: all pass",
-        "Run backend test suite: all pass",
-        "Manual smoke: fresh DB, run migration + seed, log in, navigate to /project/<id>/assets, click an asset, switch tabs, edit a field, create a new asset, delete it — every step works without console errors"
+        "Implement AssetChecklists component from frontend-design/screens/asset-panels-a.jsx using wk-* primitives",
+        "Fetch GET /test-procedure-instances?asset_id=:id; filter level=L2",
+        "Show template name, status pill (pending/in_progress/complete), assignee initials if available",
+        "Empty state: 'No checklists assigned'",
+        "No AI affordances rendered",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": true
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Asset Detail — Tests tab (real API, L3/L4/L5 instances)",
+      "description": "As a user, I want the Tests tab to list this asset's L3/L4/L5 TestProcedureInstances per the asset-panels-a.jsx design.",
+      "acceptanceCriteria": [
+        "Implement AssetTests component from frontend-design/screens/asset-panels-a.jsx using wk-* primitives",
+        "Fetch GET /test-procedure-instances?asset_id=:id; filter level in [L3,L4,L5]",
+        "Show template name, level pill (L3/L4/L5), status pill, assignee initials",
+        "Empty state: 'No tests scheduled'",
+        "No AI affordances rendered",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Asset Detail — Issues + Files tabs (design preview, mock data)",
+      "description": "As a user, I want the Issues and Files tabs to render their visual design with mock data, clearly badged as design previews until backend lands.",
+      "acceptanceCriteria": [
+        "Implement AssetIssues and AssetFiles components from frontend-design/screens/asset-panels-b.jsx using wk-* primitives",
+        "Issues tab loads from _design_preview/issues.json; Files tab from files.json",
+        "Each tab shows a sticky [design preview] badge at the top",
+        "Strip AI affordances (no summarize, no draft RFI buttons)",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Asset Detail — RFIs + History tabs (design preview, mock data)",
+      "description": "As a user, I want the RFIs and History tabs to render their visual design with mock data, clearly badged as design previews.",
+      "acceptanceCriteria": [
+        "Implement AssetRFIs and AssetHistory components from frontend-design/screens/asset-panels-b.jsx using wk-* primitives",
+        "RFIs tab loads from _design_preview/rfis.json; History from history.json",
+        "Each tab shows a sticky [design preview] badge at the top",
+        "Strip AI affordances",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Asset Detail — Linked tab (real API, systems membership)",
+      "description": "As a user, I want the Linked tab to show this asset's System memberships, per the asset-panels-b.jsx design.",
+      "acceptanceCriteria": [
+        "Implement AssetLinked component from frontend-design/screens/asset-panels-b.jsx using wk-* primitives",
+        "Fetch GET /systems?asset_id=:id (use the existing membership endpoint)",
+        "Each system row links to /project/[id]/systems/[systemId]",
+        "Empty state: 'Not a member of any system'",
+        "Omit the 'drawings' subsection — no backend",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Checklist Template library page — cl-templates variant",
+      "description": "As a user, I want the new Template library page (grid of template cards with filters by level/discipline) at /project/[id]/test-procedure-templates, wired to GET /test-procedure-templates.",
+      "acceptanceCriteria": [
+        "Rewrite frontend/src/app/(app)/project/[id]/test-procedure-templates/page.tsx from frontend-design/screens/checklist-templates.jsx using wk-* primitives",
+        "Each card links to /project/[id]/test-procedure-templates/[templateId]",
+        "Level filter chips (L1-L5) and discipline filter chips, persisted to URL",
+        "No AI affordances rendered",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Setup pages reskin — AssetTypes list + detail",
+      "description": "As a user, I want the Asset Types pages to use the new wk-* kit so they don't look orphaned next to the redesigned screens.",
+      "acceptanceCriteria": [
+        "Reskin frontend/src/app/(app)/project/[id]/asset-types/page.tsx using wk-* primitives (WBox, WT, WPill, WBtn, WSectionLabel)",
+        "Reskin frontend/src/app/(app)/project/[id]/asset-types/[assetTypeId]/page.tsx the same way",
+        "No functional changes — only swap primitives, fonts, tokens",
+        "Existing tests pass against new markup (update selectors if needed)",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Setup pages reskin — Spaces list + detail",
+      "description": "As a user, I want the Spaces pages to use the new wk-* kit.",
+      "acceptanceCriteria": [
+        "Reskin frontend/src/app/(app)/project/[id]/spaces/page.tsx and spaces/[spaceId]/page.tsx using wk-* primitives",
+        "No functional changes",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Setup pages reskin — Systems list + detail",
+      "description": "As a user, I want the Systems pages to use the new wk-* kit.",
+      "acceptanceCriteria": [
+        "Reskin frontend/src/app/(app)/project/[id]/systems/page.tsx and systems/[systemId]/page.tsx using wk-* primitives",
+        "No functional changes",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Cleanup — purge old fk-* references, dead files, smoke-verify whole app",
+      "description": "As a maintainer, I want every reference to the prior fk-* kit gone and the app smoke-verified end-to-end before marking the PRD complete.",
+      "acceptanceCriteria": [
+        "grep -rE 'fk-[a-z]+' frontend/src returns no matches inside .tsx/.ts/.css files",
+        "Delete frontend/src/app/(app)/project/[id]/equipment/page.tsx if redundant with the rebuilt Assets page",
+        "Delete stale test files that reference removed components",
+        "Update /frontend-kit-preview page to demo all new wk-* primitives + theme/accent toggles",
+        "Smoke-verify: log in → land on /projects → open DC-12 demo project → Assets list renders → open an asset detail → click through all 9 tabs → switch theme to dark → switch accent to copper → reload page (theme/accent persist) → open Templates library → open a template → visit each Setup page (AssetTypes/Spaces/Systems)",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
     }
   ]
 }
