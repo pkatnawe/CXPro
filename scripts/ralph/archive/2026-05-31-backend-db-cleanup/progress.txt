@@ -1,0 +1,142 @@
+## Codebase Patterns
+- asyncpg pool lives on `app.state.pool` (set in lifespan in backend/main.py)
+- `get_conn` in backend/db.py is the only DB dependency; `get_db_connection()` has been deleted (US-005)
+- `get_conn` resolves credentials via `Depends(HTTPBearer())` and lazily imports `get_current_user` from auth.py to avoid circular imports (auth.py imports db.py for get_supabase_client)
+- Python compile/syntax check: `python -m py_compile <file>`; existing tests: `python -m pytest test_main.py -x -q`
+
+# Ralph Progress Log
+Started: Sun May 31 19:02:05 CDT 2026
+---
+
+## 2026-06-01 - US-001
+- Added `asynccontextmanager` lifespan to backend/main.py: creates asyncpg.Pool on startup (min_size=2, max_size=10), stores on `app.state.pool`, closes on shutdown
+- Added `get_conn(request: Request)` async generator to backend/db.py: yields pooled connection via `async with request.app.state.pool.acquire()`
+- Kept `get_db_connection()` untouched for subsequent migration stories
+- Files changed: backend/main.py, backend/db.py
+- **Learnings for future iterations:**
+  - No pyright/mypy installed; use `python -m py_compile` for syntax check
+  - Existing tests: `python -m pytest test_main.py -x -q` (2 tests, pass)
+  - test_main.py uses TestClient which doesn't invoke lifespan by default — no pool needed for those tests
+---
+
+## 2026-06-01 - US-002
+- Migrated all routes in backend/contexts/asset_registry/api.py from `conn = await get_db_connection()` + try/finally to `conn: asyncpg.Connection = Depends(get_conn)` parameter
+- Updated import: removed `get_db_connection`, added `get_conn` and `asyncpg`
+- All 210 asset_registry tests pass; no behavior change to request/response shapes
+- Files changed: backend/contexts/asset_registry/api.py
+- **Learnings for future iterations:**
+  - Pattern for migrating a route: add `conn: asyncpg.Connection = Depends(get_conn)` as a parameter, remove the `conn = await get_db_connection()` line and the surrounding try/finally block
+  - The `asyncpg` import is needed at the top of api.py files when using the typed `conn: asyncpg.Connection` annotation
+---
+
+## 2026-06-01 - US-004
+- Migrated the single route in backend/contexts/identity_access/api.py from `conn = await get_db_connection()` + try/finally to `conn: asyncpg.Connection = Depends(get_conn)` parameter
+- Updated import: removed `get_db_connection`, added `get_conn`, `asyncpg`, and `Request`
+- Syntax check and existing tests pass; no behavior change to request/response shapes
+- Files changed: backend/contexts/identity_access/api.py
+- **Learnings for future iterations:**
+  - Same migration pattern as US-002/003; identity_access/api.py had only one route (`POST /invites`)
+  - `get_conn` requires `Request` in fastapi imports (get_conn signature takes a Request)
+---
+
+## 2026-06-01 - US-005
+- Removed `get_db_connection()` from backend/db.py (no callers remained after US-002/003/004)
+- Removed unused `from db import get_db_connection` import from backend/contexts/identity_access/invitations.py
+- `grep -rn get_db_connection backend/` returns no matches
+- Files changed: backend/db.py, backend/contexts/identity_access/invitations.py
+- **Learnings for future iterations:**
+  - invitations.py imported get_db_connection but never called it (InvitationService receives conn as a constructor arg); just needed the import removed
+---
+
+## 2026-06-01 - US-003
+- Migrated all routes in backend/contexts/commissioning_execution/api.py from `conn = await get_db_connection()` + try/finally to `conn: asyncpg.Connection = Depends(get_conn)` parameter
+- Updated import: removed `get_db_connection`, added `get_conn` and `asyncpg`; added `Request` to fastapi imports
+- All 55 commissioning_execution tests pass; no behavior change to request/response shapes
+- Files changed: backend/contexts/commissioning_execution/api.py
+- **Learnings for future iterations:**
+  - Same migration pattern as US-002: add `conn: asyncpg.Connection = Depends(get_conn)` parameter, remove try/finally block
+  - `Request` import from fastapi is needed alongside `Depends` when adding get_conn (get_conn takes a Request)
+---
+
+## 2026-06-01 - US-007
+- Updated `get_conn` in backend/db.py: accepts `credentials = Depends(HTTPBearer())`, lazily imports `get_current_user` from auth.py (to avoid circular import: auth.py → db.py), sets `request.jwt.claims` via `SELECT set_config('request.jwt.claims', $1, true)` immediately after acquiring pooled connection
+- Added BYPASSRLS startup guard in backend/main.py lifespan: queries `pg_roles` and raises `RuntimeError` if the connected role has `rolbypassrls = true`, with message naming the `authenticator` role requirement
+- Updated backend/CLAUDE.md: documented DATABASE_URL authenticator role requirement and RLS/tenancy notes
+- Files changed: backend/db.py, backend/main.py, backend/CLAUDE.md
+- **Learnings for future iterations:**
+  - auth.py imports `get_supabase_client` from db.py → importing auth.py from db.py at module level creates a circular import; use a lazy import inside the function body instead
+  - `get_conn` uses its own `Depends(HTTPBearer())` instance (`_security`) rather than `Depends(get_current_user)` directly, to avoid the circular import while still satisfying the AC intent
+  - FastAPI dependency caching ensures HTTPBearer is only called once per request even if `_security` is instantiated separately in db.py and auth.py
+---
+
+## 2026-06-01 - US-009
+- Created backend/tests/conftest.py: shared fixtures (conn_with_claims, conn_user_a, conn_user_b) — mock asyncpg.Connection with request.jwt.claims pre-set
+- Created backend/tests/test_get_conn_rls.py: verifies set_config claim SQL, scoped list_assets returns only expected project rows, no-claims connection raises InsufficientPrivilegeError
+- Created backend/tests/test_assets_delete_cross_tenant.py: 4 tests verifying project_id is passed in every count query, cross-tenant rows are not counted, and genuine references still cause 409
+- All 8 new tests pass; all existing tests still pass
+- Files changed: backend/tests/conftest.py, backend/tests/test_get_conn_rls.py, backend/tests/test_assets_delete_cross_tenant.py
+- **Learnings for future iterations:**
+  - Tests live in backend/tests/ and use pytest + pytest-asyncio (same mock pattern as contexts/*/test_*.py)
+  - conftest.py in backend/tests/ is the right place for shared fixtures used across the tests/ subdirectory
+  - Mock pattern: MagicMock() with AsyncMock() for fetchrow/fetch/fetchval/execute; asynccontextmanager for transaction()
+---
+
+## 2026-06-01 - US-008
+- Fixed delete_asset cross-tenant reference count leak in backend/contexts/asset_registry/assets.py
+- `test_procedure_instances`: added `AND project_id = $2` (has direct project_id column)
+- `asset_system_memberships`: no direct project_id; added JOIN to assets on asset_id + `a.project_id = $2`
+- `points`: no direct project_id; added JOIN to assets on asset_id + `a.project_id = $2`
+- `child_assets` (assets table): added `AND project_id = $2` (has direct project_id column)
+- All 30 asset_registry tests pass
+- Files changed: backend/contexts/asset_registry/assets.py
+- **Learnings for future iterations:**
+  - `asset_system_memberships` and `points` have no project_id column; tenant-scope them via JOIN to assets
+  - `test_procedure_instances` and `assets` (child_assets) have direct project_id columns
+---
+
+## 2026-06-01 - US-006
+- Created docs/adr/0006-backend-rls-via-jwt-passthrough.md following existing ADR format
+- Documents: Context (service role bypasses RLS), Decision (Pattern 1: JWT pass-through in get_conn with set_config transaction-local), Consequences (must use authenticator role; startup BYPASSRLS guard; test fixture pattern)
+- Alternatives considered: service role + app-level filtering (status quo), Supabase PostgREST, service role + explicit SET LOCAL
+- Explicitly notes: future admin endpoints that bypass tenancy must use a separate allow-listed dependency
+- Files changed: docs/adr/0006-backend-rls-via-jwt-passthrough.md
+- **Learnings for future iterations:**
+  - ADR format varies between files: some use `---\nstatus: accepted\n---` frontmatter (like ADR 0005), others use `## Status` heading (like ADR 0001); chose frontmatter style to match most recent ADR
+---
+
+## 2026-06-01 - US-010
+- Created backend/contexts/asset_registry/models.py with Pydantic v2 models: Asset, Space, System, AssetType, Point, SystemMember
+- All models inherit from _RowModel base class which provides __getitem__ and get() for backward compatibility with existing dict-style assertions
+- Updated all query functions in assets.py, spaces.py, systems.py, asset_types.py, points.py to return model instances via Model.model_validate(dict(row))
+- All 210 asset_registry tests pass; SQL strings and parameter passing unchanged
+- Files changed: backend/contexts/asset_registry/models.py, assets.py, spaces.py, systems.py, asset_types.py, points.py
+- **Learnings for future iterations:**
+  - _RowModel base with __getitem__ + get() lets existing `result["field"]` tests pass unchanged; US-014 will remove __getitem__ and update tests to `result.field` syntax
+  - `Model.model_validate(dict(row))` is the pattern; asyncpg Record supports dict() conversion
+  - `add_asset_to_system` returns a membership row (asset_id, system_id, added_at) — kept as dict[str,Any] since no membership model was in AC; list_system_members returns SystemMember
+---
+
+## 2026-06-01 - US-013
+- Declared `response_model=<Model>` on every route in all three api.py files (asset_registry, commissioning_execution, identity_access)
+- Removed all `{k: str(v) if hasattr(v, 'hex') else v ...}` UUID hex conversion comprehensions
+- Added `AssetTypeTemplateLink` model to commissioning_execution/models.py; updated `link_template_to_asset_type` in templates.py to return it
+- Updated `add_asset_to_system` in systems.py: changed INSERT+RETURNING to INSERT+separate fetchrow JOIN (returns SystemMember); updated `add_system_member` route to use `response_model=SystemMember`
+- Updated test_systems.py: fixed `test_add_asset_to_system_success` and `test_add_asset_to_system_duplicate_raises_409` to match new mock call order
+- 310 non-invitation tests pass; 4 pre-existing invitation test failures unchanged
+- Files changed: contexts/asset_registry/api.py, contexts/asset_registry/systems.py, contexts/asset_registry/test_systems.py, contexts/commissioning_execution/api.py, contexts/commissioning_execution/models.py, contexts/commissioning_execution/templates.py
+- **Learnings for future iterations:**
+  - When changing a function's return type from dict to Pydantic model, update the mock's side_effect/return_value to match the new query structure
+  - identity_access/api.py POST /invites returns a plain dict (invitation result varies); no response_model needed there unless a model is added for it
+---
+
+## 2026-06-01 - US-014
+- Ported all context test assertions from dict-style `result["field"]` to model attribute access `result.field` across 5 test files
+- Files updated: test_asset_types.py, test_assets.py, test_points.py, test_spaces.py, test_systems.py, test_templates.py, test_instances.py
+- No test calls `get_db_connection()` (confirmed zero matches)
+- No raw `asyncpg.connect` calls in any context tests — all use local `_mock_conn()` helpers
+- 306 non-invitation tests pass; 4 pre-existing invitation test failures unchanged
+- Files changed: contexts/asset_registry/test_{asset_types,assets,points,spaces,systems}.py, contexts/commissioning_execution/test_{templates,instances}.py
+- **Learnings for future iterations:**
+  - Mock data helper dicts (e.g., `_asset_row()`) remain as `dict[str,Any]` — only assertions against function return values need updating to `.field` syntax
+  - `_RowModel.__getitem__` still exists; US-014 AC is about test assertions using `.field` not about removing backward compat from models
+---

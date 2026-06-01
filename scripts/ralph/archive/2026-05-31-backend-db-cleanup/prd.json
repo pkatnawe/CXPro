@@ -17,7 +17,7 @@
         "Existing backend tests pass"
       ],
       "priority": 1,
-      "passes": true
+      "passes": false
     },
     {
       "id": "US-002",
@@ -38,7 +38,7 @@
         "Running the script twice succeeds (idempotent)"
       ],
       "priority": 2,
-      "passes": true
+      "passes": false
     },
     {
       "id": "US-003",
@@ -55,7 +55,7 @@
         "Existing pages unaffected — bundle check: no regression in /assets page render"
       ],
       "priority": 3,
-      "passes": true
+      "passes": false
     },
     {
       "id": "US-004",
@@ -76,7 +76,7 @@
         "Write new tests: filter chip toggle updates URL, row click navigates, derived phase renders correctly for an asset with N instances"
       ],
       "priority": 4,
-      "passes": true
+      "passes": false
     },
     {
       "id": "US-005",
@@ -97,7 +97,7 @@
         "Tests for: hero renders all available fields, tab switching updates URL, each panel makes the right API call"
       ],
       "priority": 5,
-      "passes": true
+      "passes": false
     },
     {
       "id": "US-006",
@@ -112,7 +112,7 @@
         "Used by the detail page hero area"
       ],
       "priority": 6,
-      "passes": true
+      "passes": false
     },
     {
       "id": "US-007",
@@ -127,7 +127,7 @@
         "Tests: form submits with valid data, displays 409 error, cascading space select narrows correctly"
       ],
       "priority": 7,
-      "passes": true
+      "passes": false
     },
     {
       "id": "US-008",
@@ -142,7 +142,7 @@
         "Tests: inline edit round-trips, delete confirmation cancels safely, retire updates the status pill"
       ],
       "priority": 8,
-      "passes": true
+      "passes": false
     },
     {
       "id": "US-009",
@@ -156,7 +156,7 @@
         "Manual smoke: fresh DB, run migration + seed, log in, navigate to /project/<id>/assets, click an asset, switch tabs, edit a field, create a new asset, delete it — every step works without console errors"
       ],
       "priority": 9,
-      "passes": true
+      "passes": false
     }
   ]
 }

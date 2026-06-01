@@ -366,6 +366,7 @@ export interface Asset {
   manufacturer: string | null
   model: string | null
   serial: string | null
+  vendor_name: string | null
   nameplate_data: Record<string, unknown>
   created_at: string
   retired_at: string | null
@@ -389,6 +390,7 @@ export async function createAsset(
     manufacturer?: string | null
     model?: string | null
     serial?: string | null
+    vendor_name?: string | null
     nameplate_data?: Record<string, unknown>
   }
 ): Promise<Asset> {
@@ -456,6 +458,7 @@ export async function updateAsset(
     manufacturer?: string | null
     model?: string | null
     serial?: string | null
+    vendor_name?: string | null
     nameplate_data?: Record<string, unknown>
   }
 ): Promise<Asset> {
