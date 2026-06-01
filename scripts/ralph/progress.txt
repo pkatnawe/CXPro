@@ -7,6 +7,7 @@
 - WBar/WTabs/WKVGrid do NOT accept `style` prop — use `className` with JSX `<style jsx>` CSS instead
 - Tab state: persist in URL with `router.replace()` + `?tab=TabName`; read with `useSearchParams().get('tab')`
 - Detail page data loading: fetch instances with `{ asset_id: assetId }` filter; call `listTemplates()` once and build `Map<id, Template>` for name resolution
+- PhaseTracker maps phase string → current step via PHASE_TO_CURRENT_STEP dict; connector lines use `idx <= currentIdx` for done vs upcoming
 
 # Ralph Progress Log
 Started: Sun May 31 20:03:10 CDT 2026
@@ -84,6 +85,17 @@ Started: Sun May 31 20:03:10 CDT 2026
   - WBar does not accept `style` prop; use `className` with CSS instead
   - WTabs, WKVGrid do not accept `style` prop; wrap in div or use className
   - `deriveCxProgress` = `complete / total * 100` (where total = all instances, not just active)
+---
+
+## 2026-06-01 - US-006
+- `derivePhase.ts` already existed from US-004 with correct logic and 10 passing unit tests covering all 6 PRD-required cases
+- Added `PhaseTracker` component to `frontend/src/lib/frontend-kit/index.tsx`: 8 steps (Design, Submittals, Install, Pre-functional, Functional, IST, Turnover, Operations), done/current/upcoming states, connector lines
+- Added `fk-phase-tracker` CSS to `frontend/src/lib/frontend-kit/styles.css` — circles, connector lines, labels
+- Imported and rendered `<PhaseTracker phase={phase} />` in asset detail page hero below the pills row
+- type-check: clean; lint: 0 errors; 10 derivePhase tests pass
+- **Learnings for future iterations:**
+  - PhaseTracker connector line state: use `idx <= currentIdx` (not `idx < currentIdx`) so the line entering the current node is also "done"
+  - L3 and L4 both map to "Functional" step — same visual position
 ---
 
 ## 2026-06-01 - US-004
