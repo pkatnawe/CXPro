@@ -15,6 +15,7 @@ import {
 import { listInstances, type Instance } from '@/contexts/commissioning_execution/api'
 import { useUrlFilters } from '@/contexts/asset_registry/useUrlFilters'
 import { derivePhase } from '@/contexts/asset_registry/derivePhase'
+import { CreateAssetModal } from '@/contexts/asset_registry/CreateAssetModal'
 import {
   WFrame,
   WHeader,
@@ -23,7 +24,6 @@ import {
   WLiveDot,
   WSkeleton,
   WEmpty,
-  WBox,
 } from '@/lib/frontend-kit'
 
 const PHASE_LABEL: Record<string, string> = {
@@ -294,27 +294,17 @@ function AssetsPageContent() {
       </div>
 
       {showCreateModal && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+        <CreateAssetModal
+          projectId={projectId}
+          assetTypes={assetTypes}
+          spaces={spaces}
+          assets={assets}
+          onClose={() => setShowCreateModal(false)}
+          onCreated={newAsset => {
+            setAssets(prev => [newAsset, ...prev])
+            setShowCreateModal(false)
           }}
-          onClick={e => { if (e.target === e.currentTarget) setShowCreateModal(false) }}
-        >
-          <WBox style={{ minWidth: 320, maxWidth: 480, width: '100%' }}>
-            <WT weight="bold" as="p" style={{ marginBottom: 8 }}>New Asset</WT>
-            <WT color="dim" size="sm" as="p">Create asset modal — coming in US-007</WT>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-              <WPill
-                variant="outline"
-                style={{ cursor: 'pointer' }}
-                onClick={() => setShowCreateModal(false)}
-              >
-                Cancel
-              </WPill>
-            </div>
-          </WBox>
-        </div>
+        />
       )}
     </WFrame>
   )
