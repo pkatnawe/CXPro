@@ -4,6 +4,9 @@
 - typecheck for backend: not applicable (Python), run pytest instead
 - frontend-kit primitives: import from `@/lib/frontend-kit`; all CSS classes are fk-* (never bp-*); styles auto-loaded via layout.tsx
 - frontend-kit pattern: components use className prop pass-through + variant/size/color unions; no `any` types; `'use client'` at top
+- WBar/WTabs/WKVGrid do NOT accept `style` prop — use `className` with JSX `<style jsx>` CSS instead
+- Tab state: persist in URL with `router.replace()` + `?tab=TabName`; read with `useSearchParams().get('tab')`
+- Detail page data loading: fetch instances with `{ asset_id: assetId }` filter; call `listTemplates()` once and build `Map<id, Template>` for name resolution
 
 # Ralph Progress Log
 Started: Sun May 31 20:03:10 CDT 2026
@@ -58,6 +61,29 @@ Started: Sun May 31 20:03:10 CDT 2026
   - WTabs, WKV, WKVGrid, WSkeleton, WEmpty are bonus helpers useful for US-004/005
   - WPill variant="chip" supports `active` boolean prop for filter chip toggles
   - WHeader takes `crumbs[]` array for breadcrumb row
+---
+
+## 2026-06-01 - US-005
+- Rewrote `frontend/src/app/(app)/project/[id]/assets/[assetId]/page.tsx` using frontend-kit primitives
+- Hero: WStamps row (tag, type, loc, id), WH tag + name, lifecycle status pill, vendor pill, scheduled_date pill (from nameplate_data), phase pill
+- KPI strip (5 boxes): Cx progress % + WBar, sub-asset count, instances done/total, manufacturer, model
+- WTabs strip: Overview / Devices / Checklists / Tests / Linked — active tab persisted in URL via `?tab=`
+- Overview panel: WKVGrid of all asset fields + all nameplate_data keys; activity timeline = WEmpty empty state
+- Devices panel: list of child assets with click → navigate to child detail
+- Checklists panel: L2 instances with template name (from templateMap) + status + date
+- Tests panel: L3/L4/L5 instances with level stamp + template name + status + date
+- Linked panel: parent asset (if any) + system memberships + space path breadcrumb
+- Loading state: skeleton placeholders in hero + KPI boxes (no centered spinner)
+- Empty/not-found state: WEmpty (no 'Failed to load' string)
+- Created `frontend/src/app/(app)/project/[id]/assets/[assetId]/page.test.ts` — 22 tests covering hero field derivation, space path, phase derivation, cx progress, tab URL switching, panel API calls, checklist/test split, linked panel
+- type-check: clean; lint: 0 errors; all new tests pass; 4 pre-existing failures in dashboard/members tests (unrelated)
+- **Learnings for future iterations:**
+  - Asset detail fetches instances filtered by `asset_id` (not project-wide) — more efficient than grouping
+  - listTemplates() is called once to build a `Map<id, Template>` — used to resolve template names in Checklists/Tests panels
+  - Tab state persisted via `router.replace()` with `?tab=TabName` — use `useSearchParams` to read
+  - WBar does not accept `style` prop; use `className` with CSS instead
+  - WTabs, WKVGrid do not accept `style` prop; wrap in div or use className
+  - `deriveCxProgress` = `complete / total * 100` (where total = all instances, not just active)
 ---
 
 ## 2026-06-01 - US-004

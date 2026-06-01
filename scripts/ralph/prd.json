@@ -97,7 +97,7 @@
         "Tests for: hero renders all available fields, tab switching updates URL, each panel makes the right API call"
       ],
       "priority": 5,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-006",
