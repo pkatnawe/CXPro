@@ -1,24 +1,25 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { Suspense, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import {
-  getSpace,
-  listSpaces,
-  type Space,
-} from '@/contexts/asset_registry/api'
+import { getSpace, listSpaces, type Space } from '@/contexts/asset_registry/api'
 import { useBreadcrumbLabel } from '@/contexts/navigation/breadcrumbLabel'
+import {
+  WFrame,
+  WH,
+  WT,
+  WPill,
+  WBtn,
+  WSectionLabel,
+  WSkeleton,
+  WEmpty,
+  WBox,
+} from '@/lib/frontend-kit'
 
-export default function SpaceDetailPage() {
-  const params = useParams()
+function SpaceDetailContent({ projectId, spaceId }: { projectId: string; spaceId: string }) {
   const router = useRouter()
-  const projectId = params?.id as string
-  const spaceId = params?.spaceId as string
-
   const { setEntityLabel } = useBreadcrumbLabel()
-
   const [space, setSpace] = useState<Space | null>(null)
   const [parentSpace, setParentSpace] = useState<Space | null>(null)
   const [childSpaces, setChildSpaces] = useState<Space[]>([])
@@ -26,102 +27,138 @@ export default function SpaceDetailPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session?.user) {
-        router.push('/auth')
-        return
-      }
-      try {
-        const [spaceData, allSpaces] = await Promise.all([
-          getSpace(projectId, spaceId),
-          listSpaces(projectId),
-        ])
+    Promise.all([getSpace(projectId, spaceId), listSpaces(projectId)])
+      .then(([spaceData, allSpaces]) => {
         setSpace(spaceData)
         setEntityLabel(spaceData.name)
         setChildSpaces(allSpaces.filter(s => s.parent_space_id === spaceId))
         if (spaceData.parent_space_id) {
-          const parent = allSpaces.find(s => s.id === spaceData.parent_space_id)
-          setParentSpace(parent ?? null)
+          setParentSpace(allSpaces.find(s => s.id === spaceData.parent_space_id) ?? null)
         }
-      } catch {
-        setError('Failed to load space.')
-      } finally {
         setLoading(false)
-      }
-    })
-  }, [projectId, spaceId, router, setEntityLabel])
+      })
+      .catch(() => { setError('Failed to load space.'); setLoading(false) })
+  }, [projectId, spaceId, setEntityLabel])
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <span style={{ color: 'var(--bp-text-secondary)' }}>Loading…</span>
-      </div>
+      <WFrame style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--ui-bg)' }}>
+        <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--ui-line)', background: 'var(--ui-panel)' }}>
+          <WSkeleton width={200} height="28px" />
+        </div>
+        <div style={{ padding: 18 }}><WSkeleton width="100%" height="80px" /></div>
+      </WFrame>
     )
   }
 
   if (error || !space) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <span style={{ color: 'var(--bp-text-secondary)' }}>{error ?? 'Space not found.'}</span>
-      </div>
+      <WFrame style={{ padding: 24 }}>
+        <WEmpty title="Space not found" subtitle={error ?? 'This space may have been deleted.'} />
+      </WFrame>
     )
   }
 
   return (
-    <>
-      <style jsx>{`
-        .sdp-page { padding: 32px; max-width: 800px; margin: 0 auto; }
-        .sdp-back { font-size: 0.875rem; color: var(--bp-text-secondary); cursor: pointer; background: none; border: none; padding: 0; margin-bottom: 24px; display: inline-flex; align-items: center; gap: 4px; }
-        .sdp-back:hover { color: var(--bp-text-primary); }
-        .sdp-header { margin-bottom: 24px; }
-        .sdp-kind-badge { font-size: 0.65rem; text-transform: uppercase; background: var(--bp-bg-tertiary); color: var(--bp-text-secondary); padding: 2px 6px; border-radius: 3px; margin-right: 8px; }
-        .sdp-h1 { font-size: 1.5rem; font-weight: 600; color: var(--bp-text-primary); margin: 8px 0 0 0; }
-        .sdp-section { margin-top: 24px; }
-        .sdp-section-title { font-size: 0.875rem; font-weight: 600; color: var(--bp-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-        .sdp-link { font-size: 0.875rem; color: var(--bp-accent); text-decoration: none; display: block; padding: 6px 10px; border-radius: 4px; background: var(--bp-bg-secondary); margin-bottom: 4px; }
-        .sdp-link:hover { text-decoration: underline; background: var(--bp-bg-tertiary); }
-        .sdp-empty { font-size: 0.875rem; color: var(--bp-text-secondary); }
-        .sdp-action-link { display: inline-flex; align-items: center; gap: 4px; padding: 8px 16px; background: var(--bp-accent); color: white; border-radius: 4px; text-decoration: none; font-size: 0.875rem; font-weight: 500; }
-        .sdp-action-link:hover { opacity: 0.9; }
-      `}</style>
-      <div className="sdp-page">
-        <button className="sdp-back" onClick={() => router.push(`/project/${projectId}/spaces`)}>
-          ← Back to Spaces
-        </button>
-
-        <div className="sdp-header">
-          <span className="sdp-kind-badge">{space.kind}</span>
-          <h1 className="sdp-h1">{space.name}</h1>
+    <WFrame style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--ui-bg)' }}>
+      <div style={{
+        padding: '14px 20px 12px',
+        borderBottom: '1px solid var(--ui-line)',
+        background: 'var(--ui-panel)',
+        flexShrink: 0,
+      }}>
+        <WSectionLabel tone="primary">Setup · Spaces</WSectionLabel>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+          <WPill tone="ink" size="sm">{space.kind}</WPill>
+          <WH size={22}>{space.name}</WH>
         </div>
+      </div>
 
+      <div style={{ flex: 1, overflowY: 'auto', padding: 18, display: 'flex', flexDirection: 'column', gap: 20 }}>
         {parentSpace && (
-          <div className="sdp-section">
-            <div className="sdp-section-title">Parent Space</div>
-            <Link className="sdp-link" href={`/project/${projectId}/spaces/${parentSpace.id}`}>
-              <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--bp-text-secondary)', marginRight: 6 }}>{parentSpace.kind}</span>
-              {parentSpace.name}
-            </Link>
+          <div>
+            <WSectionLabel tone="ink" style={{ marginBottom: 8 }}>Parent Space</WSectionLabel>
+            <WBox style={{ padding: 0, overflow: 'hidden' }}>
+              <div
+                onClick={() => router.push(`/project/${projectId}/spaces/${parentSpace.id}`)}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', cursor: 'pointer', background: 'transparent' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--ui-panel-2)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <WPill tone="ink" size="sm">{parentSpace.kind}</WPill>
+                <WT size={13} weight={500}>{parentSpace.name}</WT>
+              </div>
+            </WBox>
           </div>
         )}
 
         {childSpaces.length > 0 && (
-          <div className="sdp-section">
-            <div className="sdp-section-title">Child Spaces</div>
-            {childSpaces.map(child => (
-              <Link key={child.id} className="sdp-link" href={`/project/${projectId}/spaces/${child.id}`}>
-                <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--bp-text-secondary)', marginRight: 6 }}>{child.kind}</span>
-                {child.name}
-              </Link>
-            ))}
+          <div>
+            <WSectionLabel tone="ink" style={{ marginBottom: 8 }}>Child Spaces ({childSpaces.length})</WSectionLabel>
+            <WBox style={{ padding: 0, overflow: 'hidden' }}>
+              {childSpaces.map((child, i) => (
+                <div
+                  key={child.id}
+                  onClick={() => router.push(`/project/${projectId}/spaces/${child.id}`)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '9px 14px',
+                    borderBottom: i < childSpaces.length - 1 ? '1px solid var(--ui-line)' : 'none',
+                    cursor: 'pointer',
+                    background: 'transparent',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--ui-panel-2)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <WPill tone="ink" size="sm">{child.kind}</WPill>
+                  <WT size={13} weight={500}>{child.name}</WT>
+                </div>
+              ))}
+            </WBox>
           </div>
         )}
 
-        <div className="sdp-section">
-          <Link className="sdp-action-link" href={`/project/${projectId}/assets?space=${spaceId}`}>
+        <div>
+          <WBtn tone="primary" onClick={() => router.push(`/project/${projectId}/assets?space=${spaceId}`)}>
             View Assets in this Space →
-          </Link>
+          </WBtn>
         </div>
       </div>
-    </>
+    </WFrame>
+  )
+}
+
+function SpaceDetailPageInner() {
+  const params = useParams()
+  const router = useRouter()
+  const projectId = params?.id as string
+  const spaceId = params?.spaceId as string
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) { router.push('/auth'); return }
+      setReady(true)
+    })
+  }, [router])
+
+  if (!ready) {
+    return (
+      <WFrame style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+        <WSkeleton width={200} />
+      </WFrame>
+    )
+  }
+
+  return <SpaceDetailContent projectId={projectId} spaceId={spaceId} />
+}
+
+export default function SpaceDetailPage() {
+  return (
+    <Suspense>
+      <SpaceDetailPageInner />
+    </Suspense>
   )
 }
