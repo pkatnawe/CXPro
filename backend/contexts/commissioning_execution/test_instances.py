@@ -419,6 +419,56 @@ async def test_delete_instance_not_found_raises_404() -> None:
 
 
 # ---------------------------------------------------------------------------
+# list_instances template_id filter tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_list_instances_filter_by_template_id_returns_matching() -> None:
+    project_id = _make_uuid()
+    template_id = _make_uuid()
+    conn = _mock_conn()
+    rows = [_instance_row(project_id=project_id, template_id=template_id)]
+    conn.fetch.return_value = rows
+
+    result = await list_instances(conn, project_id=project_id, template_id=template_id)
+    assert len(result) == 1
+    assert str(result[0]["template_id"]) == template_id
+
+
+@pytest.mark.asyncio
+async def test_list_instances_template_id_composes_with_status() -> None:
+    project_id = _make_uuid()
+    template_id = _make_uuid()
+    conn = _mock_conn()
+    rows = [_instance_row(project_id=project_id, template_id=template_id, status="complete")]
+    conn.fetch.return_value = rows
+
+    result = await list_instances(
+        conn, project_id=project_id, template_id=template_id, status="complete"
+    )
+    assert len(result) == 1
+    assert result[0]["status"] == "complete"
+    call_args = conn.fetch.call_args
+    query: str = call_args[0][0]
+    assert "template_id" in query
+    assert "status" in query
+
+
+@pytest.mark.asyncio
+async def test_list_instances_unknown_template_id_returns_empty() -> None:
+    project_id = _make_uuid()
+    unknown_template_id = _make_uuid()
+    conn = _mock_conn()
+    conn.fetch.return_value = []
+
+    result = await list_instances(
+        conn, project_id=project_id, template_id=unknown_template_id
+    )
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
 # RLS: unauthorized user gets empty list
 # ---------------------------------------------------------------------------
 
@@ -430,4 +480,17 @@ async def test_rls_unauthorized_user_gets_empty_list() -> None:
     conn.fetch.return_value = []
 
     result = await list_instances(conn, project_id=project_id)
+    assert result == []
+
+
+@pytest.mark.asyncio
+async def test_rls_template_id_filter_unauthorized_gets_empty() -> None:
+    project_id = _make_uuid()
+    template_id = _make_uuid()
+    conn = _mock_conn()
+    conn.fetch.return_value = []
+
+    result = await list_instances(
+        conn, project_id=project_id, template_id=template_id
+    )
     assert result == []

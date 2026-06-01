@@ -42,7 +42,7 @@ export default function SpacesPage() {
           ← Back to Project
         </button>
         <h1 className="sp-h1">Space Tree</h1>
-        <SpaceTree projectId={projectId} />
+        <SpaceTree projectId={projectId} onNodeClick={(space) => router.push(`/project/${projectId}/spaces/${space.id}`)} />
       </div>
     </>
   )

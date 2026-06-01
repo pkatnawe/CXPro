@@ -42,7 +42,7 @@ export default function SystemsPage() {
           ← Back to Project
         </button>
         <h1 className="syp-h1">Systems</h1>
-        <SystemTree projectId={projectId} />
+        <SystemTree projectId={projectId} onNodeClick={(system) => router.push(`/project/${projectId}/systems/${system.id}`)} />
       </div>
     </>
   )

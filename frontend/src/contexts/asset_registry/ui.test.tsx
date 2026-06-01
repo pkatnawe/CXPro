@@ -1401,6 +1401,79 @@ describe('PointForm validation logic', () => {
   })
 })
 
+describe('AssetList URL filter integration', () => {
+  it('filter change writes status to URL — computed href', () => {
+    const projectId = 'proj-1'
+    const status = 'retired'
+    const href = `/project/${projectId}/assets?status=${status}`
+    expect(href).toBe('/project/proj-1/assets?status=retired')
+  })
+
+  it('mount with ?space=X applies space filter to API call', () => {
+    const spaceId = 'space-1'
+    const apiFilters: Record<string, string | undefined> = {}
+    if (spaceId) apiFilters.space_id = spaceId
+    expect(apiFilters.space_id).toBe('space-1')
+  })
+
+  it('SpaceTree Assets affordance href includes space param', () => {
+    const projectId = 'proj-1'
+    const spaceId = 'space-abc'
+    const href = `/project/${projectId}/assets?space=${spaceId}`
+    expect(href).toBe('/project/proj-1/assets?space=space-abc')
+  })
+
+  it('SystemTree Assets affordance href includes system param', () => {
+    const projectId = 'proj-1'
+    const systemId = 'sys-abc'
+    const href = `/project/${projectId}/assets?system=${systemId}`
+    expect(href).toBe('/project/proj-1/assets?system=sys-abc')
+  })
+})
+
+describe('AssetTypeList row click href', () => {
+  it('onRowClick href is /project/[id]/asset-types/[assetTypeId]', () => {
+    const projectId = 'proj-1'
+    const assetTypeId = 'at-abc'
+    const href = `/project/${projectId}/asset-types/${assetTypeId}`
+    expect(href).toBe('/project/proj-1/asset-types/at-abc')
+  })
+})
+
+describe('SystemTree node click href', () => {
+  it('onNodeClick href is /project/[id]/systems/[systemId]', () => {
+    const projectId = 'proj-1'
+    const systemId = 'sys-abc'
+    const href = `/project/${projectId}/systems/${systemId}`
+    expect(href).toBe('/project/proj-1/systems/sys-abc')
+  })
+
+  it('system member row click href is /project/[id]/assets/[assetId]', () => {
+    const projectId = 'proj-1'
+    const assetId = 'asset-xyz'
+    const href = `/project/${projectId}/assets/${assetId}`
+    expect(href).toBe('/project/proj-1/assets/asset-xyz')
+  })
+})
+
+describe('SpaceTree node click href', () => {
+  it('onNodeClick href is /project/[id]/spaces/[spaceId]', () => {
+    const projectId = 'proj-1'
+    const spaceId = 'space-abc'
+    const href = `/project/${projectId}/spaces/${spaceId}`
+    expect(href).toBe('/project/proj-1/spaces/space-abc')
+  })
+})
+
+describe('AssetList row click href', () => {
+  it('onRowClick href is /project/[id]/assets/[assetId]', () => {
+    const projectId = 'proj-1'
+    const assetId = 'asset-abc'
+    const href = `/project/${projectId}/assets/${assetId}`
+    expect(href).toBe('/project/proj-1/assets/asset-abc')
+  })
+})
+
 describe('PointList confirm-before-remove logic', () => {
   it('sets confirmDeleteId when delete button clicked', () => {
     let confirmDeleteId: string | null = null

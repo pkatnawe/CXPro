@@ -73,6 +73,18 @@ export async function listTemplates(
   return res.json()
 }
 
+export async function getTemplate(projectId: string, templateId: string): Promise<Template> {
+  const auth = await getAuthHeader()
+  const res = await fetch(`${API_BASE}/projects/${projectId}/test-procedure-templates/${templateId}`, {
+    headers: { Authorization: auth },
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw Object.assign(new Error(body.detail ?? 'Failed to get template'), { status: res.status, body })
+  }
+  return res.json()
+}
+
 export async function updateTemplate(
   projectId: string,
   templateId: string,
@@ -145,7 +157,7 @@ export async function unlinkTemplateFromAssetType(
 
 export async function listInstances(
   projectId: string,
-  filters?: { asset_id?: string; system_id?: string; level?: string; status?: string }
+  filters?: { asset_id?: string; system_id?: string; level?: string; status?: string; template_id?: string }
 ): Promise<Instance[]> {
   const auth = await getAuthHeader()
   const url = new URL(`${API_BASE}/projects/${projectId}/test-procedure-instances`)
@@ -153,6 +165,7 @@ export async function listInstances(
   if (filters?.system_id) url.searchParams.set('system_id', filters.system_id)
   if (filters?.level) url.searchParams.set('level', filters.level)
   if (filters?.status) url.searchParams.set('status', filters.status)
+  if (filters?.template_id) url.searchParams.set('template_id', filters.template_id)
   const res = await fetch(url.toString(), {
     headers: { Authorization: auth },
   })

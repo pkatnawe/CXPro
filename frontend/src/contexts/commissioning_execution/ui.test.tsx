@@ -618,3 +618,12 @@ describe('InstanceList template name display logic', () => {
     expect(map['tpl-2']).toBe('L3 Functional Test')
   })
 })
+
+describe('TemplateList row click href', () => {
+  it('onRowClick href is /project/[id]/test-procedure-templates/[templateId]', () => {
+    const projectId = 'proj-1'
+    const templateId = 'tpl-abc'
+    const href = `/project/${projectId}/test-procedure-templates/${templateId}`
+    expect(href).toBe('/project/proj-1/test-procedure-templates/tpl-abc')
+  })
+})

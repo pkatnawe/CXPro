@@ -315,9 +315,10 @@ function TemplateDeleteDialog({ template, onConfirm, onCancel, deleting, deleteE
 
 interface TemplateListProps {
   projectId: string
+  onRowClick?: (template: Template) => void
 }
 
-export function TemplateList({ projectId }: TemplateListProps) {
+export function TemplateList({ projectId, onRowClick }: TemplateListProps) {
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -449,7 +450,7 @@ export function TemplateList({ projectId }: TemplateListProps) {
           <tbody>
             {templates.map(t => (
               <>
-                <tr key={t.id}>
+                <tr key={t.id} style={onRowClick ? { cursor: 'pointer' } : undefined} onClick={onRowClick ? () => onRowClick(t) : undefined}>
                   <td className="tl-td">{t.name}</td>
                   <td className="tl-td"><span className="tl-badge">{t.level}</span></td>
                   <td className="tl-td">

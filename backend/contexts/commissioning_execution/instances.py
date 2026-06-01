@@ -137,6 +137,7 @@ async def list_instances(
     system_id: str | None = None,
     level: str | None = None,
     status: str | None = None,
+    template_id: str | None = None,
 ) -> list[dict[str, Any]]:
     conditions = ["project_id = $1"]
     params: list[Any] = [uuid.UUID(project_id)]
@@ -160,6 +161,11 @@ async def list_instances(
     if status is not None:
         conditions.append(f"status = ${idx}")
         params.append(status)
+        idx += 1
+
+    if template_id is not None:
+        conditions.append(f"template_id = ${idx}")
+        params.append(uuid.UUID(template_id))
         idx += 1
 
     where = " AND ".join(conditions)

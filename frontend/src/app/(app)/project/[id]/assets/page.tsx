@@ -1,15 +1,17 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { AssetList } from '@/contexts/asset_registry/ui'
+import { useUrlFilters } from '@/contexts/asset_registry/useUrlFilters'
 
-export default function AssetsPage() {
+function AssetsPageContent() {
   const params = useParams()
   const router = useRouter()
   const projectId = params?.id as string
   const [ready, setReady] = useState(false)
+  const { filters, setFilter } = useUrlFilters()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -42,8 +44,21 @@ export default function AssetsPage() {
           ← Back to Project
         </button>
         <h1 className="asp-h1">Assets</h1>
-        <AssetList projectId={projectId} />
+        <AssetList
+          projectId={projectId}
+          onRowClick={(asset) => router.push(`/project/${projectId}/assets/${asset.id}`)}
+          externalFilters={filters}
+          onFilterChange={setFilter}
+        />
       </div>
     </>
+  )
+}
+
+export default function AssetsPage() {
+  return (
+    <Suspense>
+      <AssetsPageContent />
+    </Suspense>
   )
 }

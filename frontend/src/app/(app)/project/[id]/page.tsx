@@ -568,7 +568,7 @@ export default function DashboardPage() {
 
         <div className="bp-stats-row">
           <div className="bp-stat-card">
-            <div className="bp-stat-label">Equipment Progress</div>
+            <div className="bp-stat-label">Asset Progress</div>
             <div className="bp-stat-value">
               <span className="bp-stat-num">{completionPercentage}</span>
               <span className="bp-stat-unit">%</span>
@@ -582,7 +582,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="bp-stat-card">
-            <div className="bp-stat-label">Equipment Status</div>
+            <div className="bp-stat-label">Asset Status</div>
             <div className="bp-stat-value">
               <span className="bp-stat-num">{totalTPIs}</span>
               <span className="bp-stat-unit">items</span>

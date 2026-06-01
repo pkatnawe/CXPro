@@ -42,7 +42,7 @@ export default function TestProcedureTemplatesPage() {
           ← Back to Project
         </button>
         <h1 className="tpp-h1">Test Procedure Templates</h1>
-        <TemplateList projectId={projectId} />
+        <TemplateList projectId={projectId} onRowClick={(t) => router.push(`/project/${projectId}/test-procedure-templates/${t.id}`)} />
       </div>
     </>
   )

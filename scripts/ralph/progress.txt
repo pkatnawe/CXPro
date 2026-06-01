@@ -1,259 +1,151 @@
+## 2026-05-31 - US-012
+- Refactored `AssetList` to support `externalFilters?: AssetFilters` and `onFilterChange?: (key, value) => void` props
+- `AssetList` is now a controlled component when `externalFilters` provided; uses server-side filters in `listAssets` API call
+- Updated `assets/page.tsx` to wrap in `<Suspense>` and use `useUrlFilters` hook; passes `externalFilters` + `onFilterChange`
+- Added `Link` import to `ui.tsx`; added "Assets" cross-link affordance to `SpaceTree` nodes (`?space=X`) and `SystemTree` nodes (`?system=X`)
+- Added 4 URL filter integration tests to `ui.test.tsx`
+- Typecheck passes; 134 tests pass
+- **Learnings for future iterations:**
+  - `useSearchParams` requires `<Suspense>` wrapper in Next.js App Router pages
+  - Controlled filter pattern: pass `externalFilters` + `onFilterChange` to list components to externalize state to URL
+  - `listAssets` already supports `space_id`, `system_id`, `asset_type_id`, `parent_asset_id` filters server-side
+---
+
+## 2026-05-31 - US-011
+- Created `frontend/src/app/(app)/project/[id]/test-procedure-templates/[templateId]/page.tsx` — fetches Template, linked AssetTypes (via listTemplates+filter per AssetType), and Instances
+- Added `getTemplate` to `commissioning_execution/api.ts`
+- Added `template_id` filter support to `listInstances` in `commissioning_execution/api.ts`
+- Added `onRowClick?: (template: Template) => void` prop to `TemplateList`
+- Updated `test-procedure-templates/page.tsx` to pass `onRowClick`
+- Added `TemplateList row click href` test to `commissioning_execution/ui.test.tsx`
+- Typecheck passes; 49 commissioning tests pass
+- **Learnings for future iterations:**
+  - To find AssetTypes linked to a Template: iterate all AssetTypes, call `listTemplates(projectId, {asset_type_id})` for each, check if templateId is in result (no direct endpoint)
+  - `listInstances` now supports `template_id` filter
+---
+
+## 2026-05-31 - US-010
+- Created `frontend/src/app/(app)/project/[id]/asset-types/[assetTypeId]/page.tsx` — fetches AssetType, linked Templates (via `listTemplates` with `asset_type_id` filter), and Assets of that type
+- Added `getAssetType` to `api.ts` (backend supports GET /asset-types/{asset_type_id})
+- Added `onRowClick?: (assetType: AssetType) => void` prop to `AssetTypeList` in `ui.tsx`
+- Updated `asset-types/page.tsx` to pass `onRowClick` navigating to `/project/[id]/asset-types/[assetTypeId]`
+- Added `AssetTypeList row click href` test case to `ui.test.tsx`
+- Typecheck passes; 130 tests pass
+---
+
+## 2026-05-31 - US-009
+- Created `frontend/src/app/(app)/project/[id]/systems/[systemId]/page.tsx` — fetches system, child systems, member assets; renders cross-links and "View Assets in this System" action
+- Added `onNodeClick?: (system: System) => void` prop to `SystemTree` in `ui.tsx`; system name becomes clickable when provided
+- Added `getSystem` to `api.ts` (backend supports GET /systems/{system_id})
+- Updated `systems/page.tsx` to pass `onNodeClick` navigating to `/project/[id]/systems/[systemId]`
+- Added `SystemTree node click href` and system-member row click href test cases to `ui.test.tsx`
+- Typecheck passes; 129 tests pass
+---
+
+## 2026-05-31 - US-008
+- Created `frontend/src/app/(app)/project/[id]/spaces/[spaceId]/page.tsx` — fetches space, parent space, child spaces; renders links to parent/children and "View Assets in this Space" action link
+- Added `onNodeClick?: (space: Space) => void` prop to `SpaceTree` in `ui.tsx`; space name becomes clickable link when provided
+- Updated `spaces/page.tsx` to pass `onNodeClick` navigating to `/project/[id]/spaces/[spaceId]`
+- Added `SpaceTree node click href` test case to `ui.test.tsx`
+- Typecheck passes; 127 tests pass
+- **Learnings for future iterations:**
+  - Pattern: add `onNodeClick?: (entity: T) => void` to tree components; make the name span clickable inline
+  - Space detail page uses `listSpaces` then filters for parent/children (single API call)
+---
+
+## 2026-05-31 - US-007
+- Created `frontend/src/app/(app)/project/[id]/assets/[assetId]/page.tsx` — fetches asset, assetType, space, parent, children, system memberships
+- Added `onRowClick?: (asset: Asset) => void` prop to `AssetList` in `ui.tsx`; row click calls `onRowClick(asset)` when provided, else falls back to modal
+- Updated `assets/page.tsx` to pass `onRowClick` navigating to `/project/[id]/assets/[assetId]`
+- Added `AssetList row click href` test case to `ui.test.tsx`
+- Typecheck passes; 126 tests pass
+- **Learnings for future iterations:**
+  - No backend API to get systems-for-asset; must fetch all systems then check each via `listSystemMembers` (O(n) calls)
+  - `AssetDetail` component already embeds `PointList` and `InstanceList` inline
+  - Pattern for optional row navigation: add `onRowClick?: (entity: Entity) => void` to the list component props
+---
+
+## 2026-05-31 - US-006
+- Renamed 'Equipment Progress' → 'Asset Progress' and 'Equipment Status' → 'Asset Status' in `frontend/src/app/(app)/project/[id]/page.tsx`
+- Did not touch `run.equipment_type` display string (legacy DB column) or `/equipment` page
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Dashboard stat cards use `bp-stat-label` class — only the label text needed changing, not the CSS class names
+---
+
+## 2026-05-31 - US-005
+- Created `frontend/src/contexts/navigation/breadcrumbLabel.tsx` exporting `BreadcrumbLabelProvider` and `useBreadcrumbLabel` hook
+- Updated `frontend/src/app/(app)/layout.tsx`: split into `AppLayout` (provides context) and `AppLayoutInner` (consumes it)
+- `AppLayoutInner` fetches project name via supabase when on `/project/[id]/*`, passes it to `buildBreadcrumbs` along with `entityLabel` from context
+- Topbar renders dynamic crumbs: non-terminal crumbs are `<Link>`s, terminal crumb is plain `<span>`
+- Falls back to static "Project" span until project name loads
+- Typecheck passes
+- **Learnings for future iterations:**
+  - React context provider and consumer must be in separate components — can't `useContext` in the same component that renders the `<Provider>`
+  - Split pattern: outer `AppLayout` wraps children in provider, inner `AppLayoutInner` consumes via hook
+  - `useBreadcrumbLabel` is exported from `@/contexts/navigation/breadcrumbLabel` — detail pages call `setEntityLabel` in a `useEffect`
+---
+
+## 2026-05-31 - US-004
+- Updated `frontend/src/app/(app)/layout.tsx` to replace Equipment sidebar link with 6 project nav entries
+- Entries: Spaces, Asset Types, Systems, Assets, Test Procedure Templates, Members
+- Each entry uses `pathname.startsWith(href)` for active highlighting (prefix match, not exact)
+- Wrapped in a `<>` fragment inside the existing `isProjectRoute && projectId` condition
+- Top-level Inbox and Projects links remain unchanged
+- Equipment link removed entirely
+- Typecheck passes; no tests required for this story
+- **Learnings for future iterations:**
+  - Sidebar items use template literals with backtick-interpolated projectId for both href and active check
+  - Active check must be `startsWith` (not `===`) to highlight parent when on a child route (e.g., `/assets/[id]` highlights Assets)
+---
+
 ## Codebase Patterns
-- commissioning_execution frontend context lives at frontend/src/contexts/commissioning_execution/ (api.ts, ui.tsx, ui.test.tsx)
-- AssetTypeLinkPicker determines linked asset types by querying listTemplates(projectId, {asset_type_id}) for each asset type — no dedicated "list links" endpoint
-- Migrations live in /migrations/ (root level), numbered with prefix e.g. 018_asset_registry.sql
-- Apply scripts live in backend/ as apply_<name>_migration.py, load dotenv from '../.env.local', use psycopg2
-- RLS pattern: participations-based — SELECT/INSERT/UPDATE/DELETE check EXISTS (SELECT 1 FROM participations WHERE project_id = <table>.project_id AND user_id = auth.uid())
-- For child tables without project_id (points, asset_system_memberships), RLS joins via parent table to participations
-- Partial unique index for soft-delete: CREATE UNIQUE INDEX ... WHERE status != 'retired'
-- Existing failing tests (pre-existing): test_invitation_service.py, test_invitation_service_simple.py, test_redeem_pending_invitations.py, tests/test_invites_endpoint.py (need DB integration) — ignore these
-- CRUD modules use asyncpg.Connection; tests mock it with MagicMock + AsyncMock (no live DB needed)
-- FastAPI routers: prefix on router (e.g., /projects/{project_id}), register in main.py via app.include_router()
-- UUID params passed as uuid.UUID() to asyncpg; str() or hasattr(v, "hex") used to serialize back to string in API layer
-- update_space uses sentinel `...` for optional params to distinguish "not provided" from None (for nullable fields)
-- Frontend API modules call the backend via fetch() with Bearer token from supabase.auth.getSession(); base URL from NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-- Frontend tests use vitest + jsdom; no @testing-library/react — test logic/API functions directly with vi.stubGlobal('fetch', ...) mocks
-- vi.mock() inside beforeEach() causes hoisting issues; always place vi.mock() at top level of test file
-- asyncpg conn.transaction() is an async context manager; mock it with @asynccontextmanager async def _transaction(): yield (assigned to conn.transaction)
-- Frontend pages use 'use client', useParams/useRouter, and inline <style jsx> CSS (no Tailwind classes in page components)
-- SpaceKind union and ALLOWED_PARENTS mirror backend tree_validation.py exactly — keep in sync
+- useUrlFilters hook: avoid useCallback (React internals won't work in direct vitest calls); use plain nested functions that close over router/searchParams
+- Next.js router mock in vitest: `vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: mockFn }), useSearchParams: () => new URLSearchParams(str) }))`
+- Backend filter params: add as optional keyword arg with `str | None = None`, append to conditions list with parameterized `$N` placeholder, increment idx
+- Tests use `_mock_conn()` returning MagicMock with AsyncMock fetch/fetchrow; no live DB needed
+- All backend instance tests are in `backend/contexts/commissioning_execution/test_instances.py`
+- Frontend pure modules (no React/Next/fetch) live in `frontend/src/contexts/navigation/`
+- Vitest tests: table-driven with `describe/it/expect`, no mocks needed for pure functions
+- typecheck command is `npm run type-check` (not `typecheck`)
+- React context split pattern: outer component provides `<Provider>`, inner component uses `useContext` — can't do both in one component
+- BreadcrumbLabel context: `useBreadcrumbLabel()` from `@/contexts/navigation/breadcrumbLabel` — detail pages call `setEntityLabel` in a useEffect to inject crumb label into topbar
 
 # Ralph Progress Log
-Started: Tue May 26 22:48:58 CDT 2026
+Started: Sun May 31 17:07:45 CDT 2026
 ---
 
-## 2026-05-27 - US-001
-- Created migrations/018_asset_registry.sql with tables: spaces, asset_types, systems, asset_system_memberships, assets, points
-- Created backend/apply_asset_registry_migration.py following existing apply_*_migration.py pattern
-- All tables have RLS enabled with participations-based policies (SELECT/INSERT/UPDATE/DELETE)
-- asset_system_memberships and points use parent-join RLS (join via assets to participations)
-- Partial unique index on assets(project_id, tag) WHERE status != 'retired' per ADR-0005
+## 2026-05-31 - US-003
+- Created `frontend/src/contexts/asset_registry/useUrlFilters.ts` exporting `useUrlFilters()` returning `{ filters, setFilter, clearFilter, clearAll }`
+- Supports filter keys: status, space, system, type, parent
+- setFilter writes via Next router.replace with merged params; clearFilter removes single key; clearAll removes all five; unknown params preserved
+- Created `frontend/src/contexts/asset_registry/useUrlFilters.test.ts` with 13 vitest tests covering empty state, round-trip each key, mutations, and unknown param preservation
+- All 13 tests pass; typecheck passes
 - **Learnings for future iterations:**
-  - Space kinds per ADR-0003: campus, building, floor, wing, department, data_hall, rack_row, room
-  - The UNIQUE constraint for spaces uses (project_id, parent_space_id, name) — parent_space_id can be NULL so this is a nullable composite unique
-  - assets.asset_type_id is NOT NULL — every asset must have a type
-  - points ON DELETE CASCADE from assets — verified in schema
+  - Do NOT use useCallback inside hooks tested directly in vitest — React fiber context is absent; use plain nested functions instead
+  - Mock `next/navigation` via `vi.mock` with module-level mutable variables for `mockReplace` and `mockSearchParamsString`
 ---
 
-## 2026-05-27 - US-002
-- Created backend/contexts/asset_registry/__init__.py
-- Created backend/contexts/asset_registry/tree_validation.py with is_allowed_space_parent(parent_kind, child_kind) -> bool
-- Created backend/contexts/asset_registry/test_tree_validation.py with 74 table-driven tests (all pass)
-- No DB/IO imports — pure function only
+## 2026-05-31 - US-002
+- Created `frontend/src/contexts/navigation/breadcrumbs.ts` exporting `buildBreadcrumbs(pathname, projectName, entityLabel?)`
+- Function recognizes `/project/[id]`, all 6 section list routes, and their `[entityId]` children
+- Last crumb always has `href: null`; earlier crumbs have `href` one level up
+- No React, Next, or fetch imports — pure TypeScript
+- Created `frontend/src/contexts/navigation/breadcrumbs.test.ts` with 16 vitest table-driven tests covering all routes, entity label presence/absence, and edge cases
+- All 16 tests pass; typecheck passes
 - **Learnings for future iterations:**
-  - Space kinds and their allowed parents are encoded as a dict[str, set[str|None]] — None means top-of-tree
-  - Unknown child kinds return False (not an error)
+  - Pure modules with no framework dependencies live in `frontend/src/contexts/navigation/`
+  - Vitest tests for pure functions need no mocks — just import and assert
+  - `npm run type-check` is the typecheck command
 ---
 
-## 2026-05-27 - US-003
-- Created backend/contexts/asset_registry/asset_lifecycle.py with decide_delete_mode(reference_counts) -> Literal['hard_delete','retire_only']
-- Created backend/contexts/asset_registry/test_asset_lifecycle.py with 20 tests (all pass)
-- No DB/IO imports — pure function only
+## 2026-05-31 - US-001
+- Added `template_id: str | None = None` parameter to `list_instances` in `backend/contexts/commissioning_execution/instances.py`
+- Filter appends `template_id = $N` WHERE clause when provided, fully composable with other filters
+- Exposed `template_id` as Query param on `GET /test-procedure-instances` route in `backend/contexts/commissioning_execution/api.py`
+- Added 4 new tests: filter returns matching instances, composes with status, unknown template returns empty list, RLS honored with template_id
+- All 28 tests pass
 - **Learnings for future iterations:**
-  - Reference keys: test_procedure_instances, deviations, punch_items, documents, asset_system_memberships, points, child_assets
-  - Any non-zero (including negative) count returns 'retire_only'; extra keys are ignored
----
-
-## 2026-05-27 - US-004
-- Created backend/contexts/asset_registry/spaces.py with public API: create_space, get_space, list_spaces, update_space, delete_space
-- Created backend/contexts/asset_registry/api.py with Space routes under /projects/{project_id}/spaces (POST/GET/PATCH/DELETE)
-- Registered asset_registry_router in backend/main.py
-- Created backend/contexts/asset_registry/test_spaces.py with 19 tests (all pass): create top-level, create child, reject malformed parent kind, list, rename, reparent, delete-empty, delete-with-children-409, delete-with-assets-409, RLS empty result
-- 146 total tests pass (no regressions)
-- **Learnings for future iterations:**
-  - update_space uses sentinel `...` as default for nullable optional params to distinguish "not passed" from "explicitly set to None"
-  - asyncpg UniqueViolationError is caught and converted to HTTPException 409 for duplicate name constraint
-  - UUID serialization: asyncpg returns uuid.UUID objects; API layer serializes with str() via hasattr(v, "hex") check
-  - delete_space checks both child spaces count AND asset references (space_id FK) before allowing delete
----
-
-## 2026-05-27 - US-005
-- Created frontend/src/contexts/asset_registry/api.ts with Space client functions: createSpace, listSpaces, getSpace, updateSpace, deleteSpace
-- Created frontend/src/contexts/asset_registry/ui.tsx with SpaceTree, SpaceForm, DeleteDialog components
-- Created frontend/src/app/(app)/project/[id]/spaces/page.tsx — Space tree management route
-- Created frontend/src/contexts/asset_registry/ui.test.tsx with 41 vitest tests (all pass): isAllowedSpaceParent matrix, API call/error handling, component exports, in-flight disable logic
-- TypeScript typecheck passes (tsc --noEmit clean)
-- **Learnings for future iterations:**
-  - Frontend contexts/asset_registry/ mirrors backend layout
-  - fetch() calls need vi.stubGlobal('fetch', vi.fn()...) in tests; do NOT call vi.resetAllMocks() (breaks module mocks)
-  - SpaceForm shows inline server errors (400/409 detail message); submit button disabled while in-flight
-  - DeleteDialog shows 409 error inline (with children or asset refs message) without closing the dialog
-  - ALLOWED_PARENTS record in api.ts must stay in sync with backend tree_validation.py
----
-
-## 2026-05-27 - US-006
-- Created backend/contexts/asset_registry/asset_types.py with public API: create_asset_type, get_asset_type, list_asset_types, update_asset_type, delete_asset_type
-- Added AssetType routes to backend/contexts/asset_registry/api.py under /projects/{project_id}/asset-types (POST/GET/PATCH/DELETE)
-- Created backend/contexts/asset_registry/test_asset_types.py with 16 tests (all pass): create, duplicate-name-rejected (409), get, list, update (rename/description/attributes), not-found (404), delete-empty, delete-with-asset-references (409), RLS
-- 162 total tests pass (no regressions)
-- **Learnings for future iterations:**
-  - asyncpg.UniqueViolationError() takes NO keyword arguments — pass message as positional only
-  - update_asset_type uses sentinel `...` for description and expected_attributes to distinguish "not passed" from "explicitly set to None"
-  - The second fetchrow in update_asset_type is the UPDATE RETURNING — side_effect list needs [existing_row, updated_row] or [existing_row, exception]
----
-
-## 2026-05-27 - US-007
-- Extended frontend/src/contexts/asset_registry/api.ts with AssetType client functions: createAssetType, listAssetTypes, updateAssetType, deleteAssetType
-- Extended frontend/src/contexts/asset_registry/ui.tsx with AssetTypeForm, AssetTypeDeleteDialog, AssetTypeList components
-- Created frontend/src/app/(app)/project/[id]/asset-types/page.tsx — AssetType management route
-- Extended frontend/src/contexts/asset_registry/ui.test.tsx with 16 new tests (57 total, all pass): API calls, form validation, delete confirmation, in-flight disable
-- TypeScript typecheck passes (tsc --noEmit clean)
-- **Learnings for future iterations:**
-  - AssetTypeDeleteDialog surfacing 409 inline (without closing dialog) follows the same pattern as Space's DeleteDialog
-  - AssetTypeForm uses empty string default for description state; trims to null on submit (matches backend's optional description field)
-  - Route page follows SpacesPage pattern exactly: auth check → ready state → page layout with back button
----
-
-## 2026-05-27 - US-009
-- Extended frontend/src/contexts/asset_registry/api.ts with System and membership client functions: createSystem, listSystems (with parent_system_id + include_descendants query params), updateSystem, deleteSystem, addAssetToSystem, removeAssetFromSystem, listSystemMembers
-- Extended frontend/src/contexts/asset_registry/ui.tsx with SystemForm (name required, parent picker excludes self when editing), SystemMembershipPicker (tag prefix filter + asset UUID input), SystemMemberList (confirm-before-remove), and SystemTree (recursive tree with expandable member panel per system)
-- Created frontend/src/app/(app)/project/[id]/systems/page.tsx — Systems management route following SpacesPage/AssetTypesPage pattern
-- Extended frontend/src/contexts/asset_registry/ui.test.tsx from 57 to 81 tests (all pass): System API functions, component exports, form validation, membership add/remove, confirm-before-remove logic
-- TypeScript typecheck passes (tsc --noEmit clean)
-- **Learnings for future iterations:**
-  - SystemMemberList is intentionally not exported (internal to SystemTree) — only SystemForm, SystemTree, SystemMembershipPicker are exported
-  - memberRefreshKey integer state used to force SystemMemberList remount after add/remove (avoids needing callback ref coordination)
-  - tagPrefix field in SystemMembershipPicker is UI-only — filtering happens in the API layer (not yet implemented client-side since assets module is not yet built)
----
-
-## 2026-05-27 - US-010
-- Created backend/contexts/asset_registry/assets.py with public API: create_asset, get_asset, list_assets, update_asset, retire_asset, decommission_asset, delete_asset
-- list_assets supports filters: status, space_id, system_id, parent_asset_id, asset_type_id (system_id uses JOIN)
-- delete_asset calls asset_lifecycle.decide_delete_mode; returns "hard_delete" on 204 or raises 409 with {error, next_action, counts}
-- Added Asset routes to backend/contexts/asset_registry/api.py: POST/GET/PATCH/DELETE /projects/{project_id}/assets, POST .../retire, POST .../decommission
-- Created backend/contexts/asset_registry/test_assets.py with 29 tests (all pass)
-- 222 total tests pass (no regressions)
-- **Learnings for future iterations:**
-  - delete_asset queries test_procedure_instances which doesn't exist until US-014; mocked in tests (will work in production after US-014 lands)
-  - cycle detection uses WITH RECURSIVE ancestors query on parent_asset_id; asset_id in ancestors set means cycle
-  - update_asset uses sentinel `...` for nullable optionals (name, parent_asset_id, space_id, manufacturer, model, serial)
-  - nameplate_data is stored as JSONB; needs json.dumps() before passing to asyncpg
-  - partial unique index (WHERE status != 'retired') enforces tag uniqueness only for active/decommissioned assets
----
-
-## 2026-05-27 - US-011
-- Created backend/contexts/asset_registry/points.py with public API: create_point, get_point, list_points_for_asset, update_point, delete_point
-- Point validation: signal_type enum (4-20mA, 0-10V, RTD, thermocouple, discrete, modbus) raises 422; range_low > range_high raises 422
-- Tag uniqueness per asset enforced via asyncpg.UniqueViolationError → 409
-- All functions verify parent Asset exists (and is in project) via SELECT before operating — RLS enforced
-- Added Point routes to api.py nested under /projects/{project_id}/assets/{asset_id}/points (POST/GET/PATCH/DELETE + GET list)
-- Created test_points.py with 20 tests (all pass): create, duplicate-tag-409, invalid-signal-type-422, range-validation-422, range-equal-ok, list, update, delete, parent-asset-cascade (documented as 404 when asset missing), RLS-via-parent-404
-- 244 tests pass total (no regressions; 3 pre-existing failures excluded)
-- **Learnings for future iterations:**
-  - Points module checks asset existence before every operation (project_id scoping for RLS); unauthorized users get 404 (asset not visible)
-  - signal_type validated as frozenset at module level; invalid values raise 422 before any DB call
-  - update_point uses sentinel `...` for nullable optional params (description, range_low, range_high, engineering_units, cal dates)
-  - ON DELETE CASCADE from assets to points is schema-level — no explicit logic needed in delete_asset
-  - Date fields in API request models stored as str (ISO format) and parsed with date.fromisoformat() in route handler
----
-
-## 2026-05-27 - US-012
-- Extended frontend/src/contexts/asset_registry/api.ts with Asset client functions: createAsset, listAssets (with status/space_id/system_id/parent_asset_id/asset_type_id filters), getAsset, updateAsset, retireAsset, decommissionAsset, deleteAsset
-- Added Asset, AssetStatus, DeleteAssetError interfaces to api.ts
-- Extended frontend/src/contexts/asset_registry/ui.tsx with AssetForm (tag required, asset type required, parent picker filters to active assets only), AssetDetail (shows asset info with retire/decommission/delete actions), AssetList (status filter, create/edit modal, retire/decommission/delete confirmation dialogs)
-- Tag-reuse confirmation: when creating with a tag matching a retired asset, form shows inline warning and requires second submit to confirm
-- Delete flow: if 409 with next_action=retire, dialog surfaces "Retire instead" button
-- Created frontend/src/app/(app)/project/[id]/assets/page.tsx with auth check and AssetList render
-- Extended ui.test.tsx from 81 to 105 tests (24 new tests, all pass): Asset API functions, AssetForm/AssetList/AssetDetail component exports, form validation, parent picker filtering, tag-reuse detection, delete-vs-retire branching
-- TypeScript typecheck passes (tsc --noEmit clean)
-- **Learnings for future iterations:**
-  - deleteAsset returns void on 204; check res.status === 204 explicitly (not just res.ok) since 204 has no body
-  - The 409 body from delete_asset is nested: {detail: {error, next_action, counts}} — access via e.body?.detail?.next_action
-  - AssetForm loads all assets (not just filtered) via allAssets state for parent picker options
-  - statusFilter state controls both the UI select and the load() logic; allAssets holds the unfiltered set for parent picker
----
-
-## 2026-05-27 - US-008
-- Created backend/contexts/asset_registry/systems.py with public API: create_system, get_system, list_systems (parent filter + include_descendants), update_system, delete_system, add_asset_to_system, remove_asset_from_system, list_system_members
-- Added System and membership routes to backend/contexts/asset_registry/api.py under /projects/{project_id}/systems and .../systems/{system_id}/members
-- Created backend/contexts/asset_registry/test_systems.py with 31 tests (all pass): create top-level + nested, parent not found, list by parent, list descendants recursive, update/rename/reparent, delete-empty, delete-with-children-409, delete-with-members-409, add/remove member, list members, RLS empty result
-- 193 total tests pass (no regressions)
-- **Learnings for future iterations:**
-  - WITH RECURSIVE query for descendants uses UNION ALL with self-join on parent_system_id; two variants — one with parent filter, one from top (parent_system_id IS NULL)
-  - delete_system checks both child systems (parent_system_id FK) AND membership rows before allowing delete
-  - update_system uses sentinel `...` for description and parent_system_id to distinguish "not passed" from "explicitly set to None"
-  - add_asset_to_system verifies both system and asset exist in the same project before inserting membership
----
-
-## 2026-05-27 - US-013
-- Extended frontend/src/contexts/asset_registry/api.ts with Point client functions: createPoint, listPointsForAsset, updatePoint, deletePoint; added SIGNAL_TYPES constant, SignalType type, Point interface
-- Extended frontend/src/contexts/asset_registry/ui.tsx with PointForm (tag required, unique within asset, signal_type enum picker, range_low <= range_high validation, cal date fields) and PointList (embedded inside AssetDetail; add/edit/delete with confirm-before-remove dialog)
-- PointList auto-refreshes list after add/edit/delete without page reload
-- Extended ui.test.tsx from 105 to 125 tests (20 new tests, all pass): SIGNAL_TYPES coverage, Point API functions, PointForm/PointList component exports, form validation (tag empty, duplicate, range invalid, range-equal-ok, range-one-side-null), confirm-before-remove logic
-- TypeScript typecheck passes (tsc --noEmit clean)
-- **Learnings for future iterations:**
-  - PointForm uses dynamic import for updatePoint (avoids circular import issue with inline import './api')
-  - existingTags prop passed to PointForm to client-side detect duplicate tags before submit (server still enforces uniqueness)
-  - PointList embedded inside AssetDetail component — no separate page needed
-  - SIGNAL_TYPES const mirrors backend points.py VALID_SIGNAL_TYPES frozenset exactly
----
-
-## 2026-05-27 - US-016
-- Created backend/contexts/commissioning_execution/instances.py with public API: generate_instances_for_asset, create_instance, get_instance, list_instances, update_instance_status, delete_instance
-- generate_instances_for_asset is idempotent: queries linked templates via asset_type_template_links JOIN, skips existing (asset_id, template_id) pairs
-- Updated assets.py create_asset to wrap INSERT + generate_instances_for_asset in async with conn.transaction() for atomicity
-- Added Instance routes to commissioning_execution/api.py: POST/GET /test-procedure-instances, GET/PATCH/DELETE /test-procedure-instances/{id}
-- Created test_instances.py with 25 tests (all pass): generate idempotency, multiple templates, create with asset/system XOR validation, get, list filters, status updates, delete, RLS
-- Updated test_assets.py: added async transaction() context manager mock, added conn.fetch.return_value=[] for create_asset tests, added auto-generation test
-- 294 total tests pass (no regressions)
-- **Learnings for future iterations:**
-  - asyncpg conn.transaction() is an async context manager; mock it with @asynccontextmanager async def _transaction(): yield
-  - generate_instances_for_asset uses separate fetchrow for idempotency check before each INSERT (not ON CONFLICT) to avoid PK collision assumptions
-  - XOR validation (asset_id XOR system_id) done in Python before DB, raising 422 (not relying solely on DB CHECK constraint)
-  - update_instance_status validates against VALID_STATUSES frozenset before any DB call
----
-
-## 2026-05-27 - US-015
-- Created backend/contexts/commissioning_execution/__init__.py
-- Created backend/contexts/commissioning_execution/templates.py with public API: create_template, get_template, list_templates (filter by level, by asset_type_id), update_template, delete_template, link_template_to_asset_type, unlink_template_from_asset_type
-- Created backend/contexts/commissioning_execution/api.py with Template routes under /projects/{project_id}/test-procedure-templates and .../asset-type-links; registered router in backend/main.py
-- Created backend/contexts/commissioning_execution/test_templates.py with 27 tests (all pass): create per level (L1-L5), invalid level 422, steps, duplicate name 409, get, list all/by level/by asset_type_id, update/rename/404/409, delete-empty, delete-with-instances-409, link/unlink asset type, RLS
-- 269 total tests pass (no regressions)
-- **Learnings for future iterations:**
-  - commissioning_execution context follows the same deep-module layout as asset_registry
-  - templates.py uses json.dumps() for steps JSONB field (same as assets.py nameplate_data pattern)
-  - update_template uses sentinel `...` for description and steps to distinguish "not passed" from "explicitly set to None"
-  - unlink_template_from_asset_type checks execute() return value "DELETE 0" to detect missing link (→ 404)
-  - link_template_to_asset_type verifies both template AND asset_type exist in the same project before inserting
----
-
-## 2026-05-27 - US-017
-- Created frontend/src/contexts/commissioning_execution/api.ts with Template client functions: createTemplate, listTemplates (level + asset_type_id filters), updateTemplate, deleteTemplate, linkTemplateToAssetType, unlinkTemplateFromAssetType; plus Instance functions: listInstances, updateInstanceStatus
-- Created frontend/src/contexts/commissioning_execution/ui.tsx with TemplateForm (name required, level L1-L5 picker, steps editable as a list), AssetTypeLinkPicker (multi-select per project AssetTypes, queries per-asset-type to determine current links), TemplateList (filter by level, create/edit dialog, delete confirmation with 409 inline error)
-- Created frontend/src/app/(app)/project/[id]/test-procedure-templates/page.tsx following AssetTypesPage pattern
-- Created frontend/src/contexts/commissioning_execution/ui.test.tsx with 35 vitest tests (all pass): TEMPLATE_LEVELS, API functions (create/list/update/delete/link/unlink/listInstances/updateInstanceStatus), component exports, form validation, delete confirmation, link picker toggle, level filter
-- TypeScript typecheck passes (tsc --noEmit clean)
-- **Learnings for future iterations:**
-  - commissioning_execution frontend context mirrors asset_registry pattern exactly
-  - AssetTypeLinkPicker uses per-asset-type listTemplates filter to build linkedIds set on load (no dedicated backend endpoint)
-  - TemplateForm steps are stored as string[] in state; filtered (blank removed) on submit
-  - deleteTemplate 409 surfaces inline in confirm dialog with 'template is in use by N instances' message
----
-
-## 2026-05-27 - US-018
-- Extended frontend/src/contexts/commissioning_execution/api.ts already had Instance client functions (listInstances, updateInstanceStatus) from US-017
-- Extended frontend/src/contexts/commissioning_execution/ui.tsx InstanceList component: added template name resolution by fetching listTemplates(projectId) alongside listInstances; built templateMap (id→name); display templateMap[template_id] ?? template_id in the Template column
-- Embedded InstanceList in AssetDetail (asset_registry/ui.tsx) with level filter (All | Checklist (L2) | Tests (L3–L5)); status transitions via inline dropdown per row
-- Extended frontend/src/contexts/commissioning_execution/ui.test.tsx from 35 to 48 tests (all pass): added InstanceList component export, level filter, empty state, status transition, and template name display logic tests
-- TypeScript typecheck passes (tsc --noEmit clean)
-- 173 total frontend tests pass (no regressions)
-- **Learnings for future iterations:**
-  - InstanceList co-fetches listTemplates(projectId) alongside listInstances to build a templateMap for display — avoids a dedicated backend join endpoint
-  - templateMap[template_id] ?? template_id fallback ensures graceful display even if template was deleted
-  - LEVEL_FILTER_OPTIONS const uses 'L3', 'L4', 'L5' as separate options; the acceptance criteria "L3–L5" maps to individual level filters passed to the backend
----
-
-## 2026-05-27 - US-014
-- Created migrations/019_commissioning_execution.sql with tables: test_procedure_templates, asset_type_template_links, test_procedure_instances
-- Created backend/apply_commissioning_migration.py following the existing apply_*_migration.py pattern
-- test_procedure_templates: project_id, name, level CHECK IN ('L1'..'L5'), description NULL, steps JSONB DEFAULT '[]', created_at; UNIQUE (project_id, name)
-- asset_type_template_links: (asset_type_id, test_procedure_template_id) PK; both CASCADE on delete; RLS joins via test_procedure_templates to participations
-- test_procedure_instances: project_id, template_id FK RESTRICT, asset_id NULL, system_id NULL, level, status DEFAULT 'pending', created_at; XOR CHECK ((asset_id IS NOT NULL) != (system_id IS NOT NULL))
-- All three tables have RLS enabled with participations-based policies
-- 209 asset_registry tests still pass (no regressions)
-- **Learnings for future iterations:**
-  - test_procedure_instances has XOR CHECK: exactly one of asset_id or system_id must be set (not both, not neither)
-  - asset_type_template_links RLS joins via test_procedure_templates (not asset_types) because template owns the project_id
-  - template_id in test_procedure_instances uses ON DELETE RESTRICT (not CASCADE) — instances must be deleted before template
-  - asset_id in test_procedure_instances uses ON DELETE CASCADE — deleting an Asset cascades to its instances
+  - Backend filter pattern: add param, append condition with parameterized idx, pass UUID-cast value to params list
+  - Test pattern: mock `conn.fetch.return_value`, call function, assert on result length/values
 ---

@@ -132,6 +132,18 @@ export interface AssetType {
   created_at: string
 }
 
+export async function getAssetType(projectId: string, assetTypeId: string): Promise<AssetType> {
+  const auth = await getAuthHeader()
+  const res = await fetch(`${API_BASE}/projects/${projectId}/asset-types/${assetTypeId}`, {
+    headers: { Authorization: auth },
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw Object.assign(new Error(body.detail ?? 'Failed to get asset type'), { status: res.status, body })
+  }
+  return res.json()
+}
+
 export async function createAssetType(
   projectId: string,
   params: { name: string; description?: string | null; expected_attributes?: Record<string, unknown> }
@@ -244,6 +256,18 @@ export async function listSystems(
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw Object.assign(new Error(body.detail ?? 'Failed to list systems'), { status: res.status, body })
+  }
+  return res.json()
+}
+
+export async function getSystem(projectId: string, systemId: string): Promise<System> {
+  const auth = await getAuthHeader()
+  const res = await fetch(`${API_BASE}/projects/${projectId}/systems/${systemId}`, {
+    headers: { Authorization: auth },
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw Object.assign(new Error(body.detail ?? 'Failed to get system'), { status: res.status, body })
   }
   return res.json()
 }

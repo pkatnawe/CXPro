@@ -42,7 +42,7 @@ export default function AssetTypesPage() {
           ← Back to Project
         </button>
         <h1 className="atp-h1">Asset Types</h1>
-        <AssetTypeList projectId={projectId} />
+        <AssetTypeList projectId={projectId} onRowClick={(at) => router.push(`/project/${projectId}/asset-types/${at.id}`)} />
       </div>
     </>
   )

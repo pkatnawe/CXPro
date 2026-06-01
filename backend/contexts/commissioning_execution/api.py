@@ -270,6 +270,7 @@ async def list_instances(
     system_id: str | None = Query(default=None),
     level: str | None = Query(default=None),
     status: str | None = Query(default=None),
+    template_id: str | None = Query(default=None),
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> list[dict[str, Any]]:
     await get_current_user(credentials)
@@ -282,6 +283,7 @@ async def list_instances(
             system_id=system_id,
             level=level,
             status=status,
+            template_id=template_id,
         )
         return [_serialize(r) for r in rows]
     finally:

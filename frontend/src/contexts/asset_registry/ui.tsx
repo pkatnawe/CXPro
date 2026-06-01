@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import {
   type Space,
   type SpaceKind,
@@ -41,6 +42,7 @@ import {
   deletePoint,
 } from './api'
 import { InstanceList } from '@/contexts/commissioning_execution/ui'
+import { type AssetFilters, type FilterKey } from './useUrlFilters'
 
 interface SpaceFormProps {
   projectId: string
@@ -213,9 +215,10 @@ export function DeleteDialog({ space, onConfirm, onCancel, deleting, deleteError
 
 interface SpaceTreeProps {
   projectId: string
+  onNodeClick?: (space: Space) => void
 }
 
-export function SpaceTree({ projectId }: SpaceTreeProps) {
+export function SpaceTree({ projectId, onNodeClick }: SpaceTreeProps) {
   const [spaces, setSpaces] = useState<Space[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -285,7 +288,14 @@ export function SpaceTree({ projectId }: SpaceTreeProps) {
       <div key={space.id} style={{ marginLeft: depth * 20 }}>
         <div className="st-row">
           <span className="st-kind-badge">{space.kind}</span>
-          <span className="st-name">{space.name}</span>
+          <span className="st-name" style={onNodeClick ? { cursor: 'pointer', color: 'var(--bp-accent)' } : undefined} onClick={onNodeClick ? () => onNodeClick(space) : undefined}>{space.name}</span>
+          <Link
+            className="st-btn-view-assets"
+            href={`/project/${projectId}/assets?space=${space.id}`}
+            title="View Assets in this Space"
+          >
+            Assets
+          </Link>
           <div className="st-actions">
             <button
               className="st-btn-icon"
@@ -323,6 +333,8 @@ export function SpaceTree({ projectId }: SpaceTreeProps) {
         .st-btn-icon { background: transparent; border: none; cursor: pointer; color: var(--bp-text-secondary); font-size: 1rem; padding: 2px 6px; border-radius: 3px; }
         .st-btn-icon:hover { background: var(--bp-bg-tertiary); }
         .st-btn-danger { color: #ef4444; }
+        .st-btn-view-assets { font-size: 0.7rem; color: var(--bp-accent); text-decoration: none; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--bp-accent); opacity: 0.7; }
+        .st-btn-view-assets:hover { opacity: 1; }
         .st-empty { text-align: center; padding: 48px; color: var(--bp-text-secondary); font-size: 0.875rem; }
         .st-error { color: var(--bp-error-text, #ef4444); font-size: 0.875rem; margin-bottom: 8px; }
         .st-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
@@ -517,9 +529,10 @@ export function AssetTypeDeleteDialog({ assetType, onConfirm, onCancel, deleting
 
 interface AssetTypeListProps {
   projectId: string
+  onRowClick?: (assetType: AssetType) => void
 }
 
-export function AssetTypeList({ projectId }: AssetTypeListProps) {
+export function AssetTypeList({ projectId, onRowClick }: AssetTypeListProps) {
   const [assetTypes, setAssetTypes] = useState<AssetType[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -613,7 +626,7 @@ export function AssetTypeList({ projectId }: AssetTypeListProps) {
         ) : (
           <div>
             {assetTypes.map(at => (
-              <div key={at.id} className="atl-row">
+              <div key={at.id} className="atl-row" style={onRowClick ? { cursor: 'pointer' } : undefined} onClick={onRowClick ? () => onRowClick(at) : undefined}>
                 <span className="atl-name">{at.name}</span>
                 <span className="atl-desc">{at.description ?? ''}</span>
                 <div className="atl-actions">
@@ -965,9 +978,10 @@ function SystemMemberList({ projectId, systemId, onMembersChanged }: SystemMembe
 
 interface SystemTreeProps {
   projectId: string
+  onNodeClick?: (system: System) => void
 }
 
-export function SystemTree({ projectId }: SystemTreeProps) {
+export function SystemTree({ projectId, onNodeClick }: SystemTreeProps) {
   const [systems, setSystems] = useState<System[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -1047,8 +1061,15 @@ export function SystemTree({ projectId }: SystemTreeProps) {
     return (
       <div key={system.id} style={{ marginLeft: depth * 20 }}>
         <div className="syt-row">
-          <span className="syt-name">{system.name}</span>
+          <span className="syt-name" style={onNodeClick ? { cursor: 'pointer', color: 'var(--bp-accent)' } : undefined} onClick={onNodeClick ? () => onNodeClick(system) : undefined}>{system.name}</span>
           {system.description && <span className="syt-desc">{system.description}</span>}
+          <Link
+            className="syt-btn-view-assets"
+            href={`/project/${projectId}/assets?system=${system.id}`}
+            title="View Assets in this System"
+          >
+            Assets
+          </Link>
           <div className="syt-actions">
             <button
               className="syt-btn-icon"
@@ -1108,6 +1129,8 @@ export function SystemTree({ projectId }: SystemTreeProps) {
         .syt-btn-icon { background: transparent; border: none; cursor: pointer; color: var(--bp-text-secondary); font-size: 1rem; padding: 2px 6px; border-radius: 3px; }
         .syt-btn-icon:hover { background: var(--bp-bg-tertiary); }
         .syt-btn-danger { color: #ef4444; }
+        .syt-btn-view-assets { font-size: 0.7rem; color: var(--bp-accent); text-decoration: none; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--bp-accent); opacity: 0.7; }
+        .syt-btn-view-assets:hover { opacity: 1; }
         .syt-empty { text-align: center; padding: 48px; color: var(--bp-text-secondary); font-size: 0.875rem; }
         .syt-error { color: var(--bp-error-text, #ef4444); font-size: 0.875rem; margin-bottom: 8px; }
         .syt-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
@@ -1804,15 +1827,18 @@ export function AssetDetail({ projectId, asset, assetType, space, onClose, onRet
 
 interface AssetListProps {
   projectId: string
+  onRowClick?: (asset: Asset) => void
+  externalFilters?: AssetFilters
+  onFilterChange?: (key: FilterKey, value: string) => void
 }
 
-export function AssetList({ projectId }: AssetListProps) {
+export function AssetList({ projectId, onRowClick, externalFilters, onFilterChange }: AssetListProps) {
   const [assets, setAssets] = useState<Asset[]>([])
   const [assetTypes, setAssetTypes] = useState<AssetType[]>([])
   const [spaces, setSpaces] = useState<Space[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<AssetStatus | ''>('active')
+  const [localStatusFilter, setLocalStatusFilter] = useState<AssetStatus | ''>('active')
   const [showForm, setShowForm] = useState(false)
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
@@ -1826,28 +1852,36 @@ export function AssetList({ projectId }: AssetListProps) {
   const [retireInstead, setRetireInstead] = useState(false)
   const [allAssets, setAllAssets] = useState<Asset[]>([])
 
+  const statusFilter = externalFilters !== undefined
+    ? (externalFilters.status ?? 'active')
+    : localStatusFilter
+
+  const spaceFilter = externalFilters?.space ?? ''
+  const systemFilter = externalFilters?.system ?? ''
+
   const load = useCallback(async () => {
     setLoading(true)
     setLoadError(null)
     try {
+      const apiFilters: Parameters<typeof listAssets>[1] = {}
+      if (statusFilter) apiFilters.status = statusFilter as AssetStatus
+      if (spaceFilter) apiFilters.space_id = spaceFilter
+      if (systemFilter) apiFilters.system_id = systemFilter
       const [atData, spData, allData] = await Promise.all([
         listAssetTypes(projectId),
         listSpaces(projectId),
-        listAssets(projectId),
+        listAssets(projectId, apiFilters),
       ])
       setAssetTypes(atData)
       setSpaces(spData)
       setAllAssets(allData)
-      const filtered = statusFilter
-        ? allData.filter(a => a.status === statusFilter)
-        : allData
-      setAssets(filtered)
+      setAssets(allData)
     } catch {
       setLoadError('Failed to load assets.')
     } finally {
       setLoading(false)
     }
-  }, [projectId, statusFilter])
+  }, [projectId, statusFilter, spaceFilter, systemFilter])
 
   useEffect(() => { load() }, [load])
 
@@ -1932,9 +1966,7 @@ export function AssetList({ projectId }: AssetListProps) {
     }
   }
 
-  const filteredAssets = statusFilter
-    ? assets.filter(a => a.status === statusFilter)
-    : assets
+  const filteredAssets = assets
 
   return (
     <>
@@ -1982,7 +2014,14 @@ export function AssetList({ projectId }: AssetListProps) {
             <select
               className="al-filter-select"
               value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value as AssetStatus | '')}
+              onChange={e => {
+                const val = e.target.value as AssetStatus | ''
+                if (externalFilters !== undefined && onFilterChange) {
+                  onFilterChange('status', val)
+                } else {
+                  setLocalStatusFilter(val)
+                }
+              }}
             >
               <option value="active">Active</option>
               <option value="retired">Retired</option>
@@ -2006,7 +2045,7 @@ export function AssetList({ projectId }: AssetListProps) {
             {filteredAssets.map(asset => {
               const at = assetTypes.find(t => t.id === asset.asset_type_id)
               return (
-                <div key={asset.id} className="al-row" onClick={() => setSelectedAsset(asset)}>
+                <div key={asset.id} className="al-row" onClick={() => onRowClick ? onRowClick(asset) : setSelectedAsset(asset)}>
                   <span className="al-tag">{asset.tag}</span>
                   <span className="al-name">{asset.name ?? ''}</span>
                   <span className="al-type">{at?.name ?? ''}</span>
