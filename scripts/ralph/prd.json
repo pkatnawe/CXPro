@@ -76,7 +76,7 @@
         "Write new tests: filter chip toggle updates URL, row click navigates, derived phase renders correctly for an asset with N instances"
       ],
       "priority": 4,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-005",
