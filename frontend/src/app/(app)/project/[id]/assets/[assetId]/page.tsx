@@ -32,6 +32,7 @@ import {
   WSkeleton,
   WEmpty,
   WBar,
+  PhaseTracker,
 } from '@/lib/frontend-kit'
 
 const STATUS_VARIANT: Record<AssetStatus, 'default' | 'ok' | 'amber' | 'warn'> = {
@@ -273,6 +274,8 @@ function AssetDetailContent({ projectId, assetId }: AssetDetailContentProps) {
           )}
           <WPill variant="ghost">{PHASE_LABEL[phase] ?? phase}</WPill>
         </div>
+
+        <PhaseTracker phase={phase} />
       </div>
 
       <div className="adp-kpi-strip">

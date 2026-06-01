@@ -423,3 +423,58 @@ export function WEmpty({ icon, title = 'Nothing here', subtitle, action, classNa
     </div>
   )
 }
+
+/* ── PhaseTracker ────────────────────────────────────────────────────── */
+
+const PHASE_STEPS = [
+  'Design',
+  'Submittals',
+  'Install',
+  'Pre-functional',
+  'Functional',
+  'IST',
+  'Turnover',
+  'Operations',
+] as const
+
+type PhaseStep = typeof PHASE_STEPS[number]
+type PhaseTrackerState = 'done' | 'current' | 'upcoming'
+
+const PHASE_TO_CURRENT_STEP: Record<string, PhaseStep> = {
+  'pre-install': 'Install',
+  'L2': 'Pre-functional',
+  'L3': 'Functional',
+  'L4': 'Functional',
+  'L5': 'IST',
+}
+
+interface PhaseTrackerProps {
+  phase: string
+  className?: string
+}
+
+export function PhaseTracker({ phase, className = '' }: PhaseTrackerProps) {
+  const currentStep = PHASE_TO_CURRENT_STEP[phase] ?? 'Install'
+  const currentIdx = PHASE_STEPS.indexOf(currentStep)
+
+  return (
+    <div className={`fk-phase-tracker ${className}`.trim()}>
+      {PHASE_STEPS.map((step, idx) => {
+        let state: PhaseTrackerState = 'upcoming'
+        if (idx < currentIdx) state = 'done'
+        else if (idx === currentIdx) state = 'current'
+
+        return (
+          <div key={step} className="fk-phase-tracker__step">
+            {idx > 0 && <div className={`fk-phase-tracker__line fk-phase-tracker__line--${idx <= currentIdx ? 'done' : 'upcoming'}`} />}
+            <div className={`fk-phase-tracker__circle fk-phase-tracker__circle--${state}`}>
+              {state === 'done' && <span className="fk-phase-tracker__check">✓</span>}
+              {state === 'current' && <span className="fk-phase-tracker__dot" />}
+            </div>
+            <div className={`fk-phase-tracker__label fk-phase-tracker__label--${state}`}>{step}</div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}

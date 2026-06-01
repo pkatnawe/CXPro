@@ -596,6 +596,89 @@
   background: var(--bp-blue-tint);
 }
 
+/* ── PhaseTracker ── */
+.fk-phase-tracker {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+}
+.fk-phase-tracker__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 64px;
+}
+.fk-phase-tracker__line {
+  position: absolute;
+  top: 10px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  z-index: 0;
+}
+.fk-phase-tracker__line--done {
+  background: var(--bp-blue);
+}
+.fk-phase-tracker__line--upcoming {
+  background: var(--bp-line-softer);
+}
+.fk-phase-tracker__circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.fk-phase-tracker__circle--done {
+  background: var(--bp-blue);
+  border: 2px solid var(--bp-blue);
+}
+.fk-phase-tracker__circle--current {
+  background: var(--bp-paper);
+  border: 2px solid var(--bp-blue);
+}
+.fk-phase-tracker__circle--upcoming {
+  background: var(--bp-paper);
+  border: 2px solid var(--bp-line-softer);
+}
+.fk-phase-tracker__check {
+  font-size: 10px;
+  color: #fff;
+  line-height: 1;
+}
+.fk-phase-tracker__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bp-blue);
+}
+.fk-phase-tracker__label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-align: center;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+.fk-phase-tracker__label--done {
+  color: var(--bp-blue);
+}
+.fk-phase-tracker__label--current {
+  color: var(--bp-blue);
+  font-weight: 700;
+}
+.fk-phase-tracker__label--upcoming {
+  color: var(--bp-dim);
+}
+
 /* ── Empty state ── */
 .fk-empty {
   display: flex;
