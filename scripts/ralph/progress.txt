@@ -115,6 +115,21 @@ Started: Sun May 31 20:03:10 CDT 2026
   - KV editor: filter out rows with empty keys before building nameplate_data object
 ---
 
+## 2026-06-01 - US-008
+- Added `InlineEditField` component: click-to-edit span that turns into input; Enter saves (PATCH), Esc cancels; optimistic update with rollback on error
+- Added `NameplateEditorModal`: KV editor modal (same pattern as CreateAssetModal), opened via "Edit nameplate data" button in Overview tab
+- Added `DeleteConfirmModal`: names the asset, handles 409 (has_references) inline, navigates back to list on success
+- Added overflow menu (`⋯` button) in header with Retire, Decommission, Delete asset… actions
+- Retire/Decommission POST to `.../retire` and `.../decommission`; status pill updates optimistically
+- Created `edit.test.ts` with 14 unit tests: inline edit round-trips, null clear, nameplate update, optimistic rollback logic, delete cancel, 409 handling, retire/decommission, InlineEditField key logic, NameplateEditorModal row-building
+- type-check: clean; lint: 0 errors; 14 new tests pass; 4 pre-existing failures unchanged
+- **Learnings for future iterations:**
+  - WBtn variants are: primary | blue | outline | ghost | danger (NOT 'warn')
+  - Overflow menus use `position: relative` on the wrapper + `position: absolute; top: 100%; right: 0` on the menu
+  - InlineEditField pattern: `useRef<HTMLInputElement>` + `setTimeout(() => ref.current?.focus(), 0)` for auto-focus after state update
+  - patchAsset = optimistic setState → await API → setState(updated) → catch: setState(original)
+---
+
 ## 2026-06-01 - US-004
 - Rewrote `frontend/src/app/(app)/project/[id]/assets/page.tsx` using frontend-kit primitives (WFrame, WHeader, WPill, WT, WLiveDot, WSkeleton, WEmpty, WBox)
 - Added `vendor_name: string | null` to `Asset` interface in `api.ts`; also added to `createAsset` and `updateAsset` params

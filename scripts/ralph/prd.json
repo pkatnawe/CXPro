@@ -142,7 +142,7 @@
         "Tests: inline edit round-trips, delete confirmation cancels safely, retire updates the status pill"
       ],
       "priority": 8,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-009",
