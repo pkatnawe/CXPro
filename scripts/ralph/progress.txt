@@ -13,3 +13,27 @@ Commit: feat: US-001 - Kit foundation — replace fk-* with wk-* primitives + Ge
 - Added backward-compat prop support so existing asset pages continued to compile
 - TypeScript typecheck: PASS; Tests: PASS (4 pre-existing failures unrelated to kit)
 
+## US-002 — Theme + accent provider (light/dark, azure/cobalt/copper/emerald) backed by localStorage
+Status: COMPLETE
+Commit: feat: US-002 - Theme + accent provider (light/dark, azure/cobalt/copper/emerald) backed by localStorage
+
+- Created frontend/src/lib/theme/ThemeProvider.tsx with ThemeContext, useTheme hook, ThemeProvider component
+- Persists theme/accent to localStorage keys cxp.theme and cxp.accent; defaults light/azure
+- Sets data-theme and data-accent on documentElement on mount and on change
+- Added inline pre-hydration script in layout.tsx <head> to avoid flash of wrong theme
+- styles.css already had [data-theme="dark"] and [data-accent="*"] blocks from US-001
+- Wrapped app/layout.tsx body with ThemeProvider
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
+## US-003 — App shell — left rail + top bar + user menu
+Status: COMPLETE
+Commit: feat: US-003 - App shell — left rail + top bar + user menu
+
+- Rewrote frontend/src/app/(app)/layout.tsx with new wk-* styled shell (inline styles with --ui-* tokens)
+- Left rail: Assets, Checklists, Asset Types, Spaces, Systems as active nav items; Issues, Drawings, Reports as ghost/disabled items
+- Active rail item highlighted with --ui-primary-soft background + left border indicator
+- Top bar: shows project name + entityLabel breadcrumb; top-right user-menu dropdown
+- User menu: Organization, Projects, Team (when in project), Theme toggle (light/dark via useTheme), Accent picker (4 swatches), Sign out
+- Integrated useTheme hook from US-002 ThemeProvider; removed old inline theme state management
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+

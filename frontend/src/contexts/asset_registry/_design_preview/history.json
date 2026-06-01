@@ -1,0 +1,74 @@
+[
+  {
+    "timestamp": "2026-05-25T15:42:00Z",
+    "actor_initials": "JR",
+    "action": "status changed",
+    "target": "Lifecycle → Active"
+  },
+  {
+    "timestamp": "2026-05-24T11:20:00Z",
+    "actor_initials": "SM",
+    "action": "file uploaded",
+    "target": "TAB Report — Final.pdf"
+  },
+  {
+    "timestamp": "2026-05-22T09:05:00Z",
+    "actor_initials": "KT",
+    "action": "issue opened",
+    "target": "ISS-005: Condensate drain pan overflow"
+  },
+  {
+    "timestamp": "2026-05-20T08:50:00Z",
+    "actor_initials": "JR",
+    "action": "issue opened",
+    "target": "ISS-004: BACnet point mapping incorrect for VAV-07"
+  },
+  {
+    "timestamp": "2026-05-18T14:30:00Z",
+    "actor_initials": "AL",
+    "action": "issue resolved",
+    "target": "ISS-003: Control panel label missing"
+  },
+  {
+    "timestamp": "2026-05-15T10:00:00Z",
+    "actor_initials": "SM",
+    "action": "checklist completed",
+    "target": "Pre-functional Checklist #3"
+  },
+  {
+    "timestamp": "2026-05-10T09:20:00Z",
+    "actor_initials": "JR",
+    "action": "issue opened",
+    "target": "ISS-001: AHU-2 supply air damper fails to open"
+  },
+  {
+    "timestamp": "2026-05-08T11:15:00Z",
+    "actor_initials": "AL",
+    "action": "file uploaded",
+    "target": "Warranty Certificate — Carrier 30XA.pdf"
+  },
+  {
+    "timestamp": "2026-05-02T09:20:00Z",
+    "actor_initials": "SM",
+    "action": "file uploaded",
+    "target": "Pre-functional Checklist — AHU-2.xlsx"
+  },
+  {
+    "timestamp": "2026-04-29T14:00:00Z",
+    "actor_initials": "JR",
+    "action": "RFI opened",
+    "target": "RFI-0044: AHU-2 electrical disconnect location"
+  },
+  {
+    "timestamp": "2026-04-12T14:35:00Z",
+    "actor_initials": "KT",
+    "action": "file uploaded",
+    "target": "Mechanical Floor Plan — Level 3.dwg"
+  },
+  {
+    "timestamp": "2026-04-05T10:05:00Z",
+    "actor_initials": "AL",
+    "action": "asset created",
+    "target": "AHU-02 · Air Handling Unit"
+  }
+]
