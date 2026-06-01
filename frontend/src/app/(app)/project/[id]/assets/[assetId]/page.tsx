@@ -27,6 +27,7 @@ import { AssetIssues } from '@/contexts/asset_registry/AssetIssues'
 import { AssetFiles } from '@/contexts/asset_registry/AssetFiles'
 import { AssetRFIs } from '@/contexts/asset_registry/AssetRFIs'
 import { AssetHistory } from '@/contexts/asset_registry/AssetHistory'
+import { AssetLinked } from '@/contexts/asset_registry/AssetLinked'
 import {
   WFrame,
   WH,
@@ -378,6 +379,8 @@ function AssetDetailContent({ projectId, assetId }: { projectId: string; assetId
             <AssetRFIs />
           ) : activeTab === 'history' ? (
             <AssetHistory />
+          ) : activeTab === 'linked' ? (
+            <AssetLinked projectId={projectId} assetId={assetId} />
           ) : (
             <div style={{ padding: 20 }}>
               <WBox style={{ padding: 20 }}>

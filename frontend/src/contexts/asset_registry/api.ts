@@ -240,7 +240,7 @@ export async function createSystem(
 
 export async function listSystems(
   projectId: string,
-  options?: { parent_system_id?: string | null; include_descendants?: boolean }
+  options?: { parent_system_id?: string | null; include_descendants?: boolean; asset_id?: string }
 ): Promise<System[]> {
   const auth = await getAuthHeader()
   const url = new URL(`${API_BASE}/projects/${projectId}/systems`)
@@ -249,6 +249,9 @@ export async function listSystems(
   }
   if (options?.include_descendants) {
     url.searchParams.set('include_descendants', 'true')
+  }
+  if (options?.asset_id) {
+    url.searchParams.set('asset_id', options.asset_id)
   }
   const res = await fetch(url.toString(), {
     headers: { Authorization: auth },
