@@ -86,3 +86,39 @@ Commit: feat: US-007 - Asset Detail Overview tab (real API, no AI summary card)
 - Updated page.tsx to load listSpaces, pass spaceMap; render AssetOverview for #overview tab
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
 
+## US-008 — Asset Detail Devices tab (real API, parent/child tree)
+Status: COMPLETE
+Commit: feat: US-008 - Asset Detail Devices tab (real API, parent/child tree)
+
+- Created contexts/asset_registry/AssetDevices.tsx
+- Fetches GET /assets?parent_asset_id=:assetId, resolves type names from listAssetTypes
+- Each child row links to /project/[id]/assets/[child.id]
+- Empty state: "No sub-assets registered"
+- No AI affordances
+- Wired into page.tsx for #devices tab
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
+## US-009 — Asset Detail Checklists tab (real API, L2 instances)
+Status: COMPLETE
+Commit: feat: US-009 + US-010 - Asset Detail Checklists and Tests tabs (real API)
+
+- Created contexts/asset_registry/AssetChecklists.tsx
+- Fetches listInstances(projectId, { asset_id }) filtered to level === 'L2'
+- Resolves template names from listTemplates; shows status pill, created date
+- Empty state: "No checklists assigned"
+- No AI affordances
+- Wired into page.tsx for #checklists tab
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
+## US-010 — Asset Detail Tests tab (real API, L3/L4/L5 instances)
+Status: COMPLETE
+Commit: feat: US-009 + US-010 - Asset Detail Checklists and Tests tabs (real API)
+
+- Created contexts/asset_registry/AssetTests.tsx
+- Fetches listInstances(projectId, { asset_id }) filtered to levels [L3, L4, L5]
+- Resolves template names from listTemplates; shows WStamp level, status pill, created date
+- Empty state: "No tests scheduled"
+- No AI affordances
+- Wired into page.tsx for #tests tab
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
