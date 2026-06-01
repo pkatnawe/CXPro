@@ -156,3 +156,14 @@ Commit: feat: US-013 - Asset Detail Linked tab (real API, systems membership)
 - Wired into page.tsx for #linked tab
 - TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
 
+## US-014 — Checklist Template library page (cl-templates variant)
+Status: COMPLETE
+Commit: feat: US-014 - Checklist Template library page (cl-templates variant, wk-* kit)
+
+- Rewrote frontend/src/app/(app)/project/[id]/test-procedure-templates/page.tsx
+- Level filter chips (All/L1-L5) call listTemplates with level filter
+- Table rows: WStamp level, name, step count, description; click → template detail
+- Empty state per active filter
+- No AI affordances
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing failures)
+
