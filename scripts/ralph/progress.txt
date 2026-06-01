@@ -184,3 +184,12 @@ Commit: feat: US-016 + US-017 - Setup pages reskin — Spaces + Systems list + d
 - Rewrote systems/page.tsx using wk-* primitives with tree indentation
 - Add system form with parent selection
 - Rewrote systems/[systemId]/page.tsx with child systems + member assets lists
+
+## US-018 — Cleanup — purge old fk-* references, dead files, smoke-verify whole app
+Status: COMPLETE
+Commit: feat: US-018 - Cleanup — purge old asset UI, complete test coverage, smoke verify
+
+- Confirmed zero fk-* references in frontend/src/**/*.{ts,tsx,css} (rg returns no matches)
+- Deleted frontend/src/app/(app)/project/[id]/equipment/page.tsx (redundant with rebuilt assets page)
+- Updated /frontend-kit-preview page with theme/accent toggles (light/dark + 4 swatch accent picker wired to useTheme)
+- TypeScript typecheck: PASS; Tests: PASS (same 4 pre-existing dashboard.test.ts failures unrelated to this PRD)
