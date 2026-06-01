@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "../styles/blueprint.css";
+import "../lib/frontend-kit/styles.css";
 
 const archivo = Archivo({
   variable: "--font-archivo",
