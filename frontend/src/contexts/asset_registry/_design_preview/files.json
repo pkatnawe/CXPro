@@ -1,0 +1,38 @@
+[
+  {
+    "name": "AHU-2 O&M Manual.pdf",
+    "kind": "manual",
+    "size": "4.2 MB",
+    "uploaded_at": "2026-04-05T10:00:00Z"
+  },
+  {
+    "name": "Mechanical Floor Plan — Level 3.dwg",
+    "kind": "drawing",
+    "size": "1.8 MB",
+    "uploaded_at": "2026-04-12T14:30:00Z"
+  },
+  {
+    "name": "Pre-functional Checklist — AHU-2.xlsx",
+    "kind": "checklist",
+    "size": "220 KB",
+    "uploaded_at": "2026-05-02T09:15:00Z"
+  },
+  {
+    "name": "Warranty Certificate — Carrier 30XA.pdf",
+    "kind": "certificate",
+    "size": "310 KB",
+    "uploaded_at": "2026-05-08T11:00:00Z"
+  },
+  {
+    "name": "TAB Report — Final.pdf",
+    "kind": "report",
+    "size": "2.1 MB",
+    "uploaded_at": "2026-05-19T16:45:00Z"
+  },
+  {
+    "name": "Shop Drawings — Ductwork Section B.pdf",
+    "kind": "drawing",
+    "size": "3.5 MB",
+    "uploaded_at": "2026-05-25T08:30:00Z"
+  }
+]

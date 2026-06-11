@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-accent="azure">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CX Pro · wireframes</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Light tokens ───────────────────────────────────────────────── */
+    html[data-theme="light"] {
+      --ui-bg:          #eef1f6;
+      --ui-bg-grid:     #d9dee7;
+      --ui-panel:       #ffffff;
+      --ui-panel-2:     #f7f9fc;
+      --ui-panel-3:     #f0f3f8;
+
+      --ui-ink:         #0c111a;
+      --ui-ink-soft:    #4a5466;
+      --ui-ink-faint:   #8b95a7;
+      --ui-note:        #6c5a30;
+
+      --ui-line:        #e1e6ee;
+      --ui-line-strong: #c5cdda;
+      --ui-line-line:   #c5cdda;
+      --ui-dot:         #c6cdd8;
+
+      --ui-ok:          #0e9d58;
+      --ui-ok-soft:     #d5f3e1;
+      --ui-ok-line:     #84d9a8;
+      --ui-on-ok:       #ffffff;
+
+      --ui-warn:        #e6202d;
+      --ui-warn-soft:   #fde0e2;
+      --ui-warn-line:   #f5a8ae;
+      --ui-on-warn:     #ffffff;
+
+      --ui-ai:          #b87515;
+      --ui-ai-soft:     #fbeed0;
+      --ui-ai-line:     #f0d590;
+      --ui-on-ai:       #ffffff;
+
+      --ui-ink-soft-soft: #eef1f6;
+      --ui-ink-line:      #d6dbe4;
+      --ui-on-ink:        #ffffff;
+
+      --ui-shadow: 0 1px 2px rgba(13, 23, 42, 0.04), 0 4px 14px rgba(13, 23, 42, 0.04);
+    }
+
+    /* ── Dark tokens ────────────────────────────────────────────────── */
+    html[data-theme="dark"] {
+      --ui-bg:          #0a0d12;
+      --ui-bg-grid:     #1a1f28;
+      --ui-panel:       #12161e;
+      --ui-panel-2:     #161b24;
+      --ui-panel-3:     #1c222c;
+
+      --ui-ink:         #e8ecf3;
+      --ui-ink-soft:    #9aa3b4;
+      --ui-ink-faint:   #5d6677;
+      --ui-note:        #c5a86b;
+
+      --ui-line:        #232934;
+      --ui-line-strong: #333a48;
+      --ui-line-line:   #333a48;
+      --ui-dot:         #232934;
+
+      --ui-ok:          #22e07a;
+      --ui-ok-soft:     #0e2a1c;
+      --ui-ok-line:     #1a5e3a;
+      --ui-on-ok:       #06160c;
+
+      --ui-warn:        #ff4d5a;
+      --ui-warn-soft:   #2c1115;
+      --ui-warn-line:   #5a1e25;
+      --ui-on-warn:     #1a0408;
+
+      --ui-ai:          #e5a93d;
+      --ui-ai-soft:     #2a2113;
+      --ui-ai-line:     #5a4520;
+      --ui-on-ai:       #1a1206;
+
+      --ui-ink-soft-soft: #1a1f28;
+      --ui-ink-line:      #2c333f;
+      --ui-on-ink:        #0a0d12;
+
+      --ui-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 6px 22px rgba(0,0,0,0.35);
+    }
+
+    /* ── Accent (primary) ───────────────────────────────────────────── */
+    html[data-accent="azure"] {
+      --ui-primary:      #2160e0;
+      --ui-primary-soft: #e1ecff;
+      --ui-primary-line: #b9d0fa;
+      --ui-on-primary:   #ffffff;
+    }
+    html[data-accent="cobalt"] {
+      --ui-primary:      #1d4ed8;
+      --ui-primary-soft: #dde6fa;
+      --ui-primary-line: #aebee8;
+      --ui-on-primary:   #ffffff;
+    }
+    html[data-accent="copper"] {
+      --ui-primary:      #c25a1a;
+      --ui-primary-soft: #fae2d0;
+      --ui-primary-line: #efbb96;
+      --ui-on-primary:   #ffffff;
+    }
+    html[data-accent="emerald"] {
+      --ui-primary:      #047857;
+      --ui-primary-soft: #ccecdf;
+      --ui-primary-line: #92cfb7;
+      --ui-on-primary:   #ffffff;
+    }
+
+    html[data-theme="dark"][data-accent="azure"]   { --ui-primary: #5d8bff; --ui-primary-soft: #16243f; --ui-primary-line: #2a3a5e; }
+    html[data-theme="dark"][data-accent="cobalt"]  { --ui-primary: #4d70e8; --ui-primary-soft: #142037; --ui-primary-line: #243154; }
+    html[data-theme="dark"][data-accent="copper"]  { --ui-primary: #e0834b; --ui-primary-soft: #281710; --ui-primary-line: #4a2818; }
+    html[data-theme="dark"][data-accent="emerald"] { --ui-primary: #3ec08a; --ui-primary-soft: #122620; --ui-primary-line: #1f4634; }
+
+    /* Missing tone helpers (so WPill tone="ink-soft" outlines work) */
+    html { --ui-on-ink-soft: var(--ui-panel); }
+
+    /* ── Back-compat aliases for legacy wk-* tokens still used in screens ── */
+    html {
+      --wk-bg:           var(--ui-bg);
+      --wk-panel:        var(--ui-panel);
+      --wk-ink:          var(--ui-ink);
+      --wk-ink-soft:     var(--ui-ink-soft);
+      --wk-ink-soft-soft: var(--ui-ink-soft-soft);
+      --wk-line:         var(--ui-line);
+      --wk-note:         var(--ui-note);
+      --wk-primary:      var(--ui-primary);
+      --wk-primary-soft: var(--ui-primary-soft);
+      --wk-ai:           var(--ui-ai);
+      --wk-ai-soft:      var(--ui-ai-soft);
+      --wk-ok:           var(--ui-ok);
+      --wk-ok-soft:      var(--ui-ok-soft);
+      --wk-warn:         var(--ui-warn);
+      --wk-warn-soft:    var(--ui-warn-soft);
+    }
+
+    html, body, #root {
+      height: 100%;
+      margin: 0;
+      background: var(--ui-bg);
+      color: var(--ui-ink);
+      font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+      font-feature-settings: 'ss01', 'cv11';
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    /* Engineering blueprint dot grid as the canvas backdrop */
+    body {
+      background-image:
+        radial-gradient(circle, var(--ui-bg-grid) 1px, transparent 1px);
+      background-size: 22px 22px;
+      background-position: 0 0;
+    }
+
+    /* Tighter grid inside artboards (so a content area still feels like a drawing surface) */
+    .wk-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--ui-panel);
+    }
+    .wk-frame-label {
+      position: absolute;
+      top: 8px; left: 12px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.4px;
+      color: var(--ui-ink-faint);
+      text-transform: uppercase;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .wk-box { box-shadow: var(--ui-shadow); }
+    /* No box-shadow on nested boxes — only top level cards */
+    .wk-box .wk-box { box-shadow: none; }
+
+    html.hide-notes [data-wknote] { display: none !important; }
+
+    /* tabular numbers in monospace areas */
+    [data-mono] { font-variant-numeric: tabular-nums; }
+
+    /* ── Brand utilities (selective use) ────────────────────────────── */
+    :root {
+      --ui-gradient: linear-gradient(135deg, var(--ui-primary) 0%, color-mix(in oklab, var(--ui-primary) 60%, white 40%) 100%);
+      --ui-shadow-accent: 0 1px 2px rgba(13, 23, 42, 0.04),
+                          0 6px 18px color-mix(in oklab, var(--ui-primary) 30%, transparent);
+    }
+    html[data-theme="dark"] {
+      --ui-gradient: linear-gradient(135deg, var(--ui-primary) 0%, color-mix(in oklab, var(--ui-primary) 70%, black 30%) 100%);
+      --ui-shadow-accent: 0 1px 2px rgba(0, 0, 0, 0.4),
+                          0 6px 22px color-mix(in oklab, var(--ui-primary) 40%, transparent);
+    }
+
+    /* Pulsing live dot — used in "in progress" / "live" pills */
+    @keyframes wk-pulse {
+      0%   { transform: scale(1);   opacity: 1; }
+      50%  { transform: scale(1.5); opacity: 0.55; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+    .wk-live-dot {
+      position: relative;
+      display: inline-block;
+      width: 6px; height: 6px; border-radius: 999px;
+      background: currentColor;
+    }
+    .wk-live-dot::after {
+      content: '';
+      position: absolute; inset: -2px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0.35;
+      animation: wk-pulse 2s ease-in-out infinite;
+    }
+
+    /* Instrument Serif display moments only — used by WBrandHeading */
+    .wk-display {
+      font-family: 'Instrument Serif', 'Geist', ui-serif, Georgia, serif;
+      font-weight: 400;
+      letter-spacing: -0.015em;
+      line-height: 1.02;
+    }
+    .wk-display em {
+      font-style: italic;
+      background: var(--ui-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* ── Industrial touches ─────────────────────────────────────────── */
+    /* Recessed well — used for inputs / search bars / display screens */
+    .wk-well {
+      background: var(--ui-panel-3);
+      border: 1px solid var(--ui-line);
+      border-radius: 6px;
+      box-shadow: inset 0 1px 2px rgba(13, 23, 42, 0.08), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    html[data-theme="dark"] .wk-well {
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Spec stamp — mono uppercase label with hairline frame, like a metal nameplate */
+    .wk-stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 7px;
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ui-ink-soft);
+      border: 1px solid var(--ui-line-strong);
+      border-radius: 3px;
+      background: var(--ui-panel-2);
+      line-height: 1;
+    }
+    .wk-stamp .k { color: var(--ui-ink-faint); }
+    .wk-stamp .v { color: var(--ui-ink); font-weight: 600; }
+
+    /* Console strip — row of LED + caps label tiles */
+    .wk-console {
+      display: inline-flex;
+      align-items: stretch;
+      gap: 0;
+      border: 1px solid var(--ui-line);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--ui-panel-2);
+      font-family: 'Geist Mono', monospace;
+    }
+    .wk-console > .cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-right: 1px solid var(--ui-line);
+      font-size: 9.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ui-ink-soft);
+    }
+    .wk-console > .cell:last-child { border-right: none; }
+    .wk-console .led {
+      width: 6px; height: 6px; border-radius: 999px;
+      box-shadow: 0 0 6px currentColor, 0 0 1px currentColor;
+    }
+    .wk-console .led.ok { background: var(--ui-ok); color: var(--ui-ok); }
+    .wk-console .led.warn { background: var(--ui-warn); color: var(--ui-warn); }
+    .wk-console .led.ai { background: var(--ui-ai); color: var(--ui-ai); }
+    .wk-console .led.primary { background: var(--ui-primary); color: var(--ui-primary); }
+
+    /* Blueprint hairline grid (technical schematic backdrop) */
+    .wk-blueprint {
+      background-image:
+        linear-gradient(var(--ui-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ui-line) 1px, transparent 1px);
+      background-size: 40px 40px, 40px 40px;
+    }
+    .wk-blueprint.fine {
+      background-image:
+        linear-gradient(var(--ui-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ui-line) 1px, transparent 1px),
+        linear-gradient(color-mix(in oklab, var(--ui-line) 50%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in oklab, var(--ui-line) 50%, transparent) 1px, transparent 1px);
+      background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+    }
+
+    /* Polished button affordances */
+    .wk-btn { user-select: none; }
+    .wk-btn-solid:hover { filter: brightness(1.05); }
+    .wk-btn-outline:hover { background: var(--ui-panel-2); }
+    .wk-btn-ghost:hover { background: var(--ui-panel-2); }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="wireframe-kit.jsx"></script>
+  <script type="text/babel" src="screens/framework.jsx"></script>
+  <script type="text/babel" src="screens/dashboard.jsx"></script>
+  <script type="text/babel" src="screens/equipment.jsx"></script>
+  <script type="text/babel" src="screens/equipment-register.jsx"></script>
+  <script type="text/babel" src="screens/asset-detail.jsx"></script>
+  <script type="text/babel" src="screens/asset-panels-a.jsx"></script>
+  <script type="text/babel" src="screens/asset-panels-b.jsx"></script>
+  <script type="text/babel" src="screens/checklists.jsx"></script>
+  <script type="text/babel" src="screens/checklist-config.jsx"></script>
+  <script type="text/babel" src="screens/checklist-templates.jsx"></script>
+  <script type="text/babel" src="screens/documents.jsx"></script>
+  <script type="text/babel" src="screens/drawing-collab.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

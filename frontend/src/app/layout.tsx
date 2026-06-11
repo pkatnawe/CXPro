@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { Archivo, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "../styles/blueprint.css";
 import "../lib/frontend-kit/styles.css";
+import { ThemeProvider } from "../lib/theme/ThemeProvider";
 
-const archivo = Archivo({
-  variable: "--font-archivo",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const jetBrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -18,6 +19,17 @@ export const metadata: Metadata = {
   title: "CXPro",
   description: "AI-powered commissioning excellence platform",
 };
+
+const preHydrationScript = `
+(function(){
+  try {
+    var t = localStorage.getItem('cxp.theme') || 'light';
+    var a = localStorage.getItem('cxp.accent') || 'azure';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-accent', a);
+  } catch(e) {}
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -28,9 +40,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${archivo.variable} ${jetBrainsMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: preHydrationScript }} />
+      </head>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

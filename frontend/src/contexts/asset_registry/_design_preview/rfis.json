@@ -1,0 +1,30 @@
+[
+  {
+    "number": "RFI-0041",
+    "subject": "Clarify chilled water pipe insulation thickness at penthouse",
+    "status": "open",
+    "opened": "2026-04-18",
+    "due": "2026-04-25"
+  },
+  {
+    "number": "RFI-0044",
+    "subject": "AHU-2 electrical disconnect location conflicts with egress path",
+    "status": "answered",
+    "opened": "2026-04-29",
+    "due": "2026-05-06"
+  },
+  {
+    "number": "RFI-0051",
+    "subject": "Confirm BAS gateway compatibility with existing DDC controllers",
+    "status": "open",
+    "opened": "2026-05-12",
+    "due": "2026-05-19"
+  },
+  {
+    "number": "RFI-0055",
+    "subject": "Submittal required for variable frequency drive brand substitution",
+    "status": "in-review",
+    "opened": "2026-05-20",
+    "due": "2026-05-27"
+  }
+]

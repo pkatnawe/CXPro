@@ -1,0 +1,42 @@
+[
+  {
+    "id": "ISS-001",
+    "title": "AHU-2 supply air damper fails to open fully",
+    "severity": "high",
+    "status": "open",
+    "opened_at": "2026-05-10T09:15:00Z",
+    "owner_initials": "JR"
+  },
+  {
+    "id": "ISS-002",
+    "title": "Chilled water valve leaking at packing gland",
+    "severity": "medium",
+    "status": "in-progress",
+    "opened_at": "2026-05-14T11:30:00Z",
+    "owner_initials": "SM"
+  },
+  {
+    "id": "ISS-003",
+    "title": "Control panel label missing on panel LP-3",
+    "severity": "low",
+    "status": "resolved",
+    "opened_at": "2026-05-18T14:00:00Z",
+    "owner_initials": "AL"
+  },
+  {
+    "id": "ISS-004",
+    "title": "BACnet point mapping incorrect for VAV-07",
+    "severity": "high",
+    "status": "open",
+    "opened_at": "2026-05-20T08:45:00Z",
+    "owner_initials": "JR"
+  },
+  {
+    "id": "ISS-005",
+    "title": "Condensate drain pan overflow observed",
+    "severity": "medium",
+    "status": "open",
+    "opened_at": "2026-05-22T16:20:00Z",
+    "owner_initials": "KT"
+  }
+]

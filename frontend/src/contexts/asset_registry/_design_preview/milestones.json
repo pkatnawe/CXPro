@@ -1,0 +1,8 @@
+[
+  { "label": "Delivered to site",    "date": "May 12", "status": "done" },
+  { "label": "Set & anchored",        "date": "May 19", "status": "done" },
+  { "label": "Pre-functional start",  "date": "May 24", "status": "done" },
+  { "label": "Functional test",       "date": "Jun 04", "status": "target" },
+  { "label": "Integrated systems test","date": "Jun 18","status": "target" },
+  { "label": "Substantial completion","date": "Jul 01", "status": "target" }
+]
