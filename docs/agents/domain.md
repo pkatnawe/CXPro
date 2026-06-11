@@ -21,6 +21,10 @@ When your output names a domain concept (in an issue title, a refactor proposal,
 
 If the concept you need isn't in `CONTEXT.md` yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/grill-with-docs` to resolve and add to `CONTEXT.md`).
 
+## Frontier bets stay out of the domain model
+
+Marketing/strategy features (see `docs/business-overview/ai-strategy.html`) enter `CONTEXT.md` and the schema **only when a customer funds a pilot of them**. Do not reserve speculative aggregates or "future-proof" columns for unfunded bets — the site is the only home for frontier language until then. When a bet is funded, it gets grilled (`/grill-with-docs`) and earns its entries.
+
 ## Flag ADR conflicts
 
 If your output contradicts an existing ADR (or an explicit architectural decision in `docs/architecture.md`), surface it explicitly rather than silently overriding:

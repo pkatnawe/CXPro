@@ -131,6 +131,10 @@ An Asset held in reserve, not in active service.
 **Document**:
 An uploaded file with a typed role (drawing, spec, submittal_pdf, opr, bod, sequence_of_operations, cut_sheet, o_and_m_manual, photo, datalog, schedule_xlsx, report).
 
+**Equipment Logbook** (also: Asset Timeline):
+The per-Asset chronological view of everything captured about a unit: test results, deviations, and multimodal Documents (photo / audio_note / video) linked to the Asset. A read-model projection over existing aggregates — *not* an aggregate itself. Media items are Documents (owned by Document & Knowledge) carrying an Asset link; results stay in Commissioning Execution; the Logbook assembles them.
+_Avoid_: LogbookEntry as a table; storing media inside Asset Registry (its boundary excludes photos).
+
 **DocumentVersion**:
 A revision of a Document. Tests and citations always reference a specific version, not the Document alone.
 _Avoid_: Rev, draft.
@@ -317,6 +321,10 @@ The practice of binding AI claims to retrieved evidence (DocumentChunks, structu
 **Hallucination**:
 An AI claim not supported by Grounding. The thing Citations exist to prevent.
 
+**Handoff**:
+The Agent's confidence-gated transfer of work to a human: when Grounding cannot support a reliable output, the Agent names the gap and routes it as an InboxItem to the accountable role, then resumes when resolved. Routes *across* to the accountable role — distinct from Escalation, which routes *up* on SLA breach. An unactioned Handoff InboxItem may itself escalate.
+_Avoid_: "escalation" for this mechanism (reserved for SLA breach); "refusal" (implies a dead end — a Handoff always proposes the path forward).
+
 **Run**:
 Short for AgentRun in conversation.
 
@@ -328,6 +336,10 @@ A periodic quality measurement of an Agent against a labelled test set.
 
 **FeedbackRecord**:
 A captured user correction of an AI output, feeding DSPy optimization. The data network effect lives here.
+
+**Lesson**:
+A structured, reusable piece of field knowledge derived from a resolved Deviation, a FeedbackRecord, or an explicit field note — tagged to equipment type, system, and failure mode, and surfaced proactively on similar future work. Scoped to the Organization: an org's Lessons travel across that org's projects and never cross org boundaries. Cross-org improvement happens only at the model level (EvalRuns, DSPy optimization), never as retrievable records. Broader than FeedbackRecord (which covers only corrections of AI output).
+_Avoid_: project-scoped lessons (nothing would compound); a global lesson pool (confidentiality fiction).
 
 ### Identity & Access
 
@@ -348,6 +360,10 @@ The User × Project × Role × DisciplineScope(s) × authority relationship. The
 
 **Role**:
 A named bundle of Permissions assignable to a user in a project.
+
+**Commissioning Manager**:
+Alias for the Construction Manager (CM) role when held by someone employed by a CxConsultant Organization — the person who runs the commissioning program day-to-day (sequences the test campaign, manages issues, chases vendors). The job is the CM role; the employer is captured by Organization type. Not an eighth role.
+_Avoid_: treating "Cx Manager" as a distinct role with its own dashboards/agents.
 
 **Permission**:
 An atomic capability (`read:Asset`, `propose:TestStep`, etc.).

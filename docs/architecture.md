@@ -548,10 +548,12 @@ A 2-person team in 90 days ships **v0**. v1 ships in months 4-6 before the secon
 - **Analytics & Reporting** — Dashboard (presets only), Widget, KPIDefinition, SavedQuery, MetricSnapshot, ReportTemplate (3 hyperscaler-format presets). AI-driven custom reports = v1.5.
 - **Handover & Compliance** — TurnoverPackage + Handover Compiler Agent. ComplianceMapping for ASHRAE 202 + OBC 2025. Defer NFPA 72, LEED, AHJ Inspection.
 - **MCP server** — 3 read-only tools (`query_deviations`, `project_health`, `explain_design_intent`). Match BlueRithm MCP narrative within 60 days of v0 launch.
+- **Procore live-signal watcher** — read-only, thinnest valuable slice: poll Procore's self-service API for approved change orders / submittal swaps, match against affected assets and procedures, raise InboxItems ("CO swapped the chiller model — these procedures reference the old submittal"). No write-back, no Marketplace certification, no new UI. Full Procore sync and the Autodesk/BIM connector are deliberately Year 2 (see business-overview AI strategy).
 
 ### Year 2
 - Cost & Commercial (full context; v0 stores `contract_id` as string ref on Project)
 - CxAlloy two-way sync
+- Full Procore integration (write-back, Marketplace listing) + Autodesk/BIM connector (AEC Data Model, Issues API)
 - BMS integrations (Siemens / Honeywell / JCI / Schneider)
 - Pharma CQV (IQ/OQ/PQ) language adaptation
 - FedRAMP / Protected B authorization

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glossary — CXPro</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .gloss-group { margin-bottom: 40px; }
+  .gloss-grid { display: grid; grid-template-columns: 220px 1fr; gap: 0; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .gloss-grid dt { padding: 13px 18px; font-weight: 700; font-size: 14.5px; border-bottom: 1px solid var(--line); background: #f8fafd; }
+  .gloss-grid dd { padding: 13px 18px; font-size: 14.5px; color: var(--ink-soft); border-bottom: 1px solid var(--line); margin: 0; }
+  .gloss-grid dt:last-of-type, .gloss-grid dd:last-of-type { border-bottom: none; }
+  @media (max-width: 640px) { .gloss-grid { grid-template-columns: 1fr; } .gloss-grid dt { border-bottom: none; padding-bottom: 2px; } }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="inner">
+    <a class="brand" href="index.html">CX<span class="x">Pro</span></a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="ai.html">AI in CXPro</a>
+      <a href="ai-strategy.html">AI Strategy</a>
+      <a href="features.html">Core Features</a>
+      <a href="glossary.html" class="active">Glossary</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Reference</span>
+    <h1>Glossary of terms &amp; abbreviations</h1>
+    <p>Commissioning has its own language, and so does AI. This page defines every term and abbreviation used across these docs — in plain English, for readers from either world.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+
+    <div class="gloss-group">
+      <p class="kicker">Commissioning fundamentals</p>
+      <h2>The craft</h2>
+      <dl class="gloss-grid">
+        <dt>Commissioning (Cx)</dt>
+        <dd>The structured process of verifying that a building's equipment and systems are designed, installed, and tested to perform as the owner intended — before the facility goes live.</dd>
+        <dt>Cx Levels (L1–L5)</dt>
+        <dd>The five stages of commissioning: <strong>L1</strong> Factory Witness Testing (verifying equipment at the manufacturer's site) · <strong>L2</strong> Pre-Functional Checklists (confirming correct installation) · <strong>L3</strong> Start-Up (first energization and run) · <strong>L4</strong> Functional Performance Testing (proving each unit performs to spec) · <strong>L5</strong> Integrated Systems Testing (proving everything works together, including failure scenarios).</dd>
+        <dt>FPT</dt>
+        <dd>Functional Performance Test — the L4 test proving a piece of equipment meets its specified performance (flow rates, temperatures, response times).</dd>
+        <dt>IST</dt>
+        <dd>Integrated Systems Test — the L5 "final exam": whole-facility scenarios such as a simulated utility blackout, proving all systems respond together correctly.</dd>
+        <dt>Deviation</dt>
+        <dd>A formal record that something doesn't match design intent — a failed test step, an incorrect installation, an unexpected behavior. Tracked from discovery to resolution.</dd>
+        <dt>RFI</dt>
+        <dd>Request for Information — a formal question from the field to the design team ("the drawing shows X but the site has Y — which governs?"). Response time directly affects schedule.</dd>
+        <dt>Submittal</dt>
+        <dd>Vendor documentation (cut sheets, product data, shop drawings) submitted for approval to confirm proposed equipment matches the specification.</dd>
+        <dt>Punch list / Punch item</dt>
+        <dd>The list of remaining defects and incomplete items that must be closed before the owner accepts the work.</dd>
+        <dt>Change order</dt>
+        <dd>A formal, approved modification to the contracted scope, cost, or schedule — including equipment substitutions that affect testing.</dd>
+        <dt>Witness session</dt>
+        <dd>A formal event where the owner's representative observes critical tests being performed and signs off on the results.</dd>
+        <dt>Turnover package / Dossier</dt>
+        <dd>The complete, organized handover record for a system or project: test results, signatures, deviations, warranties, training records, and compliance evidence.</dd>
+        <dt>Substantial Completion</dt>
+        <dd>The contractual milestone at which the facility is usable for its intended purpose — typically triggering payment milestones and the warranty clock.</dd>
+        <dt>LOTO</dt>
+        <dd>Lock-Out / Tag-Out — the safety procedure for de-energizing and securing equipment before anyone works on it.</dd>
+        <dt>AHJ</dt>
+        <dd>Authority Having Jurisdiction — the inspector or regulatory body (fire marshal, building department) whose approval is legally required.</dd>
+      </dl>
+    </div>
+
+    <div class="gloss-group">
+      <p class="kicker">Roles</p>
+      <h2>Who's who on a commissioning team</h2>
+      <dl class="gloss-grid">
+        <dt>OCA</dt>
+        <dd>Owner's Commissioning Agent — the owner's program-level representative. Approves turnover packages, monitors compliance posture, and can override gates with documented justification.</dd>
+        <dt>CM</dt>
+        <dd>Construction Manager — the project-level orchestrator: coordinates disciplines and crews, schedules witness sessions, plans downtime windows, manages RFIs. A Cx provider's "Commissioning Manager" holds this same role — the job is identical; only the employer differs.</dd>
+        <dt>Cx Engineer / Specialist</dt>
+        <dd>The discipline-scoped engineer who authors and executes test procedures, marks results, and raises deviations.</dd>
+        <dt>Field Technician</dt>
+        <dd>The hands-on executor of assigned tests on site — often a subcontractor employee working from a tablet or phone.</dd>
+        <dt>GC</dt>
+        <dd>General Contractor — the company responsible for overall construction (e.g., DPR, Holder, PCL, Urbacon in our launch markets).</dd>
+        <dt>Discipline</dt>
+        <dd>A technical domain of work — Mechanical, Electrical, Controls, or General Construction. CXPro scopes teams, permissions, and milestones per discipline.</dd>
+        <dt>FM</dt>
+        <dd>Facility Manager — the downstream operator who runs the building after handover and inherits the commissioning record.</dd>
+      </dl>
+    </div>
+
+    <div class="gloss-group">
+      <p class="kicker">Documents &amp; design</p>
+      <h2>The paper trail</h2>
+      <dl class="gloss-grid">
+        <dt>OPR</dt>
+        <dd>Owner's Project Requirements — the owner's statement of what the facility must achieve. The yardstick commissioning measures against.</dd>
+        <dt>BOD</dt>
+        <dd>Basis of Design — the design team's explanation of how the design meets the OPR: assumptions, calculations, and selected systems.</dd>
+        <dt>SOO</dt>
+        <dd>Sequence of Operations — the written logic describing how automated systems behave ("on loss of power, generator starts within 10 seconds, then…"). The source of truth for functional testing.</dd>
+        <dt>Cut sheet</dt>
+        <dd>A vendor's product datasheet: model numbers, capacities, electrical characteristics, dimensions.</dd>
+        <dt>As-built</dt>
+        <dd>Documentation updated to reflect what was actually constructed, as opposed to what was originally designed.</dd>
+        <dt>BIM</dt>
+        <dd>Building Information Modeling — the 3D digital model of the facility carrying both geometry and metadata (what each component is, its specs, and what it connects to).</dd>
+        <dt>Digital twin</dt>
+        <dd>A live digital replica of the physical facility, combining the model with real operational data.</dd>
+      </dl>
+    </div>
+
+    <div class="gloss-group">
+      <p class="kicker">Systems &amp; infrastructure</p>
+      <h2>The machinery</h2>
+      <dl class="gloss-grid">
+        <dt>BMS</dt>
+        <dd>Building Management System — the central control system that monitors and automates HVAC, cooling, and other building systems through thousands of control points.</dd>
+        <dt>EPMS</dt>
+        <dd>Electrical Power Monitoring System — the system that tracks electrical distribution: breaker states, power quality, and events, often timestamped to the millisecond.</dd>
+        <dt>AHU</dt>
+        <dd>Air Handling Unit — the workhorse HVAC equipment that conditions and circulates air. Data centers have many; they appear throughout our examples.</dd>
+        <dt>Load bank test</dt>
+        <dd>Testing generators or power systems under artificial electrical load to prove rated capacity before the real IT load arrives.</dd>
+        <dt>Free cooling</dt>
+        <dd>Cooling using cold outdoor air or water instead of mechanical refrigeration — central to Canadian data center design, and complex to commission across the changeover.</dd>
+        <dt>ERCOT</dt>
+        <dd>Electric Reliability Council of Texas — the Texas grid operator. Its fast-frequency requirements and instability events shape how Texas facilities must prove power resilience.</dd>
+        <dt>AESO / Hydro-Québec / BC Hydro</dt>
+        <dd>Canadian grid operators and utilities (Alberta Electric System Operator, Québec, British Columbia) — the interconnection counterparties for Canadian builds.</dd>
+        <dt>Hyperscaler</dt>
+        <dd>A company operating data centers at massive scale — Meta, Microsoft, AWS, Google. The primary owners CXPro serves.</dd>
+        <dt>Colocation (colo)</dt>
+        <dd>A data center operator that leases capacity to multiple customers (Equinix, Digital Realty, eStruxture, QScale) — a key downstream recipient of commissioning data.</dd>
+        <dt>BACnet / Modbus / OPC UA</dt>
+        <dd>The dominant open communication protocols building and industrial equipment speak. Integrating with them is how software reads live data from chillers, generators, and controllers.</dd>
+        <dt>Niagara Framework</dt>
+        <dd>A widely-deployed vendor-neutral platform (by Tridium) that bridges 20+ building protocols — a single integration point through which software can reach most facility equipment.</dd>
+        <dt>Reality capture</dt>
+        <dd>Using cameras, 360° photos, or laser scanning (LiDAR) to record actual site conditions — which AI can then compare against the BIM model to detect installation deviations and track progress.</dd>
+      </dl>
+    </div>
+
+    <div class="gloss-group">
+      <p class="kicker">Standards &amp; compliance</p>
+      <h2>The rulebook</h2>
+      <dl class="gloss-grid">
+        <dt>ASHRAE 202</dt>
+        <dd>The industry-standard commissioning process for buildings and systems — the framework most commissioning programs are contractually held to.</dd>
+        <dt>NFPA 72</dt>
+        <dd>The National Fire Alarm and Signaling Code — governs fire alarm system testing and acceptance.</dd>
+        <dt>OBC</dt>
+        <dd>Ontario Building Code — the provincial building regulation relevant to our Canadian market.</dd>
+        <dt>LEED</dt>
+        <dd>Leadership in Energy and Environmental Design — the green-building certification; commissioning is a prerequisite credit.</dd>
+        <dt>CQV (IQ/OQ/PQ)</dt>
+        <dd>Commissioning, Qualification &amp; Validation — pharma's regulated equivalent of commissioning: Installation, Operational, and Performance Qualification. A future CXPro market.</dd>
+        <dt>Compliance mapping</dt>
+        <dd>CXPro's link between an individual test step and the regulatory citation it satisfies — turning compliance posture into a live dashboard.</dd>
+        <dt>Audit log</dt>
+        <dd>The tamper-evident record of every state change in CXPro: who (human or AI), what, and when. The backbone of regulator and owner trust.</dd>
+        <dt>COBie</dt>
+        <dd>Construction-Operations Building information exchange — the international standard format for handing structured facility data (equipment, warranties, maintenance info) from construction to operations. Commissioning agents have a formally defined role in producing it.</dd>
+        <dt>IFC</dt>
+        <dd>Industry Foundation Classes — the open, vendor-neutral file standard for exchanging BIM models between different software tools.</dd>
+        <dt>ASHRAE 223P</dt>
+        <dd>The 2024-published standard for machine-readable semantic tagging of building-system data — the convergence of the earlier Project Haystack and Brick Schema efforts. Its scope explicitly includes commissioning and digital twins.</dd>
+        <dt>Project Haystack / Brick Schema</dt>
+        <dd>The two pioneering semantic-tagging vocabularies for building data (e.g., labeling a sensor as "chilled water supply temperature" in a machine-readable way). Now converging under ASHRAE 223P.</dd>
+      </dl>
+    </div>
+
+    <div class="gloss-group">
+      <p class="kicker">AI terms</p>
+      <h2>The AI vocabulary, demystified</h2>
+      <dl class="gloss-grid">
+        <dt>AI agent</dt>
+        <dd>An AI system that doesn't just answer questions but performs multi-step work — retrieving documents, checking its own confidence, drafting records. In CXPro, agents are role-specific and always stop for human confirmation.</dd>
+        <dt>Grounding</dt>
+        <dd>Forcing the AI to base its output on retrieved source material (your specs and records) rather than its general training. The antidote to making things up.</dd>
+        <dt>Citation</dt>
+        <dd>A traceable link from an AI output back to the exact source passage it came from. In CXPro, citations deep-link to the page of the original document.</dd>
+        <dt>Hallucination</dt>
+        <dd>When an AI confidently states something false. CXPro's defenses: mandatory grounding, mandatory citations, confidence gating, and human confirmation.</dd>
+        <dt>Confidence gating / Handoff</dt>
+        <dd>The AI measures how well the sources support its draft; below a threshold it stops, names exactly what's missing, and hands the gap to the accountable person to resolve — then resumes. The opposite of both guessing and dead-ending. (Distinct from <em>escalation</em>, which in CXPro means routing an item up the chain when it sits unactioned past its deadline.)</dd>
+        <dt>Human-in-the-loop</dt>
+        <dd>The operating rule that AI output only takes effect after a qualified person reviews and confirms it. Every CXPro AI action works this way.</dd>
+        <dt>Multimodal AI</dt>
+        <dd>AI that understands more than text — voice, photos, video, thermal imagery, sound. The foundation of CXPro's field-capture roadmap.</dd>
+        <dt>Semantic search</dt>
+        <dd>Search by meaning rather than keywords — "what's the chiller failure response?" finds the right SOO passage even if it never uses those words.</dd>
+        <dt>Embedding / Indexing</dt>
+        <dd>The behind-the-scenes process of converting documents into a mathematical form the AI can search by meaning. Why uploaded packages become instantly queryable.</dd>
+        <dt>MCP</dt>
+        <dd>Model Context Protocol — an open standard that lets external AI tools securely connect to a platform's data and actions. CXPro exposes one, making it integrable with anyone's AI.</dd>
+        <dt>LLM</dt>
+        <dd>Large Language Model — the underlying AI model class (CXPro currently runs on Google Gemini, swappable by design).</dd>
+        <dt>Eval / Quality gate</dt>
+        <dd>A curated test set every CXPro agent must pass before updates ship. If accuracy or citation quality regresses, the release is blocked.</dd>
+        <dt>ML</dt>
+        <dd>Machine Learning — AI that finds patterns in data rather than following hand-written rules. The basis of our vibration/acoustic analysis bets.</dd>
+        <dt>OCR</dt>
+        <dd>Optical Character Recognition — extracting text from images, e.g. reading an equipment nameplate from a photo.</dd>
+        <dt>AR</dt>
+        <dd>Augmented Reality — overlaying digital information (test steps, model data) onto a live view of the physical world through a phone, tablet, or headset.</dd>
+        <dt>API / REST API</dt>
+        <dd>Application Programming Interface — the standard way one software system talks to another. "REST" is the dominant style. When we say a platform "has an API," it means we can integrate with it programmatically.</dd>
+      </dl>
+    </div>
+
+    <div class="gloss-group">
+      <p class="kicker">Business &amp; field shorthand</p>
+      <h2>Everyday abbreviations</h2>
+      <dl class="gloss-grid">
+        <dt>MW</dt>
+        <dd>Megawatt — how data centers are sized (by power capacity, not square footage). A "60 MW facility" can power roughly 50,000 homes' worth of IT load; hyperscale campuses run 100–500+ MW.</dd>
+        <dt>PPE</dt>
+        <dd>Personal Protective Equipment — hard hats, gloves, hearing protection. Why field technicians can't easily type, and why voice capture matters.</dd>
+        <dt>ROI</dt>
+        <dd>Return on Investment — what a dollar spent returns. Commissioning's documented ROI is among the best in the building lifecycle (see the LBNL study on the Overview page).</dd>
+        <dt>KPI</dt>
+        <dd>Key Performance Indicator — a tracked metric, like "% of tests complete by discipline" or "deviation aging."</dd>
+        <dt>HPC</dt>
+        <dd>High-Performance Computing — supercomputing and AI-training workloads. HPC-ready campuses (like QScale in Québec) are a growing slice of the data center market.</dd>
+        <dt>O&amp;M</dt>
+        <dd>Operations &amp; Maintenance — as in O&amp;M manuals, the vendor documentation the operations team relies on after handover.</dd>
+        <dt>QA/QC</dt>
+        <dd>Quality Assurance / Quality Control — the contractor's own inspection work, which runs alongside (but is distinct from) commissioning verification.</dd>
+      </dl>
+    </div>
+
+    <div class="gloss-group">
+      <p class="kicker">Industry references</p>
+      <h2>Organizations &amp; platforms named in these docs</h2>
+      <dl class="gloss-grid">
+        <dt>AEC</dt>
+        <dd>Architecture, Engineering &amp; Construction — the umbrella term for the building industry (as in Autodesk's "AEC Data Model API").</dd>
+        <dt>ACC</dt>
+        <dd>Autodesk Construction Cloud — Autodesk's construction management platform, one of the two dominant project backbones (with Procore) on our target projects.</dd>
+        <dt>Primavera P6 / MS Project</dt>
+        <dd>The two dominant master-scheduling tools on large construction projects. The schedule of record usually lives in one of them.</dd>
+        <dt>ENR</dt>
+        <dd>Engineering News-Record — the industry publication whose "Top 400" ranks the largest US contractors; used as a market-coverage benchmark (e.g., "62% of ENR Top 400").</dd>
+        <dt>LBNL</dt>
+        <dd>Lawrence Berkeley National Laboratory — a U.S. Department of Energy national lab; its 1,500-building commissioning study is the gold-standard evidence for commissioning ROI.</dd>
+        <dt>CII</dt>
+        <dd>Construction Industry Institute — an academic-industry research consortium at the University of Texas; the original source of much of the rework-cost research we cite.</dd>
+        <dt>FMI</dt>
+        <dd>A construction-industry research and consulting firm; with Autodesk, the source of the "miscommunication drives ~26% of rework" finding.</dd>
+        <dt>BCxA</dt>
+        <dd>Building Commissioning Association — the professional association for commissioning providers; publisher of the best-practice guides we reference.</dd>
+      </dl>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span>CXPro — Commissioning software built by engineers, for engineers.</span>
+    <span>
+      <a href="index.html">Overview</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="ai.html">AI</a>
+      <a href="ai-strategy.html">AI Strategy</a>
+      <a href="features.html">Features</a>
+      <a href="glossary.html">Glossary</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

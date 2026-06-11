@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Strategy — CXPro Living Document</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="inner">
+    <a class="brand" href="index.html">CX<span class="x">Pro</span></a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="ai.html">AI in CXPro</a>
+      <a href="ai-strategy.html" class="active">AI Strategy</a>
+      <a href="features.html">Core Features</a>
+      <a href="glossary.html">Glossary</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Living document · maintained in the product repo · last revised June 2026</span>
+    <h1>The CXPro AI Strategy</h1>
+    <p>This page is the shared map between business and engineering: every AI capability we ship or plan, the hard problem it solves, and the dollar-shaped value it creates. Statuses are honest — <span class="pill green">Live</span> ships today, <span class="pill blue">Building</span> is in active development, <span class="pill ink">Next</span> is designed and sequenced, <span class="pill amber">Frontier</span> is a researched bet that needs new data or partnerships.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">North star</p>
+    <h2>CXPro is the central nervous system of the project</h2>
+    <p class="section-intro">A commissioning app cannot win in a vacuum. The facilities we serve are designed by one set of companies, built by another, powered by a regional grid, filled with vendor equipment, and handed to an operator who lives with it for 20 years. Our AI's defining advantage is that it sits <strong>between</strong> all of them — pulling design intent downstream from the people who created it, and pushing verified operational readiness upstream to the people who depend on it.</p>
+
+    <table>
+      <thead><tr><th></th><th>Upstream — where the AI pulls intent from</th><th>Downstream — where the AI hands readiness to</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Who</strong></td>
+          <td>Hyperscale owners (Meta, Microsoft, AWS, Google) · General contractors (DPR, Holder, PCL, Urbacon) · Design engineers · Grid operators (ERCOT, Oncor, Hydro-Québec, AESO)</td>
+          <td>Colocation &amp; operators (Equinix, Digital Realty, Compass, eStruxture, QScale) · Facility management teams · Maintenance contractors · Equipment vendors (warranty)</td>
+        </tr>
+        <tr>
+          <td><strong>What flows</strong></td>
+          <td>Drawings, specs, submittals, BIM models, RFIs, change orders, grid interconnection requirements</td>
+          <td>Verified test results, as-commissioned baselines, compliance dossiers, lesson libraries, predicted-failure watch lists</td>
+        </tr>
+        <tr>
+          <td><strong>Why it matters</strong></td>
+          <td>If the AI sees a change order the moment it's approved, the team never tests an outdated design.</td>
+          <td>If the operator inherits cited, structured commissioning data, Day-2 operations start from knowledge instead of binders.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">Market reality — June 2026 scan</p>
+    <h2>What competitors ship, and what no one owns</h2>
+    <p class="section-intro">We researched what every relevant player actually ships today. The honest news: several things we planned are already in market — which sharpens, rather than weakens, where our real white space is.</p>
+
+    <table>
+      <thead><tr><th>Player</th><th>What they actually ship (mid-2026)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>CxPlanner (CxAI)</strong></td><td>The AI leader among Cx incumbents: AI-generated test scripts from specs, project-aware agents, photo nameplate extraction, O&amp;M ingestion, submittal-vs-spec checking, human-in-loop approval — and they target data center commissioning explicitly. <strong>But: no citations, and no confidence-gated handoff — their AI doesn't know when it's out of its depth.</strong></td></tr>
+        <tr><td><strong>BlueRithm 2.0</strong></td><td>Shipped an MCP server (May 2026) plus full read/write API and Procore/Revit/ACC/Willow integrations. Generation is template-based, not AI-drafted-with-citations.</td></tr>
+        <tr><td><strong>CxAlloy</strong></td><td>No real AI — OCR nameplate scanning and templated reporting. Procore integration is table stakes for them too.</td></tr>
+        <tr><td><strong>Procore</strong></td><td>RFI Creation Agent, Daily Log Agent, photo intelligence, voice on mobile, a no-code Agent Builder (beta), and Agentic APIs with MCP — but nothing commissioning-specific.</td></tr>
+        <tr><td><strong>Autodesk</strong></td><td>Conversational Q&amp;A agents and spec extraction (AutoSpecs); January 2026's 40+ updates contained nothing commissioning-specific and no multimodal AI.</td></tr>
+        <tr><td><strong>OpenSpace / Buildots</strong></td><td>Reality capture is proven, not hype: OpenSpace shipped hands-free AI Voice Notes (2025)<sup class="cite"><a href="#asrc-2">2</a></sup>; Buildots' scan-vs-BIM saved Intel ~4 weeks of delay and 4.3% rework cost per fab.<sup class="cite"><a href="#asrc-1">1</a></sup></td></tr>
+      </tbody>
+    </table>
+
+    <div class="grid cols-2" style="margin-top: 24px;">
+      <div class="card">
+        <h3>✅ Genuinely unowned white space</h3>
+        <p><strong>Cited, handoff-aware procedure generation</strong> — competitors generate, but nobody attaches mandatory citations or hands off to the right human below confidence. The trust layer is the moat, not generation itself.<br><strong>Trip chronology reconstruction</strong> — EPMS systems log millisecond data today, but nobody unifies it; Niagara's "analytics" are rule-based, not AI.<br><strong>Commissioning-phase acoustic/thermal failure scoring</strong> — the ML is mature for <em>operations</em> monitoring; nobody applies it at acceptance testing.<br><strong>Crew readiness analytics</strong> — no vendor touches it.</p>
+      </div>
+      <div class="card">
+        <h3>⚠️ Already in market — match, don't tout</h3>
+        <p><strong>MCP servers</strong> (BlueRithm shipped, CxPlanner lists it, Procore has one) — ours must exist, but it's parity, not differentiation.<br><strong>Document/spec extraction</strong> (CxAI, AutoSpecs).<br><strong>Voice field capture</strong> (OpenSpace AI Voice Notes, Procore Assist).<br><strong>Scan-vs-BIM deviation detection</strong> (Buildots, OpenSpace — integrate, don't build).<br><strong>Human-in-the-loop AI approval</strong> (CxPlanner, BlueRithm both do this).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Pillar 1 — the foundation</p>
+    <h2>Integration fabric: Procore, BIM, and open AI access</h2>
+    <p class="section-intro">Procore and BIM integration is not a nice-to-have — it's the substrate every advanced AI feature feeds on. Procore tells the AI what the project <em>decided</em>; the BIM model tells it where everything physically <em>is</em>. Our own MCP interface lets anyone else's AI plug into us, which makes CXPro the easiest commissioning tool in the market to integrate with.</p>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Procore as a live signal <span class="pill ink">Next</span></h3>
+        <p><strong>Hard task:</strong> teams discover mid-test that a chiller model was swapped by a change order three weeks ago.<br><strong>AI capability:</strong> a background agent watches Procore RFIs, submittals, and change orders; an approved equipment change automatically flags and re-drafts the affected test procedures.<br><strong>Value:</strong> zero tests executed against stale designs — the most expensive class of rework on a fast-moving Texas hyperscale job.<br><strong>Verified path:</strong> Procore's developer platform is fully self-service — we can build against the API and sandbox today, no partnership required. The RFI API supports the full workflow read/write. Marketplace listing (their certified partner program) comes later, as a distribution channel.</p>
+      </div>
+      <div class="card">
+        <h3>BIM / digital twin awareness <span class="pill amber">Year 2</span></h3>
+        <p><strong>Hard task:</strong> procedures don't know which pipe feeds which valve, or which conduit powers which rack.<br><strong>AI capability:</strong> the AI reads BIM geometry and metadata (voltages, flow rates, tolerances) so generated checklists are tailored to the exact approved model, and spatial relationships become queryable facts.<br><strong>Value:</strong> procedure generation moves from "drafted from the spec PDF" to "drafted from the engineered truth" — fewer review edits, higher trust.<br><strong>Verified path:</strong> Autodesk's AEC Data Model API exposes granular Revit data via cloud API (no plugins), and their Issues API supports <em>commissioning as a first-class issue type</em>. One caveat: access is gated on the customer's Autodesk entitlements.</p>
+      </div>
+      <div class="card">
+        <h3>Open AI access via MCP <span class="pill blue">Building</span></h3>
+        <p><strong>Hard task:</strong> every partner (owner's analysts, GC's tooling, operator's AI) wants programmatic access without a custom integration project.<br><strong>AI capability:</strong> CXPro exposes a curated, permission-scoped tool surface over the open MCP standard — external agents can query deviations, project health, and design intent, and draft (never commit) records. The same architecture already powers our internal agents.<br><strong>Value:</strong> "integrates with anyone upstream or downstream" becomes literal — partners connect their AI to ours in hours, not quarters.<br><strong>Market check:</strong> MCP is now table stakes — BlueRithm shipped one in May 2026 and Procore exposes MCP in its Agentic APIs. Our edge must be the <em>quality</em> of the surface: per-role permission scoping and draft-not-commit safety, which nobody pairs with it yet.</p>
+      </div>
+      <div class="card">
+        <h3>Automated closeout cleardown <span class="pill amber">Frontier</span></h3>
+        <p><strong>Hard task:</strong> hundreds of open punch items and RFIs gate legal opening, each closed by hand.<br><strong>AI capability:</strong> as tests pass, the AI verifies telemetry against success criteria, then updates Procore — closing punch items and RFIs with sensor logs attached as proof.<br><strong>Value:</strong> hundreds of engineering hours recovered at exactly the moment the project is most schedule-critical.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 32px;">Who's actually on the projects we're targeting</h3>
+    <p class="section-intro" style="margin-top: 8px; margin-bottom: 18px;">We mapped the software actually running on Texas and Canadian builds.<sup class="cite"><a href="#asrc-5">5</a></sup> The picture is the same in both markets: <strong>Procore and Autodesk Construction Cloud are the GC backbone; CxAlloy (and Excel) hold the commissioning layer.</strong> No Canada-specific commissioning tool exists — the Canadian difference is heavier BIM coordination and data-sovereignty requirements, not different platforms.</p>
+    <table>
+      <thead><tr><th>Platform on site</th><th>Where you'll meet it</th><th>Our move</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Procore</strong></td><td>The project-management default for the GCs building our targets — DPR, Holder, Turner in Texas; PCL-class builders in Canada</td><td><strong>Integrate now, in the thinnest valuable slice:</strong> a read-only live-signal watcher (approved change orders and submittal swaps → inbox flags on affected procedures). Full sync and Marketplace listing follow later. CxAlloy's integration is a dumb data push; our signal watcher is the differentiator.</td></tr>
+        <tr><td><strong>Autodesk Construction Cloud / Revit</strong></td><td>BIM-heavy jobs and Canadian projects, where model coordination is the norm</td><td><strong>Integrate.</strong> AEC Data Model + Issues API (commissioning is a native issue type). Stronger lever in Canada.</td></tr>
+        <tr><td><strong>CxAlloy</strong></td><td>The incumbent commissioning tool on many live sites, including data centers</td><td><strong>Import from, coexist, then replace.</strong> Our one-way sync (CxAlloy → CXPro) is already designed; teams switch without losing history.</td></tr>
+        <tr><td><strong>Excel + PDF binders</strong></td><td>Honestly: the real #1 commissioning tool everywhere</td><td><strong>Make import effortless.</strong> The spreadsheet wizard and AI document ingestion are our true migration path.</td></tr>
+        <tr><td><strong>CxPlanner / BlueRithm / Facility Grid</strong></td><td>Competitor Cx platforms on some projects</td><td><strong>Coexist via open rails, don't build point integrations.</strong> Our API + MCP server means a mixed-tool program can still pull our data.</td></tr>
+        <tr><td><strong>Primavera P6 / MS Project</strong></td><td>Master schedules on virtually every large job</td><td><strong>CSV import/export first</strong>, live sync when a paying customer demands it.</td></tr>
+        <tr><td><strong>BMS / EPMS (via Niagara, BACnet)</strong></td><td>The building's own control and power-monitoring systems</td><td><strong>Last and highest-payoff</strong> — the telemetry rail our frontier features need.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>The strategy in one sentence:</strong> replace the commissioning layer (CxAlloy, Excel), integrate with everything around it (Procore, Autodesk/BIM, schedules, building systems), and be reachable by anything with an AI (MCP) — so choosing CXPro never requires a project to change anything else it runs.</p>
+    </div>
+
+    <h3 style="margin-top: 32px;">The full integration rail map, priority-ordered</h3>
+    <p class="section-intro" style="margin-top: 8px; margin-bottom: 18px;">How a small team "integrates with anyone": ride the established rails in this order — each verified against what the rail actually offers as of mid-2026.</p>
+    <table>
+      <thead><tr><th>#</th><th>Rail</th><th>Mechanism</th><th>Why this order</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td><strong>Procore</strong></td><td>Self-service REST API + sandbox now; Marketplace certification later for distribution</td><td>Where change orders, RFIs, and submittals live on most of our target projects. Zero gatekeeping to start; per-resource API versioning gives a small team a stable contract.</td></tr>
+        <tr><td><strong>2</strong></td><td><strong>MCP server</strong></td><td>Open Model Context Protocol, permission-scoped, draft-only writes</td><td>Makes every AI tool a potential client without custom work. Already parity in the market — ship it well, not first.</td></tr>
+        <tr><td><strong>3</strong></td><td><strong>Autodesk Platform Services</strong></td><td>AEC Data Model API (model data), Issues API (native commissioning type), Data Connector (bulk/delta extraction)</td><td>The BIM data that makes procedure generation and spatial queries dramatically better.</td></tr>
+        <tr><td><strong>4</strong></td><td><strong>COBie handover export</strong></td><td>The international standard for structured facility handover data (spreadsheet, XML, and IFC formats)</td><td>Commissioning agents have a formally defined role in the COBie workflow — exporting it makes CXPro dossiers drop into 30+ downstream FM systems. Cheap to ship, contractually demanded in US/UK projects.</td></tr>
+        <tr><td><strong>5</strong></td><td><strong>BMS/EPMS via Niagara &amp; BACnet</strong></td><td>Niagara Framework bridges 20+ building protocols (BACnet, Modbus, OPC); one integration reaches most facility equipment</td><td>The telemetry rail the frontier features (trip chronology, acoustic detection) depend on. Hardest, so last — but the payoff is the features nobody else can build.</td></tr>
+        <tr><td><strong>6</strong></td><td><strong>Semantic standards</strong></td><td>ASHRAE 223P (the 2024-published convergence of Haystack + Brick tagging), layered with Brick Schema</td><td>223P's stated scope explicitly includes commissioning and digital twins. Adopting it makes our data machine-readable to the whole building-systems ecosystem.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>Already in place today:</strong> spreadsheet/CSV import, legacy-tool (CxAlloy) one-way sync design, and an event-driven core that pushes records to external systems with retries — the plumbing all six rails ride on.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Pillar 2 — the daily superpower</p>
+    <h2>The Commissioning Copilot: answering the hardest questions on site</h2>
+    <p class="section-intro">The most valuable AI feature isn't exotic — it's the one a CM or tech reaches for twenty times a day. CXPro's copilot is built to answer the questions that currently take hours of document archaeology, phone calls, and tribal memory — with citations, every time.</p>
+
+    <table>
+      <thead><tr><th>The question they actually ask</th><th>What the AI draws on</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>"What does the spec say this setpoint should be — and which revision?"</td><td>Indexed specs, submittals, and sequences with revision history</td><td><span class="pill green">Live</span></td></tr>
+        <tr><td>"Why did this exact step fail on the last three AHUs?"</td><td>Full retest history and deviation records across the project</td><td><span class="pill green">Live</span></td></tr>
+        <tr><td>"Have we seen this deviation before — here or on a past project?"</td><td>Similar-deviation search over the structured deviation library</td><td><span class="pill blue">Building</span></td></tr>
+        <tr><td>"Which code requirement does this test step actually satisfy?"</td><td>Compliance mappings to ASHRAE 202, NFPA 72, local codes</td><td><span class="pill ink">Next</span></td></tr>
+        <tr><td>"If valve V-102 fails, what's downstream of it?"</td><td>BIM spatial graph + system topology</td><td><span class="pill amber">Frontier</span></td></tr>
+        <tr><td>"What actually happened, in order, during last night's trip?"</td><td>Unified telemetry chronology (see Pillar 4)</td><td><span class="pill amber">Frontier</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <p><strong>Why we can answer harder questions than a chatbot:</strong> every conversation is auto-scoped to the asset, test, or deviation it was opened from, and the copilot's grounding pool is the union of documents, structured records, test history, and (as integrations land) BIM and telemetry. Hard questions are hard because the answer spans sources — our architecture is built to span them.</p>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">Pillar 3 — capture everything, lose nothing</p>
+    <h2>Multimodal field capture &amp; the lesson engine</h2>
+    <p class="section-intro">Commissioning knowledge dies in two places: the noisy plant floor where nobody types, and the project closeout where hard-won lessons leave with the team. This pillar attacks both.</p>
+
+    <div class="grid cols-3">
+      <div class="card">
+        <div class="icon">🎙️</div>
+        <h3>Voice &amp; audio <span class="pill ink">Next</span></h3>
+        <p>Hands-free voice-to-step entry for technicians in PPE on noisy floors — speak the reading, the AI structures it into the test record. Audio notes attach to steps and are transcribed, indexed, and searchable like any document.</p>
+        <p style="margin-top:8px;"><strong>Market proof:</strong> OpenSpace's AI Voice Notes (2025) already turns hands-free speech into structured fields and reported an 86% speed-up in issue documentation at one customer<sup class="cite"><a href="#asrc-2">2</a></sup> — the modality is proven; applying it to <em>test execution</em> is ours to own.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📹</div>
+        <h3>Photo &amp; video evidence <span class="pill blue">Building</span></h3>
+        <p>Photo capture per test step ships in the field experience today; video extends it — record a startup sequence or a witness demonstration, and the AI indexes it, links it to the test record, and includes it in the handover dossier as verifiable evidence.</p>
+        <p style="margin-top:8px;"><strong>Market proof:</strong> video→structured-data is emerging now (Track3D converts field video into production data via Procore's Agentic APIs). Witness-evidence video understanding is still unowned.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📚</div>
+        <h3>Lesson logging <span class="pill ink">Next</span></h3>
+        <p>Every resolved deviation, every AI correction, every "we'll know better next time" gets captured as a structured lesson — tagged to equipment type, system, and failure mode. The AI surfaces relevant lessons <em>proactively</em>: start a test on a pump model that burned you last quarter, and the lesson is already on screen.</p>
+        <p style="margin-top:8px;"><strong>Market check:</strong> CxPlanner ships pattern analytics over test results — adjacent, but a proactive lessons-learned engine tied to procedure generation remains unowned.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 32px;">The equipment logbook: where multimodal capture and lessons compound</h3>
+    <p class="section-intro" style="margin-top: 8px; margin-bottom: 18px;">Here's how the pieces above snap together into one simple idea: <strong>every piece of equipment accumulates a permanent multimodal record, and AI analytics runs on top of it.</strong></p>
+    <div class="flow">
+      <div class="step">
+        <div>
+          <h3>Capture lands on the asset, automatically</h3>
+          <p>A photo of the nameplate, a voice note during start-up ("hearing a slight rattle at 60% load"), a video of the witness demonstration, a thermal image during load testing — whoever captures it, from whatever test step, it files itself onto that asset's timeline. No uploading to the right folder, no naming conventions. AHU-42's record builds itself while the team just works.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>One logbook per asset, searchable like a conversation</h3>
+          <p>Open any unit and its full commissioning life is there: every test, result, deviation, photo, transcribed voice note, and video — in order. Ask the AI "show me everything we captured on this chiller during L3" or "what did the tech say about the rattle?" and get answers with the original media one click away.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>AI analytics at three altitudes</h3>
+          <p><strong>This unit:</strong> compare today's readings, sounds, and thermal images against the unit's own baseline — "vibration at L4 is up versus its L3 start-up." <strong>This model, fleet-wide:</strong> patterns across identical equipment — "3 of the 12 units of this pump model logged the same start-up noise; the other 9 didn't — inspect before IST." <strong>This program:</strong> the lesson engine mines all of it, so <em>your</em> next project starts knowing what this one learned the hard way. Lessons are scoped to your organization — your accumulated knowledge is never visible to anyone else.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>The logbook ships with the building</h3>
+          <p>At handover the operator doesn't get a binder — they get every unit's living history: what it sounded like healthy, what its thermal profile was at acceptance, every quirk the field team ever noted. Day-2 operations and future warranty claims start from evidence, not memory.</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout">
+      <p><strong>Why this is the compounding moat:</strong> each capture is cheap for the person making it and permanent for everyone after them. The fleet-wide signature dataset this builds is exactly what the acoustic/thermal early-failure bet (Pillar 4) needs — and it can't be bought or scraped; it has to be accumulated project by project. Whoever owns the equipment logbook owns the data the next decade of commissioning AI will be built on.</p>
+    </div>
+
+    <h3 style="margin-top: 32px;">Future multimodal AI, ranked by expected value</h3>
+    <p class="section-intro" style="margin-top: 8px; margin-bottom: 18px;">Where multimodal AI helps commissioning teams most over the next few years — each ranked by value and honestly graded by maturity.</p>
+    <table>
+      <thead><tr><th>Rank</th><th>Capability</th><th>Maturity</th><th>Why it matters for Cx teams</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td>Voice-driven test execution &amp; structured capture</td><td><span class="pill green">Proven modality</span></td><td>The single biggest field-data quality lever: techs in PPE capture readings and observations without stopping work. Proven in construction (OpenSpace, Procore voice); unapplied to test execution.</td></tr>
+        <tr><td><strong>2</strong></td><td>Video understanding for witness &amp; test evidence</td><td><span class="pill blue">Emerging</span></td><td>Frontier models can already follow events in video+audio. A recorded startup sequence becomes verifiable, searchable, citable evidence in the dossier — nobody ships this.</td></tr>
+        <tr><td><strong>3</strong></td><td>Scan-vs-BIM deviation detection</td><td><span class="pill green">Proven — partner</span></td><td>Buildots saved Intel ~4 weeks/fab<sup class="cite"><a href="#asrc-1">1</a></sup>; OpenSpace claims adoption by 62% of top-400 contractors.<sup class="cite"><a href="#asrc-2">2</a></sup> Proven ROI, crowded space — we integrate their output into commissioning workflows rather than build cameras.</td></tr>
+        <tr><td><strong>4</strong></td><td>Acoustic / thermal / vibration early-failure scoring at acceptance</td><td><span class="pill amber">Emerging-to-frontier</span></td><td>A decade of peer-reviewed ML research on rotating machinery supports it<sup class="cite"><a href="#asrc-4">4</a></sup>, and the trend toward multi-sensor fusion is exactly our bet. Honest caution: the field's labeled failure data comes from operations monitoring, not acceptance testing — our lesson engine has to build that dataset.</td></tr>
+        <tr><td><strong>5</strong></td><td>AR-assisted field guidance</td><td><span class="pill amber">Speculative</span></td><td>Overlaying test steps and BIM context onto the tech's view of the equipment. High ceiling, but hardware adoption on sites is unproven — watch, don't build.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <p><strong>The compounding asset:</strong> lessons, corrections, and multimodal evidence all feed the same feedback loop that already trains our AI quality system. Every project makes <em>your</em> next one smarter — lessons are organization-scoped, so a Cx provider's accumulated knowledge across every job they run becomes their own proprietary asset inside CXPro, never visible to competitors. That per-customer compounding is the moat nobody can copy by cloning features.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Pillar 4 — the frontier bets</p>
+    <h2>Four hard problems worth winning</h2>
+    <p class="section-intro">These are the capabilities that separate "useful tool" from "category-defining platform." Each targets a problem today's market leaders don't solve. They are staged deliberately — every one depends on the foundation pillars above, and each is honest about what it needs to become real.</p>
+
+    <div class="flow">
+      <div class="step">
+        <div>
+          <h3>Sequence-of-operations stress testing <span class="pill amber">Frontier</span></h3>
+          <p><strong>Hard task:</strong> finding subtle control-logic flaws across thousands of BMS points <em>before</em> live testing.<br><strong>AI capability:</strong> the AI converts written sequences and drawings into a simulation model and runs massive automated scenario sweeps against the vendor's control logic — surfacing failures like "if Chiller 2 fails at exactly 38.5°C outdoor air, valve V-102 reacts too slowly, causing a thermal spike."<br><strong>Value:</strong> logic flaws caught in simulation cost minutes; the same flaw caught during an integrated systems test costs days of a fully-staffed site.<br><strong>Depends on:</strong> BIM integration, extracted sequences (live today), vendor control-code access partnerships.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>Unified trip chronology <span class="pill amber">Frontier</span></h3>
+          <p><strong>Hard task:</strong> when a breaker trips during an IST, the power monitoring system, the BMS, and individual devices all log it at slightly different timestamps — root-cause analysis becomes guesswork.<br><strong>AI capability:</strong> the AI realigns mismatched device logs into a single microsecond-accurate playback of the event, so the team sees the true failure path instead of arguing about it.<br><strong>Value:</strong> root-cause sessions collapse from days of log forensics across three vendors to a single visual replay.<br><strong>Depends on:</strong> EPMS/BMS telemetry ingestion (rail #5 above).<br><strong>White space check:</strong> confirmed unowned — EPMS systems already log millisecond power-quality data, but the most advanced shipping "analytics" (Niagara) are rule-based, not AI. Nobody reconstructs unified chronologies.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>Acoustic &amp; thermal early-failure detection <span class="pill amber">Frontier</span></h3>
+          <p><strong>Hard task:</strong> equipment that passes its load bank test but is quietly flawed and fails in month 18 — inside the warranty dispute zone.<br><strong>AI capability:</strong> during L4 testing, mobile devices or site sensors capture vibration signatures, thermal images, and acoustic profiles; the AI compares them against known-failure patterns and flags units that pass today but won't last — "this generator's acoustic signature indicates a misaligned shaft bearing."<br><strong>Value:</strong> a failure caught at commissioning is a vendor warranty claim; the same failure at month 18 is an operational outage. This is also where our audio/video capture pillar pays its second dividend — the evidence is already flowing through the platform.<br><strong>Depends on:</strong> multimodal capture (Pillar 3) and an accumulated signature dataset (the lesson engine).<br><strong>White space check:</strong> unowned at the commissioning phase — the underlying ML (vibration/acoustic analysis of rotating machinery) has a decade of peer-reviewed maturity, but it's deployed for operations monitoring, not acceptance testing. The honest risk: little labeled failure data exists for brand-new equipment, which is exactly why our lesson engine must feed this bet.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>Crew readiness analytics <span class="pill amber">Frontier</span></h3>
+          <p><strong>Hard task:</strong> the facility passed every test — but can the night crew actually handle a real grid failure?<br><strong>AI capability:</strong> during L5 blackout simulations, the AI observes operational response — time-to-procedure, alarm handling, action sequence — and scores human readiness with targeted findings: "backup power came up, but the crew skipped isolating the secondary loop; a 22+ minute outage would have lost cooling."<br><strong>Value:</strong> turns the soft, unmeasured half of operational readiness into a scored, trainable deliverable owners will pay for — and a differentiated line item in every handover package.<br><strong>Depends on:</strong> IST execution data (live today) plus structured crisis-scenario instrumentation.<br><strong>White space check:</strong> confirmed unowned — no commissioning or construction vendor touches operational readiness scoring.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">Regional edge</p>
+    <h2>Built for the markets we're targeting</h2>
+    <p class="section-intro">The two launch markets demand different things from the AI — and that difference is a moat against one-size-fits-all competitors.</p>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="icon">🤠</div>
+        <h3>Texas — speed under grid stress</h3>
+        <p><strong>The market:</strong> hyperscale builds for Meta, Microsoft, and AWS, delivered at breakneck pace by GCs like DPR, Holder, and Turner (DPR delivered a 980,000 sq ft, 200 MW campus in under 18 months<sup class="cite"><a href="#asrc-5">5</a></sup>), on an ERCOT grid known for instability.<br><strong>The tooling reality:</strong> Procore-centric project management with CxAlloy or Excel holding the commissioning layer — our integration wedge.<br><strong>What the AI must do:</strong> track design changes in real time (Procore signal) so testing never trails the build, and simulate fast-frequency response and power-shedding scenarios so generators are proven against ERCOT micro-grid events — not just nameplate specs.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🍁</div>
+        <h3>Canada — precision and sovereignty</h3>
+        <p><strong>The market:</strong> sovereign-cloud and HPC campuses (Google Québec, AWS Calgary, eStruxture, QScale) with harsh winters, strict environmental rules, and data-residency requirements.<br><strong>The tooling reality:</strong> the same Procore/Autodesk backbone as the US — no Canada-specific commissioning tool exists — but with heavier BIM coordination, which makes the Autodesk integration a bigger lever here.<sup class="cite"><a href="#asrc-5">5</a></sup><br><strong>What the AI must do:</strong> model free-cooling glycol loops and the changeover between free and mechanical cooling against climate forecasts, handle district-heating handoffs, and keep all project data within Canadian jurisdiction.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">The plan on one page</p>
+    <h2>Sequencing: value first, physics second</h2>
+    <p class="section-intro">The order below is deliberate. Each stage funds and feeds the next: the copilot and capture features create daily usage; daily usage creates the structured data; the structured data makes the frontier features possible.</p>
+    <table>
+      <thead><tr><th>Stage</th><th>What ships</th><th>The business value it unlocks</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Now</strong> <span class="pill green">Live</span></td>
+          <td>Document intelligence · AI procedure generation with citations · scoped copilot Q&amp;A · photo evidence · audit-logged AI actions</td>
+          <td>Weeks of procedure-writing become hours of review; every AI answer is verifiable — the trust foundation everything else stands on.</td>
+        </tr>
+        <tr>
+          <td><strong>Next two quarters</strong> <span class="pill blue">Building</span> <span class="pill ink">Next</span></td>
+          <td>Deviation triage &amp; similar-deviation search · voice-to-step and video evidence · lesson engine · MCP open AI access · Procore + BIM connectors</td>
+          <td>The copilot answers the hard daily questions; field knowledge stops evaporating; partners integrate in hours. This is where per-project stickiness becomes per-<em>program</em> stickiness.</td>
+        </tr>
+        <tr>
+          <td><strong>Frontier</strong> <span class="pill amber">Frontier</span></td>
+          <td>SOO stress simulation · unified trip chronology · acoustic/thermal early-failure detection · crew readiness analytics · automated Procore closeout</td>
+          <td>Problems no commissioning tool solves today — priced as premium modules, justified by avoided outages and recovered schedule, powered by the data only we will have accumulated.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <p><strong>How this document stays alive:</strong> it's versioned in the product repository next to the code, so every status pill is reviewable against what's actually built. When a capability ships, moves, or gets cut, this page changes in the same pull request. If you're reading a stale claim, that's a bug — file it. The market-reality and white-space sections were last grounded in a multi-source competitive scan in <strong>June 2026</strong> — re-run it quarterly; this market is moving fast (BlueRithm's MCP server and Procore's Agentic APIs both landed within the last 90 days).</p>
+    </div>
+
+    <div class="sources" style="margin-top: 28px;">
+      <h3>Sources &amp; how much to trust them</h3>
+      <p style="margin-bottom: 12px;"><span class="pill green">Strong</span> = peer-reviewed research. <span class="pill ink">Primary vendor</span> = a company's own announcements — reliable for <em>what they ship</em>, promotional in tone. <span class="pill amber">Vendor-reported ROI</span> = customer results published by the vendor, not independently audited.</p>
+      <ol>
+        <li id="asrc-1"><span class="pill amber">Vendor-reported ROI</span> Buildots–Intel results (~4 weeks delay avoided per fab, 4.3% rework reduction): <a href="https://buildots.com">Buildots case study</a>. A named enterprise customer and a named Intel executive endorsement add weight, but the numbers are the vendor's own measurement of its own product.</li>
+        <li id="asrc-2"><span class="pill amber">Vendor-reported ROI</span> OpenSpace claims (AI Voice Notes, 86% faster issue documentation at Suffolk, 62% of ENR Top-400 contractors): <a href="https://www.openspace.ai">OpenSpace announcements</a>. Scale figures are plausible and widely cited; the speed-up is a single-customer anecdote.</li>
+        <li id="asrc-3"><span class="pill ink">Primary vendor</span> Competitor capability claims (CxPlanner CxAI, BlueRithm 2.0 + MCP server, Procore Agentic APIs/Agent Builder, Autodesk releases): each company's own product pages, release notes, and announcements, reviewed June 2026. The right source for "what they ship," but absence of a feature on a marketing page isn't proof of absence — our white-space calls are best-effort, re-verified quarterly.</li>
+        <li id="asrc-4"><span class="pill green">Strong</span> Maturity of vibration/acoustic ML for rotating machinery: a systematic peer-reviewed review covering 96 studies (2015–2024) of CNNs, RNNs, and autoencoders applied to vibration and acoustic fault detection. The strongest evidence on this page — though it also supplies our honest caution that the data comes from operations monitoring, not acceptance testing.</li>
+        <li id="asrc-5"><span class="pill ink">Primary vendor / industry reporting</span> Texas &amp; Canada tooling landscape (June 2026 scan): GC rosters and project examples from <a href="https://broadstaffglobal.com/top-data-center-construction-companies">industry reporting on data center builders</a> (incl. DPR's Crusoe Abilene campus — 980k sq ft, 200+ MW, &lt;18 months); CxAlloy's data center presence and Procore integration from <a href="https://www.cxalloy.com/generator-commissioning-data-center/">CxAlloy's own case studies</a> and product pages; competitor positioning from <a href="https://cxplanner.com/">CxPlanner</a> (which markets itself explicitly to teams "frustrated with CxAlloy, Bluerithm, Facility Grid and Excel" — telling about who holds the market); Canadian platform adoption from <a href="https://blog.solidcad.ca/en/procore-vs-autodesk-construction-cloud-which-platform-fits-your-projects-best">Canadian Autodesk/Procore partner comparisons</a>. Directionally reliable for "who's on site"; none of it is market-share data — no independent commissioning-software market study exists.</li>
+      </ol>
+      <p style="margin-top: 12px;"><strong>One process caveat:</strong> the June 2026 scan extracted these findings from 25 sources, but its adversarial fact-check pass was cut short — claims here are single-source extractions. Anything destined for an investor deck should get a second, independent verification first.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span>CXPro — Commissioning software built by engineers, for engineers.</span>
+    <span>
+      <a href="index.html">Overview</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="ai.html">AI</a>
+      <a href="ai-strategy.html">AI Strategy</a>
+      <a href="features.html">Features</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
