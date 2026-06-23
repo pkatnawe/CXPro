@@ -6,7 +6,10 @@ self-graded sources, and frontier bets — content that must not reach competito
 
 **Rule: do not deploy or share this site in its current form.** If a customer/investor-facing version is
 needed, fork `index.html`, `how-it-works.html`, `ai.html`, `features.html`, and `glossary.html`, and strip:
-the entire `ai-strategy.html` page, competitor commentary, source self-grading meta-commentary, and any
-roadmap detail you wouldn't put in a competitor's hands.
+the entire `ai-strategy.html` AND `buyers-outreach.html` pages, competitor commentary, source self-grading
+meta-commentary, and any roadmap/pricing detail you wouldn't put in a competitor's hands.
+
+`market.html` and `buyers-outreach.html` are the most sensitive pages — between them they hold the
+competitor battle plan, value/exit thesis, pricing model, and a named call list. Never deploy or forward them.
 
 Serve locally: `python3 -m http.server 8765` from this directory, or just `open index.html`.

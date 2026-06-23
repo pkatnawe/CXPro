@@ -41,11 +41,11 @@ body {
 .site-nav .inner {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 8px 24px;
   display: flex;
   align-items: center;
   gap: 28px;
-  height: 60px;
+  min-height: 60px;
 }
 .brand {
   font-weight: 800;
@@ -55,7 +55,7 @@ body {
   text-decoration: none;
 }
 .brand .x { color: var(--blue); }
-.nav-links { display: flex; gap: 4px; margin-left: auto; }
+.nav-links { display: flex; flex-wrap: wrap; gap: 4px 2px; margin-left: auto; justify-content: flex-end; }
 .nav-links a {
   text-decoration: none;
   color: var(--ink-soft);
@@ -263,6 +263,75 @@ td strong { color: var(--ink); }
 .timeline .t-step h3 { margin-top: 4px; font-size: 16.5px; }
 .timeline .t-step p { font-size: 13.5px; color: var(--ink-soft); margin-top: 6px; }
 
+/* ---------- Diagrams ---------- */
+.diagram {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px 24px;
+  box-shadow: var(--shadow);
+  margin: 8px 0 4px;
+}
+.diagram-cap { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 14px; font-style: italic; }
+
+/* Value-chain: upstream → us → downstream */
+.chain { display: flex; align-items: stretch; gap: 0; flex-wrap: nowrap; }
+@media (max-width: 760px) { .chain { flex-direction: column; gap: 10px; } }
+.chain .link {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 16px 14px;
+  text-align: center;
+  position: relative;
+}
+.chain .link:first-child { border-radius: 8px 0 0 8px; }
+.chain .link:last-child { border-radius: 0 8px 8px 0; }
+@media (max-width: 760px) { .chain .link, .chain .link:first-child, .chain .link:last-child { border-radius: 8px; } }
+.chain .link .lab { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.chain .link .who { font-size: 14px; font-weight: 700; color: var(--ink); margin: 5px 0 3px; }
+.chain .link .note { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
+.chain .link.ours {
+  background: var(--blue);
+  border-color: var(--blue);
+  transform: scale(1.05);
+  z-index: 2;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(29,78,216,.28);
+}
+.chain .link.ours .lab { color: #aFc6f5; }
+.chain .link.ours .who, .chain .link.ours .note { color: #fff; }
+.chain .arrow { display: flex; align-items: center; padding: 0 4px; color: var(--blue-line); font-size: 20px; font-weight: 700; }
+@media (max-width: 760px) { .chain .arrow { transform: rotate(90deg); justify-content: center; padding: 0; } }
+
+/* Expansion stages: concentric rings as stacked bars */
+.stages { display: grid; gap: 8px; }
+.stages .ring {
+  display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 16px;
+  padding: 14px 18px; border-radius: 8px; border: 1px solid var(--line);
+}
+.stages .ring .badge { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; text-align: center; }
+.stages .ring .body { font-size: 13.5px; color: var(--ink-soft); }
+.stages .ring .body strong { color: var(--ink); }
+.stages .ring.s1 { background: var(--blue); border-color: var(--blue); }
+.stages .ring.s1 .badge { color: #fff; } .stages .ring.s1 .body { color: #eaf1ff; } .stages .ring.s1 .body strong { color: #fff; }
+.stages .ring.s2 { background: var(--blue-soft); border-color: var(--blue-line); }
+.stages .ring.s2 .badge { color: var(--blue); }
+.stages .ring.s3 { background: var(--amber-soft); border-color: #f0d9b0; }
+.stages .ring.s3 .badge { color: var(--amber); }
+
+/* Value-capture proportion bars */
+.vbars { display: grid; gap: 14px; }
+.vbar .vlab { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+.vbar .vlab .name { font-weight: 700; color: var(--ink); }
+.vbar .vlab .val { color: var(--muted); font-variant-numeric: tabular-nums; }
+.vbar .track { height: 26px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.vbar .fill { height: 100%; border-radius: 5px 0 0 5px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; }
+.vbar .fill.budget { background: var(--ink); width: 100%; }
+.vbar .fill.ours { background: var(--blue); }
+.vbar .fill.them { background: var(--amber); color: #fff; min-width: 3px; }
+.vbar .fill.tiny { background: var(--muted); }
+
 /* ---------- Citations & sources ---------- */
 sup.cite { font-size: 11px; line-height: 0; }
 sup.cite a { color: var(--blue); text-decoration: none; font-weight: 700; }
@@ -318,3 +387,68 @@ footer a:hover { color: var(--blue); }
   color: #8db1f7;
   margin-bottom: 12px;
 }
+
+/* ---------- Nav grouping separators ---------- */
+.nav-sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; align-self: center; }
+@media (max-width: 1000px) {
+  .nav-links { flex-wrap: wrap; }
+  .site-nav .inner { height: auto; min-height: 60px; padding-top: 8px; padding-bottom: 8px; }
+  .nav-sep { display: none; }
+}
+
+/* ---------- Pricing tier cards ---------- */
+.tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; margin-top: 8px; }
+@media (max-width: 860px) { .tiers { grid-template-columns: 1fr; } }
+.tier {
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 26px 24px 28px; box-shadow: var(--shadow); position: relative; display: flex; flex-direction: column;
+}
+.tier.featured { border-color: var(--blue); border-width: 2px; box-shadow: 0 8px 28px rgba(29, 78, 216, 0.16); }
+.tier .tier-badge {
+  position: absolute; top: -12px; left: 24px; background: var(--blue); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; padding: 4px 12px; border-radius: 999px; text-transform: uppercase;
+}
+.tier h3 { font-size: 18px; margin-bottom: 4px; }
+.tier .who { font-size: 13px; color: var(--muted); margin-bottom: 16px; min-height: 38px; }
+.tier .price .amt { font-size: 27px; font-weight: 800; letter-spacing: -0.02em; color: var(--blue); }
+.tier .price .unit { font-size: 14px; font-weight: 600; color: var(--ink-soft); }
+.tier .price-sub { font-size: 12.5px; color: var(--muted); margin: 4px 0 18px; }
+.tier ul { list-style: none; display: grid; gap: 9px; margin-top: auto; }
+.tier li { font-size: 13.5px; color: var(--ink-soft); padding-left: 22px; position: relative; line-height: 1.45; }
+.tier li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--green); font-weight: 800; }
+.tier li.no { color: var(--muted); }
+.tier li.no::before { content: "—"; color: var(--muted); font-weight: 700; }
+.tier-divider { height: 1px; background: var(--line); margin: 16px 0; }
+
+/* ---------- "Never billed on" list ---------- */
+.nope { display: grid; gap: 12px; }
+.nope .row {
+  display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: start;
+  background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--amber);
+  border-radius: 0 var(--radius) var(--radius) 0; padding: 14px 18px;
+}
+.nope .mark { color: var(--amber); font-weight: 800; font-size: 17px; line-height: 1.5; }
+.nope .row strong { color: var(--ink); }
+.nope .row p { color: var(--ink-soft); font-size: 14px; }
+
+/* ---------- Rate formula band ---------- */
+.rate-formula {
+  background: var(--ink); color: #fff; border-radius: var(--radius);
+  padding: 22px 24px; text-align: center; margin: 8px 0 4px;
+}
+.rate-formula .big { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+.rate-formula .big .op { color: #79a4f5; padding: 0 6px; }
+.rate-formula .sub { font-size: 13px; color: #9fb2cc; margin-top: 8px; }
+
+/* ---------- Phase ladder (certifications pathway) ---------- */
+.ladder { display: grid; gap: 14px; }
+.ladder .phase {
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 20px 22px; border-left: 4px solid var(--blue);
+}
+.ladder .phase .ph-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.ladder .phase .ph-num { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); }
+.ladder .phase h3 { font-size: 17px; margin: 0; }
+.ladder .phase .ph-meta { font-size: 12.5px; color: var(--muted); margin-left: auto; }
+.ladder .phase p { font-size: 14px; color: var(--ink-soft); }
+.ladder .phase.gate { border-left-color: var(--amber); }

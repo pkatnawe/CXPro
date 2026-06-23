@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic Architecture — CXPro (Internal)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="inner">
+    <a class="brand" href="index.html">CX<span class="x">Pro</span></a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="ai.html">AI</a>
+      <a href="ai-strategy.html">AI Strategy</a>
+      <a href="agentic-design.html" class="active">Architecture</a>
+      <a href="agent-training.html">Agent Training</a>
+      <a href="features.html">Features</a>
+      <span class="nav-sep"></span>
+      <a href="market.html">Market</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="buyers-outreach.html">Buyers</a>
+      <span class="nav-sep"></span>
+      <a href="certifications.html">Certifications</a>
+      <a href="study-guide.html">Study Guide</a>
+      <a href="glossary.html">Glossary</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Internal · the agentic system · grounded in 2024–2026 research</span>
+    <h1>The agentic system: a living model of your project — and the research behind it.</h1>
+    <p>CXPro isn't forms with a chatbot. It's a continuously-maintained model of a commissioning project: standardized states seeded by a strong AI inception baseline, kept aligned to a global objective by per-role agents, mindful of the real team and the real-world delays, and improving from lightweight feedback. This page is the architecture and the published research it rests on. Full internal write-up: <code>docs/agentic-design-foundations.md</code>. Strictly internal.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">What CXPro actually is</p>
+    <h2>Not forms with AI — a living, self-improving model of the project</h2>
+    <p class="section-intro">The lean-in for a hyperscaler is everyday proven value through a simple interface; the moat is the agentic engine plus the feedback that compounds. Four pillars hold it up.</p>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="icon">🧩</div>
+        <h3>Standardized project states</h3>
+        <p>A canonical, auditable model of the commissioning program — instantiated automatically from the design package at <strong>inception</strong>, then kept current as reality changes. Comparable across projects, which is what makes the lesson loop and the benchmark possible.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🎯</div>
+        <h3>A global project objective</h3>
+        <p>One objective that balances the project's requirements, feasibility, schedule risk, and <em>human/safety</em> constraints — decomposed into a DAG of <strong>verifiable sub-goals</strong>. It's also the verifier: the rubric that ranks "what's the next best action / what's at risk to handover."</p>
+      </div>
+      <div class="card">
+        <div class="icon">🧑‍🔧</div>
+        <h3>Per-role agents, recursive subgoals</h3>
+        <p>One agent per team member (OCA, Cx Engineer, CM, Field Tech, Design Engineer, Owner/FM), each pursuing its own subgoals in service of the global objective — orchestrator-worker, kept aligned, never drifting from the whole.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🫶</div>
+        <h3>Mindful of humans &amp; reality</h3>
+        <p>Aware of who's on the team, their responsibilities and <strong>availability</strong>, and the realities of construction and commissioning slips — so it plans <em>around</em> delays deliberately, not by hoping nothing goes wrong. AI drafts; a human always decides.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">How it runs</p>
+    <h2>The loop: inception → live → feedback → optimize → measure</h2>
+    <p class="section-intro">Usable day one from the documents the customer already hands over; better with every answer. Onboarding <em>is</em> the product.</p>
+    <div class="flow">
+      <div class="step"><div><h3>Inception — a strong AI baseline</h3><p>Ingest the design package; <strong>sample many candidate project states/plans</strong> and select the best with the global-objective judge (test-time scaling: sample → verify → select). The standardized states are instantiated, not hand-built.</p></div></div>
+      <div class="step"><div><h3>Live — orchestrated, cited, governed</h3><p>The orchestrator runs the global objective; per-role agents draft and route. Every claim is <strong>cited</strong>; the agent <strong>refuses when unsure</strong>; risky/state-changing actions pass a <strong>human-in-the-loop gate</strong>. Same harness as inception and eval.</p></div></div>
+      <div class="step"><div><h3>Feedback — the "mini grill-me"</h3><p>Lightweight, role-scoped multi-select prompts dropped at the right moments. They simultaneously <strong>collect expert feedback, refine the state, and onboard the team</strong> — and they're the labels that calibrate the judge.</p></div></div>
+      <div class="step"><div><h3>Optimize — reflective, not RL</h3><p>The aligned judge drives automated improvement of each role agent's prompts and skills (reflective prompt evolution), versioned and gated. No RL loop, no manual prompt-tuning.</p></div></div>
+      <div class="step"><div><h3>Measure — CxBench gates releases</h3><p>A multi-regime, deliberately <strong>hard, multimodal</strong> benchmark is the held-out judge. No regression ships. The same artifacts that make the product good are the research contribution.</p></div></div>
+    </div>
+    <div class="callout">
+      <p><strong>The flywheel:</strong> every project's mini-grill-me feedback sharpens the judge and the agents → the inception baseline gets stronger → the moat compounds. That's the lesson loop — now with a name and a method.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">The research underneath</p>
+    <h2>Every part maps to recent, real work</h2>
+    <p class="section-intro">This isn't a hunch. The design lines up with a coherent 2024–2026 literature — which is what makes it credible to a technical buyer <em>and</em> tells us what to build first.</p>
+    <table>
+      <thead><tr><th>Design element</th><th>Grounded in</th><th>What the research says</th></tr></thead>
+      <tbody>
+        <tr><td>Global objective → verifiable subgoals + drift monitor</td><td><strong>Goal-Oriented Reliability &amp; Self-Improvement for Multi-Agent Systems</strong> (GDE / RRM / SIL)</td><td>Decompose a high-level goal into a monitored DAG of verifiable sub-goals; detect <em>goal drift</em> live; self-improve from traces + feedback.</td></tr>
+        <tr><td>Mini-grill-me → the system gets better</td><td><strong>Alignment-to-Optimization Bridge</strong>; MemAlign</td><td>Expert labels are the <em>only</em> manual step; they calibrate a judge that then safely drives optimization (+11–15.7% held-out).</td></tr>
+        <tr><td>Improve from a few signals (not RL)</td><td><strong>GEPA / <code>optimize_anything</code></strong> (OPRO → MIPRO → GEPA)</td><td>Reflective prompt evolution beats RL with up to <strong>35× fewer rollouts</strong>; optimizes prompts, skills, tool signatures.</td></tr>
+        <tr><td>Strong inception baseline</td><td><strong>Test-time scaling</strong> (Snell; Large Language Monkeys; Tree of Thoughts)</td><td>Sample many candidates, then <em>verify-and-select</em>; compute trades up to quality — only with a good verifier.</td></tr>
+        <tr><td>Learns the team, improves over time</td><td><strong>cotomi Act</strong> (NEC)</td><td>A "situated co-worker" that learns the org by watching; best-of-N <em>beats the human baseline</em>; shared user+agent workspace.</td></tr>
+        <tr><td>Human-authored knowledge &gt; auto-generated</td><td><strong>Skilled AI Agents + IoT-SkillsBench</strong> (Duke)</td><td>Concise human-expert skills → near-perfect; LLM-generated skills are inconsistent and can <em>degrade</em>.</td></tr>
+        <tr><td>AI drafts, humans decide — as architecture</td><td><strong>Governance by Construction</strong> (CUGA, IBM)</td><td>Policy-as-code at five checkpoints incl. a human-approval gate; auditable, compliance-by-construction.</td></tr>
+        <tr><td>Production reliability around the agent</td><td><strong>Agent Lifecycle Toolkit</strong> (IBM); KARL harness</td><td>Pre-tool semantic validation, silent-error review; one harness identical across plan / eval / live.</td></tr>
+        <tr><td>CxBench</td><td><strong>KARLBench</strong>; IoT-SkillsBench</td><td>A multi-regime benchmark <em>is</em> the optimization objective and the release gate.</td></tr>
+        <tr><td>Self-optimizing harness (later)</td><td><strong>ADAS</strong> · <strong>AFlow</strong> · <strong>Darwin Gödel Machine</strong></td><td>Systems that design/optimize their own agent structure against a benchmark (DGM: SWE-bench 20%→50%).</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>The CAIS '26 cluster:</strong> six papers from one venue (the bridge, GDE/RRM/SIL, CUGA governance, cotomi Act, IoT-SkillsBench, ALTK) together form a playbook for <strong>governed, skilled, self-learning, production-grade</strong> enterprise agents — precisely CXPro's regime: mission-critical, compliance-heavy, long-horizon, learns the team.</p>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">The load-bearing piece</p>
+    <h2>The objective that ranks plans is the whole game</h2>
+    <p class="section-intro">Every result above — test-time scaling, reflective optimization, the bridge, the drift monitor — bottlenecks on one thing: a judge that tracks expert quality. Get it right and compute trades up to quality. Get it wrong and you <em>reward-hack</em>: optimization makes the agent worse while the score rises. So we build the judge first.</p>
+    <div class="grid cols-3">
+      <div class="card">
+        <div class="icon">🧮</div>
+        <h3>Decompose into critics</h3>
+        <p>Not one monolith: <strong>feasibility</strong>, <strong>dependency ordering</strong> (L1→L5 gating), <strong>requirement coverage</strong> (every OPR / sequence item tested — a deterministic match, not "LLM vibes"), and <strong>risk/safety</strong>. Keep a deterministic "sound floor" a persuasive-but-wrong plan can't argue away.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🧠</div>
+        <h3>Calibrate from few labels</h3>
+        <p>Dual memory (MemAlign): generalizable <em>principles</em> + <em>episodic</em> edge cases; ~2–10 expert examples per critic, improving as feedback accumulates. This is exactly what the mini-grill-me collects. Gate on judge↔expert agreement (Cohen's κ); alarm on drift.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🛡️</div>
+        <h3>Guard against reward hacking</h3>
+        <p>Over-optimization is law-like — it hits even best-of-N with no training. Cap optimization pressure, ensemble diverse critics, and <strong>never optimize against an uncalibrated judge</strong>. The judge is the moat <em>and</em> the liability.</p>
+      </div>
+    </div>
+    <div class="callout amber">
+      <p><strong>Why this matters for commissioning specifically:</strong> auto-generated rubrics collapse on niche, factual domains — and commissioning is exactly that. Human episodic anchors (the certified-expert feedback we collect) are non-negotiable. This is also why earning the <a href="certifications.html">certifications</a> and authoring the <a href="study-guide.html">knowledge base</a> ourselves directly sharpens the judge.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Priority order</p>
+    <h2>We already have the hard parts — here's the build</h2>
+    <p class="section-intro">The backend already has a LangGraph agent, pgvector retrieval, cited + refuse-on-low-confidence, and DSPy. The missing pieces, in dependency order:</p>
+    <div class="ladder">
+      <div class="phase"><div class="ph-head"><span class="ph-num">1</span><h3>An aligned judge per role</h3><span class="ph-meta">everything depends on this</span></div><p>Calibrated from mini-grill-me feedback (MemAlign-style: semantic + episodic memory), decomposed into feasibility / ordering / coverage / risk critics with a deterministic sound floor.</p></div>
+      <div class="phase"><div class="ph-head"><span class="ph-num">2</span><h3>CxBench as the held-out judge</h3><span class="ph-meta">measure &amp; gate</span></div><p>Multi-regime, hard, multimodal. We have the seed (a 56-item Cx-Engineer set + a document-intelligence track design); expand it.</p></div>
+      <div class="phase"><div class="ph-head"><span class="ph-num">3</span><h3>The reflective optimization loop</h3><span class="ph-meta">GEPA / optimize_anything</span></div><p>Refine each role agent's prompts + skills against the aligned judge; versioned and gated.</p></div>
+      <div class="phase"><div class="ph-head"><span class="ph-num">4</span><h3>Test-time sample-and-select</h3><span class="ph-meta">the inception baseline</span></div><p>Generate N candidate project states/plans → verify with the global-objective judge → keep the best.</p></div>
+      <div class="phase"><div class="ph-head"><span class="ph-num">5</span><h3>The global-objective layer</h3><span class="ph-meta">GDE / RRM / SIL-style</span></div><p>Formalize the verifiable-subgoal DAG and the live drift monitor — the rubric that balances requirements, feasibility, risk, and human/safety. This rubric <em>is</em> the verifier.</p></div>
+      <div class="phase gate"><div class="ph-head"><span class="ph-num">6</span><h3>Meta-harness (later, earned)</h3><span class="ph-meta">once the judge is trusted</span></div><p>ADAS/DGM-style optimization of the agent topology itself — a strong long-term research story, safe only after the judge is trustworthy.</p></div>
+    </div>
+    <div class="callout">
+      <p><strong>The throughline:</strong> the same artifacts that make the product good — an aligned judge, optimized role agents, CxBench — <em>are</em> the research contribution. That's the product-and-research balance the project is built to hit. See the grounding plan on <a href="agent-training.html">Agent Training</a> and the benchmark in <code>corpus/eval/</code>.</p>
+    </div>
+
+    <div class="sources" style="margin-top: 28px;">
+      <h3>Sources &amp; how much to trust them</h3>
+      <p style="margin-bottom: 12px;"><span class="pill green">Peer-reviewed</span> venue-stamped · <span class="pill ink">Preprint</span> arXiv, not yet vetted · <span class="pill amber">Blog/vendor</span> informed but interested. The pattern is well-supported; exact numbers are directional.</p>
+      <ol>
+        <li><span class="pill ink">CAIS '26 (provided)</span> The six local papers: <em>Alignment-to-Optimization Bridge</em> (Pasfield); <em>Goal-Oriented Reliability &amp; Self-Improvement for Multi-Agent Systems</em> (Katharki &amp; Galhotra — GDE/RRM/SIL); <em>Governance by Construction</em> (CUGA, IBM); <em>cotomi Act</em> (NEC); <em>Skilled AI Agents + IoT-SkillsBench</em> (Duke); <em>Agent Lifecycle Toolkit</em> (IBM). CC-BY; recent, lightly vetted.</li>
+        <li><span class="pill green">Peer-reviewed</span> Optimization &amp; harness: DSPy (ICLR'24), MIPROv2 (EMNLP'24), <strong>ADAS</strong> &amp; <strong>AFlow</strong> (ICLR'25), Gödel Agent (ACL'25), <strong>GEPA</strong> (ICLR'26); SWE-agent (NeurIPS'24).</li>
+        <li><span class="pill green">Peer-reviewed</span> Test-time scaling &amp; verifiers: <em>Judging LLM-as-a-Judge</em>, G-Eval, <em>Scaling Laws for RM Overoptimization</em>, <em>Let's Verify Step by Step</em>, Math-Shepherd, LLM-Modulo, Tree of Thoughts, Self-Refine, Reflexion.</li>
+        <li><span class="pill ink">Preprint</span> <strong>KARL</strong> + KARLBench; Snell et al. compute-optimal scaling; Large Language Monkeys; <strong>MAST</strong> failure taxonomy; <em>Inherited Goal Drift</em>; Darwin Gödel Machine.</li>
+        <li><span class="pill amber">Blog/vendor</span> MemAlign (Databricks); Anthropic on multi-agent systems &amp; context engineering; the "don't build multi-agents" / read-vs-write debate.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span>CXPro — Internal agentic architecture &amp; research grounding. Not for distribution.</span>
+    <span>
+      <a href="index.html">Overview</a>
+      <a href="agent-training.html">Agent Training</a>
+      <a href="market.html">Market</a>
+      <a href="index.html">Overview</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

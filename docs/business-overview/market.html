@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market &amp; Strategy — CXPro (Internal)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="inner">
+    <a class="brand" href="index.html">CX<span class="x">Pro</span></a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="ai.html">AI</a>
+      <a href="ai-strategy.html">AI Strategy</a>
+      <a href="agentic-design.html">Architecture</a>
+      <a href="agent-training.html">Agent Training</a>
+      <a href="features.html">Features</a>
+      <span class="nav-sep"></span>
+      <a href="market.html" class="active">Market</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="buyers-outreach.html">Buyers</a>
+      <span class="nav-sep"></span>
+      <a href="certifications.html">Certifications</a>
+      <a href="study-guide.html">Study Guide</a>
+      <a href="glossary.html">Glossary</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Internal · market &amp; competition · grounded in a June 2026 scan</span>
+    <h1>Market &amp; Strategy</h1>
+    <p>The commercial case: where the competition actually is (and isn't), whether there's real value here, how far beyond data centers this goes, and how we price to win fewer, larger logos. For the named call list and outreach plan, see <a href="buyers-outreach.html" style="color:#8db1f7;">Buyers &amp; Outreach</a>. Strictly internal — see the folder README.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Competitive landscape</p>
+    <h2>The AI is landing everywhere except commissioning itself</h2>
+    <p class="section-intro">We scanned the players you flagged. The field splits into four lanes — and the prize lane (AI-native commissioning) is still open. The AI money is going upstream (scheduling) and downstream (operations); the commissioning phase in the middle is still run on flexible-but-dumb software or human services.</p>
+
+    <div class="diagram">
+      <div class="chain">
+        <div class="link">
+          <div class="lab">Upstream</div>
+          <div class="who">Scheduling AI</div>
+          <div class="note">ALICE — generative build sequencing. Real AI. No commissioning.</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="link ours">
+          <div class="lab">The open lane</div>
+          <div class="who">Commissioning — us</div>
+          <div class="note">Cited generation, per-role agents, multimodal logbook. Nobody has AI-native here.</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="link">
+          <div class="lab">Downstream</div>
+          <div class="who">Operations AI</div>
+          <div class="note">Nlyte, Emerson, Sitetracker — anomaly detection, DCIM. Day 2, not the build.</div>
+        </div>
+      </div>
+      <div class="diagram-cap">The AI money flows around commissioning, not into it — scheduling upstream, operations downstream, the verification phase in the middle still un-owned.</div>
+    </div>
+
+    <table>
+      <thead><tr><th>Lane</th><th>Who's there</th><th>What they actually do</th><th>Our read</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Construction scheduling AI</strong> (upstream)</td>
+          <td>ALICE Technologies</td>
+          <td>Generative scheduling — simulate thousands of build sequences. Real AI, real ROI ($32M-saved case). <strong>Zero commissioning coverage</strong> — explicitly preconstruction/construction only.</td>
+          <td><span class="pill green">Partner, not rival.</span> They optimize the schedule; we execute the commissioning inside it. Integration story, not a fight.</td>
+        </tr>
+        <tr>
+          <td><strong>Operations / DCIM AI</strong> (downstream)</td>
+          <td>Nlyte Operational AI, Emerson, Sitetracker Scout</td>
+          <td>Ongoing-operations intelligence: anomaly detection, capacity planning, conversational Q&amp;A over live infrastructure. Sitetracker Scout is agentic (doc processing, photo QC, custom agents) but <strong>operations/maintenance-centric — "no commissioning-specific features."</strong></td>
+          <td><span class="pill amber">Adjacent threat.</span> They own Day 2. Risk: they extend backward into commissioning. Defense: own the Cx workflow + hand them the equipment logbook as their Day-2 input — be their feeder, not their target.</td>
+        </tr>
+        <tr>
+          <td><strong>Commissioning software</strong> (head-to-head)</td>
+          <td>BlueRithm, CxAlloy, Facility Grid, CxPlanner</td>
+          <td>Cloud Cx platforms: forms, checklists, photo attachments, issue logs, reports. BlueRithm wins on flexibility + closeout time-savings and lists Procore/Autodesk integrations, but its data-center page shows <strong>no data-center-specific AI, no multimodal AI, no MCP detail.</strong> CxPlanner is the AI front-runner — still no citations/handoff.</td>
+          <td><span class="pill blue">The real fight.</span> This is where our white space lives: cited + handoff-gated generation, per-role agents, the multimodal logbook, org-scoped lessons. Nobody here has it.</td>
+        </tr>
+        <tr>
+          <td><strong>Commissioning services</strong> (human labor)</td>
+          <td>Salute IconicX, SGS, and the CxA firms on the Buyers page</td>
+          <td>Human-staffed QA/QC + functional testing. Salute = 40+ services, 100+ markets, <strong>no software platform, no AI</strong>. SGS markets "digital commissioning / real-time visibility" as a service.</td>
+          <td><span class="pill green">Customers, not competitors.</span> They're labor; we're leverage. Sell them the tool that multiplies their scarce engineers. These firms are on our call list, not our kill list.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>The one-line competitive thesis:</strong> agentic AI is arriving in critical infrastructure (Sitetracker proves it) — but aimed at deployment and operations, leaving the construction-commissioning phase open. We win by owning the Cx-specific workflow with a trust layer (citations + handoff) nobody else pairs with AI, before the operations players reach backward or BlueRithm/CxPlanner's AI matures. Speed is the moat. <a href="ai-strategy.html">Full white-space analysis →</a></p>
+    </div>
+
+    <h3 style="margin-top: 32px;">New entrants to watch — the edges are filling in</h3>
+    <p class="section-intro" style="margin-top: 8px; margin-bottom: 18px;">None of these is a head-on AI-commissioning competitor yet, but each is adjacent enough to become one. Track them.</p>
+    <table>
+      <thead><tr><th>Player</th><th>What they do</th><th>Why they matter to us</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Structured AI</strong> <span class="pill amber">Funded</span></td><td>YC / Sequoia Scout / 20VC (~$5M). AI agents that QA/QC <em>drawings</em> — learn standards, apply codes, cut RFIs before they happen.</td><td>The closest venture-backed AI threat — but upstream (design review), not commissioning execution. Could expand downstream. Proves AI-construction-quality is fundable.</td></tr>
+        <tr><td><strong>ValGenesis</strong> <span class="pill amber">Incumbent (pharma)</span></td><td>AI-driven validation & process platform for life sciences (pharma CQV).</td><td>The incumbent we'd face <em>if/when</em> we expand into pharma. Reason to enter pharma later, from data-center strength — not day one.</td></tr>
+        <tr><td><strong>Fyld</strong></td><td>Turns jobsite worker videos into actionable safety/quality/delivery risk data via AI.</td><td>Overlaps our video-evidence ambition (multimodal). Field-ops focused, not Cx — but validates video-to-structured-data as real.</td></tr>
+        <tr><td><strong>Procore / Autodesk</strong> <span class="pill amber">Platform risk</span></td><td>Both acquiring AI fast: Procore→DataGrid (Jan 2026); Autodesk→Payapps ($387M), Eyrus. Both want the handover layer they're weak on.</td><td>The real long-game risk — and the real exit. They'd rather buy commissioning/handover than build it. Be the integrable layer they acquire, not the one they crush.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">Is there real value here?</p>
+    <h2>The honest verdict — yes, and the market is now proving it for us</h2>
+    <p class="section-intro">Stepping back from the feature talk: is this a real business, or a nicely-designed hobby? The June 2026 evidence says real — and three independent signals now confirm it that weren't visible a month ago.</p>
+    <div class="grid cols-3">
+      <div class="card">
+        <div class="icon">🤝</div>
+        <h3>Strategics are buying in</h3>
+        <p><strong>Accenture acquired a majority stake in DLB Associates (Dec 2025)</strong> — a firm doing data-center commissioning, construction quality, and energy optimization — explicitly to build "end-to-end data center development."<sup class="cite"><a href="#msrc-3">3</a></sup> When a global consultancy pays up for data-center commissioning capability, the value thesis isn't ours to prove anymore — the market priced it.</p>
+      </div>
+      <div class="card">
+        <div class="icon">💸</div>
+        <h3>Venture money is adjacent</h3>
+        <p><strong>Structured AI</strong> (YC, Sequoia Scout, 20VC — ~$5M) is shipping AI agents for construction QA/QC on drawings.<sup class="cite"><a href="#msrc-3">3</a></sup> It validates the thesis (AI agents for construction quality is fundable) <em>and</em> warns us: smart money is circling the edges of our space. We're early, not alone.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📈</div>
+        <h3>The category is underpriced</h3>
+        <p>From the pricing analysis below: incumbents charge ~0.01% of the commissioning budget they serve. A correctly-priced AI platform (per-MW, value-anchored) captures 100× that while staying a rounding error to the buyer. Real margin lives in that gap.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p><strong>The verdict, stated honestly:</strong> the value is real and now externally validated — but the window is the asset, not the idea. Structured AI is funded, Procore and Autodesk are buying AI capability (DataGrid, Payapps, Eyrus), and ValGenesis already owns AI validation in pharma. None of them own AI-native <em>data-center commissioning</em> yet. The bet is winnable on <strong>speed and wedge discipline</strong>, not on the vision — and it carries a credible exit: a platform with real Cx traction is an obvious acquisition target for Procore or Autodesk (both weak on handover) or a services consolidator (Accenture just showed the appetite).</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">We're not just data centers</p>
+    <h2>The wedge-and-expand plan: one engine, many regulated facilities</h2>
+    <p class="section-intro">Commissioning is the same discipline everywhere — verify built matches designed, test by levels, document, hand over. Only the compliance framework changes. That makes data centers a <em>beachhead</em>, not the whole market. Our engine generalizes; our moat (the trust layer) matters <em>more</em> as the regulatory bar rises.</p>
+
+    <div class="diagram">
+      <div class="stages">
+        <div class="ring s1"><div class="badge">Now</div><div class="body"><strong>Beachhead: data centers</strong> — hottest demand, weakest incumbents, greenfield buyers. Win on speed.</div></div>
+        <div class="ring s2"><div class="badge">Expand 1</div><div class="body"><strong>Your customers' other work</strong> — the same Cx firms commission hospitals &amp; labs. Same logo, zero new sales motion; lessons follow them.</div></div>
+        <div class="ring s3"><div class="badge">Expand 2</div><div class="body"><strong>Pharma CQV &amp; semiconductor fabs</strong> — stricter, stickier, higher-paying. Trust layer matters most here. Later fight (ValGenesis holds pharma).</div></div>
+      </div>
+      <div class="diagram-cap">One engine, widening rings of regulated facilities. The beachhead funds the expansion; the expansion makes it a category.</div>
+    </div>
+
+    <div class="flow">
+      <div class="step"><div><h3>Beachhead — data center commissioning <span class="pill green">Now</span></h3><p>Hottest demand, weakest incumbents, greenfield buyers (Texas + Canada). Win here first — it's where speed beats everyone and there's no entrenched tool to displace.</p></div></div>
+      <div class="step"><div><h3>Expand 1 — your customers' other work <span class="pill ink">Natural</span></h3><p>The Cx firms on our call list (HPD, Salas O'Brien, BV) commission data centers <em>and</em> hospitals <em>and</em> labs. Land them on data centers; their org-scoped lessons and the platform follow them into every vertical they serve. Zero new sales motion — expansion rides the same logo.</p></div></div>
+      <div class="step"><div><h3>Expand 2 — pharma CQV &amp; semiconductor fabs <span class="pill amber">Higher bar, higher value</span></h3><p>Pharma is 42% of the cleanroom market; semi fabs are the fastest-growing segment (Amkor's $7B Arizona fab for Apple/Nvidia).<sup class="cite"><a href="#msrc-4">4</a></sup> CQV (Commissioning, Qualification, Validation — IQ/OQ/PQ, FDA 21 CFR Part 11) is stricter, stickier, and pays more. Our citation + audit trust layer is a <em>pharma-grade</em> asset — it matters more here than anywhere. Caveat: <strong>ValGenesis already ships AI validation for life sciences</strong><sup class="cite"><a href="#msrc-4">4</a></sup> — so pharma is a deliberate later fight, entered from data-center strength, not a day-one front.</p></div></div>
+    </div>
+    <div class="callout">
+      <p><strong>Why this is a better plan than any single competitor's:</strong> ALICE is locked to scheduling, ValGenesis to pharma, the DCIM players to operations, BlueRithm/CxAlloy to flexible-but-dumb data-center forms. CXPro is the only one positioned to own the <em>commissioning verification layer across regulated facility types</em> — with one AI engine, one trust contract, and a lesson dataset that compounds across verticals nobody else spans. The beachhead funds the expansion; the expansion is what makes it a category, not a tool.</p>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">Market timing — the community is ready</p>
+    <h2>The industry's own flagship conference just made AI its headline</h2>
+    <p class="section-intro">The strongest sign we're early rather than late comes from the certified community itself. CxEnergy — the flagship commissioning conference, jointly run by ACG, AABC and EMA — chose practical AI as its 2026 keynote and tripled its AI programming in two years. The gatekeepers aren't resisting AI; they're inviting it.</p>
+    <div class="grid cols-3">
+      <div class="card">
+        <div class="icon">🎤</div>
+        <h3>AI took the main stage</h3>
+        <p>The 2026 keynote was <strong>"From Checklists to Co-Pilots: Practical AI for Commissioning and Energy Professionals"</strong> (futurist Ian Beacraft), backed by three more AI sessions — up from one in 2024. ACG titled its own announcement "CxEnergy 2026 Looks to the Future with AI Keynote."<sup class="cite"><a href="#msrc-5">5</a></sup></p>
+      </div>
+      <div class="card">
+        <div class="icon">🤝</div>
+        <h3>The framing is our thesis, verbatim</h3>
+        <p>From the keynote: AI <em>"isn't coming to replace your engineering judgment… increase revenue per engineer… free technical staff from low-value documentation."</em> That is CXPro's exact "AI drafts, humans decide" positioning — stated from the podium, not by us.<sup class="cite"><a href="#msrc-5">5</a></sup></p>
+      </div>
+      <div class="card">
+        <div class="icon">📋</div>
+        <h3>They named our wedge feature</h3>
+        <p>Sessions like <em>"Less Admin, More Commissioning: Removing Repetitive Work with AI"</em> and <em>"Judgment Day"</em> (automated report generation, predictive trends, FDD) point straight at the felt pain — documentation. That's exactly where we lead.<sup class="cite"><a href="#msrc-5">5</a></sup></p>
+      </div>
+    </div>
+    <div class="callout">
+      <p><strong>The play:</strong> <strong>CxEnergy 2027 (Apr 27–30, Mandalay Bay, Las Vegas)</strong> is the launch target — ~600 high-intent attendees (Cx providers, owners, MEP engineers), 50+ exhibitors, and a Gold sponsorship (~$9k) that buys an exclusive technical-session slot, not just a booth. Pair it with the workforce-shortage narrative ACG keeps raising — "a critical talent gap as experienced professionals retire" — for which AI that raises revenue-per-engineer is the demand-side answer. Chapter on-ramps are on <a href="buyers-outreach.html">Buyers &amp; Outreach</a>; the standards and credentials to speak to are on <a href="certifications.html">Certifications</a>.<sup class="cite"><a href="#msrc-5">5</a></sup></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Pricing — fewer customers, more money</p>
+    <h2>Price to a fraction of the commissioning budget — by the megawatt, locked at signing</h2>
+    <p class="section-intro">The instinct — take a slice of the commissioning spend rather than sell cheap seats — is the right <em>economic</em> model, and the real numbers make it overwhelming. The refinement: charge by a clean unit that scales with project value (the megawatt), and tell the value story as a fraction of the Cx budget.</p>
+
+    <h3>The economics, grounded in real 2026 numbers<sup class="cite"><a href="#msrc-1">1</a></sup></h3>
+    <table>
+      <thead><tr><th>Layer</th><th>Real figure (2026)</th><th>What it implies</th></tr></thead>
+      <tbody>
+        <tr><td>Data center build cost</td><td>~$11.3M/MW standard (JLL); $15–20M+/MW for AI/liquid-cooled</td><td>The denominator. A 100 MW campus is a ~$1.1B+ build.</td></tr>
+        <tr><td>Commissioning spend</td><td>1–4% of construction cost (~2% midpoint)</td><td>≈ <strong>$200–360k of commissioning per MW</strong>. A 100 MW campus carries a <strong>~$22–36M commissioning budget</strong>; a 2.1 GW Stargate buildout, several hundred million.</td></tr>
+        <tr><td>What incumbents charge</td><td>CxPlanner: ~$65/user/mo or ~$1,720/project/yr; CxAlloy/BlueRithm quote-based but same ballpark</td><td>The incumbents price like a <em>document tool</em> — low thousands per project against a multi-<em>million</em>-dollar Cx budget. That's <strong>~0.01% of the value at stake.</strong> They have massively underpriced the category.</td></tr>
+        <tr><td>The opening</td><td>—</td><td>If commissioning on that campus is $22M and we de-risk its single biggest schedule risk (~$14M/<em>month</em> of delay), capturing even <strong>1–3% of the Cx budget = $220–660k per campus</strong> — 100× the incumbent price, still a rounding error to the buyer.</td></tr>
+      </tbody>
+    </table>
+    <div class="diagram">
+      <div class="vbars">
+        <div class="vbar">
+          <div class="vlab"><span class="name">Commissioning budget — 100 MW campus</span><span class="val">~$22M</span></div>
+          <div class="track"><div class="fill budget" style="width:100%">the value at stake</div></div>
+        </div>
+        <div class="vbar">
+          <div class="vlab"><span class="name">CXPro capture (1–3%, per-MW)</span><span class="val">~$220–660k</span></div>
+          <div class="track"><div class="fill ours" style="width:3%"></div></div>
+        </div>
+        <div class="vbar">
+          <div class="vlab"><span class="name">What incumbents charge (per-project)</span><span class="val">~$2k</span></div>
+          <div class="track"><div class="fill them" style="width:0.5%"></div></div>
+        </div>
+      </div>
+      <div class="diagram-cap">To scale against the $22M budget. Incumbents capture a sliver invisible at this resolution; even our modest 1–3% is ~100× more — while leaving 97%+ on the table for the buyer.</div>
+    </div>
+
+    <div class="callout">
+      <p><strong>The core insight:</strong> the incumbents anchored this category absurdly low — they sell a few thousand dollars of software against a $20M+ commissioning line. We must <em>not</em> fight on their per-seat / per-project axis; that's a race to a tiny number. We price against the <strong>commissioning budget and the cost of delay</strong>, on a unit (the megawatt) that scales with both. The market is moving our way: ~85% of SaaS now uses some usage-based pricing, Procore itself bills by project volume not seats, and Gartner projects 40% of enterprise SaaS will be outcome-based by end of 2026.<sup class="cite"><a href="#msrc-2">2</a></sup></p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3>Why not per-seat</h3>
+        <p>Per-seat punishes the thing we want — getting every sub and tech into the system. It also commoditizes us against CxAlloy's pricing. Our committed posture stays: <strong>unlimited users</strong>.</p>
+      </div>
+      <div class="card">
+        <h3>Why not a literal %</h3>
+        <p>"Give us 3% of your commissioning cost" is value-aligned but procurement-hostile: it demands they open their books, it's unpredictable to meter, and buyers resist a claim on their fee. Great narrative, bad invoice.</p>
+      </div>
+      <div class="card">
+        <h3>Why per-MW wins</h3>
+        <p>Data centers are sized in megawatts — it's the unit buyers already think in. Price per commissioned MW and revenue scales with project size <em>exactly like a percentage would</em> (a 200 MW campus pays far more than a 5 MW site), but the number is clean, known up front, and locked at signing — <em>never metered</em>. A single large campus is a large contract from one logo — <strong>fewer customers, more money</strong>.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p><strong>The model, decided:</strong> a <strong>fixed annual platform fee per org</strong> (unlimited users + the lesson engine) + <strong>a per-MW rate locked at signing</strong>, landing around <strong>$2.5–5k/MW for standard facilities, ×1.5 for AI/liquid-cooled</strong> — roughly <strong>1–2% of the ~$200–360k/MW commissioning budget</strong>. A 100 MW campus is ~$425k; a gigawatt buildout, ~$2.5M, from one logo. Critically, it's priced on <em>nameplate capacity fixed in the design basis</em>, so the buyer knows their bottom-dollar number before signing. We <strong>do not meter usage, charge per seat, or tie price to on-time handover</strong> — that depends on schedule slips the buyer doesn't control. Predictability is the product. <strong><a href="pricing.html">See the full pricing model, rate card &amp; worked examples →</a></strong></p>
+    </div>
+    <div class="callout amber">
+      <p><strong>Caveat, stated plainly:</strong> the <em>structure</em> (fixed platform fee + per-MW on nameplate capacity, unlimited users, rate locked at signing) is decided and well-grounded in how AEC and vertical SaaS price. The <em>exact price points</em> are still hypotheses — what a project will actually pay per-MW, and what CxAlloy/BlueRithm quote behind their "contact us." Validate with design partners before quoting a real customer.</p>
+    </div>
+
+    <div class="sources" style="margin-top: 28px;">
+      <h3>Sources &amp; how much to trust them</h3>
+      <ol>
+        <li id="msrc-1"><span class="pill ink">Industry research / vendor</span> Build &amp; commissioning economics: build cost per MW from <a href="https://www.datacenterdynamics.com/en/news/building-scale-hyperscalers-aim-build-6m-mw/">DCD</a>, JLL forecasts via <a href="https://www.constructelements.com/post/cost-to-build-modern-data-center-2026">ConstructElements</a> and <a href="https://www.irecruit.co/insights/data-center-construction-cost-per-mw-2026-benchmarks-owners">iRecruit benchmarks</a> ($11.3M/MW std, $15–20M+ AI); commissioning at 1–4% of construction from <a href="https://cxplanner.com/commissioning-101/what-does-commissioning-cost">CxPlanner</a> and <a href="https://irfanm.medium.com/optimize-commissioning-cost-on-a-data-center-construction-project-e306f23a5d68">a practitioner write-up</a>; competitor pricing (CxPlanner ~$65/user/mo, ~$1,720/project/yr) from <a href="https://www.getapp.com/construction-software/a/cxplanner/pricing/">GetApp</a> — CxAlloy/BlueRithm/Facility Grid are quote-gated, so their figure is inferred from category positioning, not confirmed. The per-MW math is <em>our</em> derivation from these inputs; treat as a sizing model, not a quote.</li>
+        <li id="msrc-2"><span class="pill ink">Industry research</span> Pricing-model trends (85% of SaaS use some usage-based pricing; 43% of models; Procore prices by project volume; Gartner 40% outcome-based by end-2026): <a href="https://www.getmonetizely.com/articles/saas-pricing-benchmark-study-2025-key-insights-from-100-companies-analyzed">Monetizely 2025 benchmark</a> and <a href="https://www.revenera.com/blog/software-monetization/saas-pricing-models-guide/">Revenera</a>. Solid directional trend data; the Gartner projection is a forecast.</li>
+        <li id="msrc-3"><span class="pill ink">News reporting</span> Value/M&amp;A signals: <a href="https://newsroom.accenture.com/news/2025/accenture-to-acquire-majority-stake-in-dlb-to-expand-capital-projects-capabilities-for-end-to-end-data-center-development">Accenture–DLB Associates (Dec 2025)</a>; <a href="https://www.enr.com/articles/63139-construction-quality-startup-structured-ai-raises-42m-seed-round">Structured AI seed round (ENR)</a>; Procore/Autodesk acquisitions via <a href="https://www.constructiondive.com/news/trimble-acquire-document-crunch-contech/816630/">Construction Dive</a> and Tracxn. Named-company announcements — solid for "the deal happened"; strategic intent is the acquirers' framing.</li>
+        <li id="msrc-4"><span class="pill ink">Industry research</span> Vertical breadth (pharma 42% of cleanroom market, semi fabs fastest-growing 8.28% CAGR, Amkor $7B AZ fab; ValGenesis AI validation): <a href="https://www.mordorintelligence.com/industry-reports/cleanroom-technology-market">Mordor Intelligence cleanroom market</a> and <a href="https://cleanroomtechnology.com/valgenesis-launches-first-ai-enabled-platform-to-unify">Cleanroom Technology (ValGenesis)</a>. Market-research CAGRs are directional; the vertical structure (CQV exists, is regulated, generalizes) is solid.</li>
+        <li id="msrc-5"><span class="pill green">Strong (primary)</span> CxEnergy 2026 program — AI keynote, AI/data-center/workforce sessions, and 2027 dates: the official <a href="https://www.cxenergy.com/wp-content/uploads/CxE26-Program_3-25-26_web_.pdf">CxEnergy 2026 program PDF</a>, ACG's <a href="https://www.cxenergy.com/cxenergy-2026-looks-to-the-future-with-ai-keynote-focus-on-workforce-development/">AI-keynote / workforce announcement</a>, and the <a href="https://www.cxenergy.com/">CxEnergy site</a> (2027: Apr 27–30, Mandalay Bay, Las Vegas). Keynote quotes are from the official program. Note: 2026 had dedicated data-center <em>sessions</em> within a four-category program, not a formally labeled "track"; ~600 attendees / 50+ exhibitors are from ACG's own 2025 recap.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span>CXPro — Internal market &amp; strategy document. Not for distribution.</span>
+    <span>
+      <a href="index.html">Overview</a>
+      <a href="ai-strategy.html">AI Strategy</a>
+      <a href="market.html">Market</a>
+      <a href="buyers-outreach.html">Buyers &amp; Outreach</a>
+      <a href="glossary.html">Glossary</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

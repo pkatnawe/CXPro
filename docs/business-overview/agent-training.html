@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Grounding &amp; Training Plan — CXPro (Internal)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="inner">
+    <a class="brand" href="index.html">CX<span class="x">Pro</span></a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="ai.html">AI</a>
+      <a href="ai-strategy.html">AI Strategy</a>
+      <a href="agentic-design.html">Architecture</a>
+      <a href="agent-training.html" class="active">Agent Training</a>
+      <a href="features.html">Features</a>
+      <span class="nav-sep"></span>
+      <a href="market.html">Market</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="buyers-outreach.html">Buyers</a>
+      <span class="nav-sep"></span>
+      <a href="certifications.html">Certifications</a>
+      <a href="study-guide.html">Study Guide</a>
+      <a href="glossary.html">Glossary</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Internal · grounding &amp; training plan · how the role agents learn the work</span>
+    <h1>How we train the role agents — grounded in real documents, cited, and never guessing.</h1>
+    <p>The plan to turn the commissioning body of knowledge and each project's documents into per-role AI agents that <em>draft</em> the work and <em>cite</em> every claim. It's built on what already ships — DSPy signatures, a pgvector store, and a refuse-when-unsure gate in <code>cx_execution_agent</code> — and extends it to a tiered knowledge corpus, role-scoped retrieval, evaluation, and a licensing-clean data strategy. Pairs with the <a href="study-guide.html" style="color:#8db1f7;">Study Guide</a> (the knowledge) and <a href="ai.html" style="color:#8db1f7;">AI in CXPro</a> (the choreography). Strictly internal — see the folder README.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">The grounding contract</p>
+    <h2>Four rules every agent obeys — they're the product's trust layer</h2>
+    <p class="section-intro">These aren't aspirations; three of the four are already enforced in code. The plan is to hold the line as we add knowledge and roles.</p>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="icon">🔎</div>
+        <h3>Retrieval-grounded, not memorized</h3>
+        <p>Agents answer from <em>retrieved documents</em>, not from model weights. The knowledge lives in a versioned corpus we control, so we can update it, audit it, and trust it — and we never depend on what a foundation model happened to absorb in training. RAG over fine-tuning, for grounding.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🧾</div>
+        <h3>Cited, or it doesn't ship</h3>
+        <p>Every generated step carries a citation to the chunk it came from — already enforced by the DSPy signatures (<code>GenerateL2ChecklistSignature</code>) with retry-until-cited logic. No citation, no output.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🛑</div>
+        <h3>Refuse when unsure</h3>
+        <p>If retrieval returns too few or low-confidence chunks, the agent <em>refuses</em> and emits an <code>AIRefusal</code> event rather than hallucinating — the confidence gate already in <code>cx_execution_agent</code> (needs ≥3 chunks, ≥2 high-confidence). A confident wrong answer is the only unacceptable outcome.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🙋</div>
+        <h3>AI drafts, humans decide</h3>
+        <p>Agents prepare work — procedures, triage, briefs — but never change project state on their own. A human confirms every proposal, and that confirmation is logged and becomes training signal. The role agents inherit this contract unchanged.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">Step 1 · the corpus</p>
+    <h2>Three layers of knowledge — global, project, and learned</h2>
+    <p class="section-intro">An agent's answer is only as good as what it can retrieve. We ground on three distinct layers, each with different ownership, licensing, and update cadence. Today the pipeline ingests Layer B (project docs) only; the plan adds A and C.</p>
+    <div class="diagram">
+      <div class="chain">
+        <div class="link">
+          <div class="lab">Layer A · global</div>
+          <div class="who">Commissioning body of knowledge</div>
+          <div class="note">The durable, org-wide knowledge: the Cx process, standards, sample tests, sequences. Mostly public-domain federal/lab sources. Same for every customer.</div>
+        </div>
+        <div class="link ours">
+          <div class="lab">Layer B · project</div>
+          <div class="who">This project's documents</div>
+          <div class="note">Specs, submittals, drawings, sequences of operation — already detected, chunked, embedded, and stored in <code>document_chunks</code>. Customer-owned context.</div>
+        </div>
+        <div class="link">
+          <div class="lab">Layer C · learned</div>
+          <div class="who">Org-scoped lessons</div>
+          <div class="note">Human edits, resolved deviations, accepted/rejected drafts — captured and fed back so each project makes the next one smarter. The moat.</div>
+        </div>
+      </div>
+      <div class="diagram-cap">Retrieval blends all three: the global process tells the agent <em>how commissioning works</em>, the project docs tell it <em>what this building is</em>, and the lessons tell it <em>what this org has learned</em>.</div>
+    </div>
+    <div class="callout">
+      <p><strong>Why the split matters:</strong> Layer A is written once and shared across all customers (and is where the free authoritative sources go). Layer B is per-project and already flows through <code>ingestion_pipeline</code>. Layer C is the compounding asset — it's also why pricing is per-org with org-scoped lessons (see <a href="pricing.html">Pricing</a>). Keeping them as separate, tagged corpora lets retrieval boost the right layer per question and keeps licensing clean (next section).</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Step 2 · the role agents</p>
+    <h2>Each role gets a scoped agent — same engine, different lens</h2>
+    <p class="section-intro">Today there's one generic <code>cx_execution</code> agent. The plan: one persona per role, each with a tailored system signature, a <em>scoped retrieval filter</em> (so the field tech isn't searching the whole spec set), an explicit set of draft-only actions, and the shared refuse/cite guardrails. The six roles already exist in the identity model.</p>
+    <table>
+      <thead><tr><th>Role agent</th><th>What it needs to retrieve</th><th>What it drafts (human confirms)</th><th>Retrieval scope</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Owner's Cx Agent (OCA)</strong></td><td>OPR/BoD, the Cx process &amp; compliance frameworks (Layer A), program-wide status across disciplines</td><td>Daily program-health brief, compliance-gap summary, turnover-readiness assessment</td><td>Project-wide + global process; read-broad</td></tr>
+        <tr><td><strong>Cx Engineer / Specialist</strong></td><td>Specs, sequences of operation, sample FPT scripts (Layer A), equipment submittals, Guideline 1.1 technical patterns</td><td>L2–L4 test procedures (the current agent), deviation triage &amp; root-cause hypotheses</td><td>Discipline-scoped specs + FPT corpus</td></tr>
+        <tr><td><strong>Construction Manager</strong></td><td>Test &amp; witness schedule, readiness rollups by space/system, look-ahead</td><td>Witness-session look-ahead, re-plan suggestions when a slip ripples</td><td>Status &amp; schedule; light on deep specs</td></tr>
+        <tr><td><strong>Field Technician</strong></td><td>The single active procedure step, that equipment's install instructions, the sequence in plain language</td><td>Step explanations, in-line "what does this mean / what's next" help</td><td>Tightly scoped to active procedure + that asset's submittal</td></tr>
+        <tr><td><strong>Design Engineer</strong></td><td>Basis of Design, control narratives, design-intent docs and their revisions</td><td>RFI responses with the basis-of-design section already cited</td><td>Design docs + revision history</td></tr>
+        <tr><td><strong>Owner / Facility Manager</strong></td><td>The Systems Manual, O&amp;M data, as-builts, the complete commissioning record</td><td>Searchable Q&amp;A over the handover package; operations onboarding</td><td>Systems manual + as-builts (post-handover)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>Implementation shape:</strong> keep the LangGraph state machine and DSPy signatures; parameterize the agent by <code>role</code>. Each role = a system signature (persona + allowed actions) + a retrieval filter (role · discipline · corpus layer · project) + the shared confidence/citation gate. One engine, six lenses — mirroring the product's "dedicated surface, shared backbone" design.</p>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">Step 3 · the pipeline</p>
+    <h2>The grounding pipeline — and the gaps to close first</h2>
+    <p class="section-intro">The skeleton exists (detect → chunk → embed → store in pgvector → retrieve → generate-with-citations → refuse-or-draft → human review). The plan hardens it for a multi-source corpus and fixes the issues the architecture review surfaced.</p>
+    <div class="flow">
+      <div class="step"><div><h3>Tag every chunk with a source tier</h3><p>Add authority metadata — <em>standard · federal/public-domain · project · vendor · lesson</em> — to each chunk. Drives both citation-trust display (we already grade sources on this site) and retrieval boosting, and makes licensing enforceable at query time.</p></div></div>
+      <div class="step"><div><h3>Chunk by structure, not by 500 characters</h3><p>Replace fixed 500-char windows with structure-aware chunking that respects headings, tables, and list boundaries. Commissioning specs and sequences are highly structured; mid-table splits destroy retrievability.</p></div></div>
+      <div class="step"><div><h3>Fix the embedding path</h3><p>Two concrete bugs from the review: the <code>document_chunks</code> schema declares <code>vector(1536)</code> while Gemini <code>text-embedding-004</code> emits <strong>768</strong> dims (reconcile the schema), and retrieval currently searches with the <em>raw query text</em> instead of an embedded query — embed the query and do true cosine search.</p></div></div>
+      <div class="step"><div><h3>Retrieve with a role-scoped filter</h3><p>Before similarity search, filter by role · discipline · corpus layer · project, then boost by source tier. The field tech's query never ranks the whole spec set; the OCA's can.</p></div></div>
+      <div class="step"><div><h3>Generate through a role signature, keep the gates</h3><p>Extend the DSPy signature pattern per role; keep mandatory citations and the ≥3-chunk / ≥2-high-confidence refusal gate. Output stays a draft + citations written to the existing citations table.</p></div></div>
+      <div class="step"><div><h3>Version the corpus and capture the edit</h3><p>Stamp each draft with the corpus version and chunk IDs that produced it (audit + reproducibility). When the human accepts or edits, capture the delta into Layer C — closing the loop the review flagged as missing.</p></div></div>
+    </div>
+    <div class="callout amber">
+      <p><strong>Model strategy:</strong> Gemini 1.5 Flash via DSPy/LiteLLM is the current workhorse and is fine for high-volume drafting. The DSPy/LiteLLM routing means we can send higher-stakes steps (final procedure generation, deviation root-cause, an LLM-judge in eval) to a stronger model — e.g. Claude Sonnet/Opus — without rewriting the agents. Decide per task by cost vs. consequence; keep embeddings consistent with whatever dimension the store is fixed to.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Step 4 · evaluation</p>
+    <h2>No role ships until it passes its bar</h2>
+    <p class="section-intro">Grounded agents fail quietly — a plausible citation to the wrong clause looks fine until an auditor checks. Every role gets a golden set and hard acceptance bars before it goes in front of a customer.</p>
+    <div class="grid cols-2" style="margin-bottom:18px;">
+      <div class="card">
+        <div class="icon">🎯</div>
+        <h3>Golden Q&amp;A per role</h3>
+        <p>~50 representative tasks per role with known-correct, human-verified cited answers (drawn from real design-partner projects). The regression set the agent must keep passing as the corpus and prompts change.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🔗</div>
+        <h3>Citation faithfulness</h3>
+        <p>For every claim, does the cited chunk actually support it? Automated groundedness scoring (LLM-judge + spot human audit) — the single most important metric, because it's the trust promise.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🚫</div>
+        <h3>Refusal calibration</h3>
+        <p>Feed out-of-corpus and adversarial questions; the agent should <em>refuse</em>, not invent. Measure false-answer rate on unanswerable prompts and tune the confidence threshold.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🧪</div>
+        <h3>Red-team for hallucination</h3>
+        <p>Deliberately ambiguous specs, contradictory documents, missing sequences. Target: zero unsupported claims reach a human as if they were grounded.</p>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Metric</th><th>What it checks</th><th>Acceptance bar (starting target)</th></tr></thead>
+      <tbody>
+        <tr><td>Citation faithfulness</td><td>Each claim supported by its cited chunk</td><td><strong>≥ 95%</strong></td></tr>
+        <tr><td>Unsupported-claim rate</td><td>Shipped claims with no valid citation</td><td><strong>≤ 1%</strong></td></tr>
+        <tr><td>Refusal precision/recall</td><td>Refuses when (and only when) it should</td><td><strong>≥ 90% / ≥ 90%</strong></td></tr>
+        <tr><td>Human accept rate</td><td>Drafts accepted with no / minor edits</td><td><strong>≥ 70%</strong> and rising</td></tr>
+        <tr><td>Retrieval hit rate</td><td>Relevant chunk in top-K for golden tasks</td><td><strong>≥ 90%</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>Build the harness once, reuse per role.</strong> The eval set plugs into the existing <code>agent_runs</code> audit data — every run already records input, output, citations, refusals, token cost, and latency. That telemetry <em>is</em> the evaluation substrate; we add labels and judges on top, and gate each role's rollout on the bars above.</p>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <p class="kicker">Step 5 · data acquisition &amp; licensing</p>
+    <h2>What we can ingest — and the copyright line we don't cross</h2>
+    <p class="section-intro">"Free to read" is not "free to embed in a product corpus and resell answers from." Grounding a commercial agent makes licensing a first-class concern. The rule of thumb: U.S. government works are public domain and safe; the customer's own documents are theirs to let us use; copyrighted standards are <em>cite-only</em> unless licensed.</p>
+    <table>
+      <thead><tr><th>Source</th><th>Ingest into product corpus?</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><strong>U.S. federal &amp; national-lab</strong> — DOE, FEMP, PNNL, LBNL, GSA, NIST, EPA guides</td><td><span class="pill green">✓ Ingest freely</span></td><td>U.S. government works are public domain. This is the backbone of Layer A — the whole Cx process, documented and free to use.</td></tr>
+        <tr><td><strong>The customer's project documents</strong> — specs, submittals, drawings, SOOs</td><td><span class="pill green">✓ Ingest (with permission)</span></td><td>The customer owns them and engages us to process them. This is Layer B, already in the pipeline. Govern with their data agreement.</td></tr>
+        <tr><td><strong>ACG / BCxA free guidelines &amp; sample checklists</strong></td><td><span class="pill amber">⚠ Per their terms</span></td><td>Free to download ≠ licensed to redistribute inside a product. Confirm terms or treat as reference/cite-only. ACG Appendix D FPTs are a likely-OK template source — verify.</td></tr>
+        <tr><td><strong>ASHRAE Guideline 0, Standard 202, Guideline 36</strong> (and other paid standards)</td><td><span class="pill amber">✗ Do not embed</span></td><td>Copyrighted. The free read-only view is <em>read-only</em>, not a license to copy text into our store and serve it. <strong>Cite the clause and let the customer open their own licensed copy</strong>, or pursue an ASHRAE redistribution license.</td></tr>
+        <tr><td><strong>Vendor manuals / training (e.g. Trane clinics)</strong></td><td><span class="pill amber">✗ Unless licensed</span></td><td>Copyrighted vendor IP. A customer's own equipment submittals (Layer B) are fine; the vendor's published course library is not.</td></tr>
+        <tr><td><strong>Org-scoped lessons</strong> — accepted edits, resolved deviations</td><td><span class="pill green">✓ Ingest (org-private)</span></td><td>Generated within the customer's own use; Layer C. Keep tenant-isolated — one org's lessons never leak to another.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>The clean architecture this implies:</strong> the agent can be deeply <em>standards-aware</em> without ever storing copyrighted standard text — it grounds on public-domain federal guides that teach the same process, cites the standard clause by number, and surfaces the relevant section of the customer's <em>own</em> licensed documents. That's both legally clean and exactly the citation-trust behavior buyers want. It's the same line we hold on the <a href="study-guide.html">Study Guide</a>: use the free legitimate corpus, point to (don't pirate) the paid standards.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">The rollout</p>
+    <h2>Sequence it — corpus first, one role deep, then fan out</h2>
+    <p class="section-intro">Don't build six agents at once. Harden the foundation, prove one role end-to-end against the bars, then replicate the pattern role by role.</p>
+    <div class="ladder">
+      <div class="phase"><div class="ph-head"><span class="ph-num">Phase 0</span><h3>Corpus + pipeline hardening</h3><span class="ph-meta">foundation</span></div><p>Assemble Layer A from the public-domain sources (PNNL/GSA/FEMP + ACG templates), tag source tiers, and fix the pipeline: reconcile embedding dimensions, switch to query-embedding retrieval, structure-aware chunking, and corpus versioning. Nothing role-specific yet — make grounding trustworthy first.</p></div>
+      <div class="phase"><div class="ph-head"><span class="ph-num">Phase 1</span><h3>One role, end-to-end</h3><span class="ph-meta">prove it</span></div><p>Take the <strong>Cx Engineer</strong> (the current procedure-drafting agent already lives here): add the role persona + scoped retrieval, stand up the eval harness and golden set, and hit every acceptance bar on a real design-partner project. This is the template every other role copies.</p></div>
+      <div class="phase"><div class="ph-head"><span class="ph-num">Phase 2</span><h3>Fan out the roles</h3><span class="ph-meta">replicate, eval-gated</span></div><p>Add OCA → Field Technician → Construction Manager → Design Engineer → Owner/FM, one at a time. Each reuses the Phase-1 pattern and must clear its own golden-set bars before it's exposed. No role ships on vibes.</p></div>
+      <div class="phase gate"><div class="ph-head"><span class="ph-num">Phase 3</span><h3>Close the lesson loop</h3><span class="ph-meta">the moat</span></div><p>Wire Layer C: every human accept/edit becomes org-scoped training signal that improves future retrieval and drafts. This is what makes each project faster than the last — the compounding asset behind the per-org pricing and the hardest thing for a competitor to copy.</p></div>
+    </div>
+    <div class="callout">
+      <p><strong>The throughline:</strong> we already have the rare, hard part — a cited, refuse-when-unsure agent with a full audit trail. The work ahead is mostly <em>knowledge and discipline</em>: give the agents the right grounded corpus, scope them per role, and never let one ship without proving it's faithful. That's how the agents become genuine support for every seat in the commissioning process — and why earning the <a href="certifications.html">certifications</a> and learning the <a href="study-guide.html">body of knowledge</a> ourselves directly sharpens the product.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="inner">
+    <span>CXPro — Internal agent grounding &amp; training plan. Not for distribution.</span>
+    <span>
+      <a href="ai.html">AI in CXPro</a>
+      <a href="study-guide.html">Study Guide</a>
+      <a href="certifications.html">Certifications</a>
+      <a href="index.html">Overview</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

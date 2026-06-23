@@ -6,3 +6,16 @@
 *.pyc
 # Added by code-review-graph
 .code-review-graph/
+
+# Reference library — copyrighted PDFs kept locally for study, NOT committed
+# (see corpus/reference-library/README.md). The manifest README is tracked; the PDFs are not.
+corpus/reference-library/**/*.pdf
+corpus/reference-library/**/*.epub
+
+# Third-party PDFs kept local, NOT committed (copyrighted; referenced by path, not redistributed):
+# CAIS '26 research papers at repo root and the industry/market source reports.
+/3786335.*.pdf
+docs/source docs/
+
+# macOS
+.DS_Store

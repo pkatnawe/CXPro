@@ -1,0 +1,7 @@
+{
+  "knowledge-qa":          { "accuracy": 0.85, "citation_required": true },
+  "procedure-gen":         { "coverage": 0.70, "citation_required": true },
+  "traceability":          { "coverage": 0.85 },
+  "standards":             { "coverage": 0.85, "no_verbatim": true },
+  "faithfulness-refusal":  { "faithfulness": 0.95, "unsupported_max": 0.01, "refusal_precision": 0.90, "refusal_recall": 0.90 }
+}
